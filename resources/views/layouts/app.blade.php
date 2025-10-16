@@ -291,7 +291,7 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.bukus.index') }}" class="{{ request()->routeIs('admin.bukus.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.buku.index') }}" class="{{ request()->routeIs('admin.bukus.*') ? 'active' : '' }}">
                     <i class="bi bi-book"></i>
                     <span>Manajemen Buku</span>
                 </a>

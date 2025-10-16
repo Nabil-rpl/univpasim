@@ -38,16 +38,14 @@ Route::get('register', [RegisterController::class, 'showRegistrationForm'])->nam
 Route::post('register', [RegisterController::class, 'register']);
 
 // ============================================
-// 📊 DASHBOARD ROUTES
+// 📊 DASHBOARD ROUTES - ADMIN
 // ============================================
-
-// 🔹 ADMIN
 Route::group(['middleware' => ['auth', 'role:admin'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
     Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
 
     // ✅ CRUD Users, Buku, Peminjaman
     Route::resource('users', UserController::class);
-    Route::resource('bukus', BukuController::class);
+    Route::resource('buku', BukuController::class);
     Route::resource('peminjamans', PeminjamanController::class);
 
     // ✅ CRUD QR Codes (khusus admin)
@@ -58,6 +56,7 @@ Route::group(['middleware' => ['auth', 'role:admin'], 'prefix' => 'admin', 'as' 
     Route::put('/qrcodes/{id}', [QRCodeController::class, 'update'])->name('qrcodes.update');
     Route::delete('/qrcodes/{id}', [QRCodeController::class, 'destroy'])->name('qrcodes.destroy');
 });
+
 
 // 🔹 PETUGAS
 Route::group(['middleware' => ['auth', 'role:petugas'], 'prefix' => 'petugas', 'as' => 'petugas.'], function () {
