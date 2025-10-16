@@ -297,7 +297,7 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.peminjamans.index') }}" class="{{ request()->routeIs('admin.peminjamans.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.peminjaman.index') }}" class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}">
                     <i class="bi bi-journal-text"></i>
                     <span>Peminjaman</span>
                 </a>

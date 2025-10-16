@@ -13,14 +13,10 @@ class PeminjamanController extends Controller
     public function index()
     {
         $peminjamans = Peminjaman::with(['user', 'buku'])->get();
-        return view('admin.peminjamans.index', compact('peminjamans'));
-    }
-
-    public function create()
-    {
         $users = User::where('role', 'mahasiswa')->get();
         $bukus = Buku::all();
-        return view('admin.peminjamans.create', compact('users', 'bukus'));
+
+        return view('admin.peminjaman.index', compact('peminjamans', 'users', 'bukus'));
     }
 
     public function store(Request $request)
@@ -38,22 +34,10 @@ class PeminjamanController extends Controller
             'status' => 'dipinjam'
         ]);
 
-        return redirect()->route('peminjamans.index')->with('success', 'Peminjaman berhasil dibuat.');
+        return redirect()->route('admin.peminjaman.index')->with('success', 'Peminjaman berhasil ditambahkan.');
     }
 
-    public function show(Peminjaman $peminjaman)
-    {
-        return view('admin.peminjamans.show', compact('peminjaman'));
-    }
-
-    public function edit(Peminjaman $peminjaman)
-    {
-        $users = User::where('role', 'mahasiswa')->get();
-        $bukus = Buku::all();
-        return view('admin.peminjamans.edit', compact('peminjaman', 'users', 'bukus'));
-    }
-
-    public function update(Request $request, Peminjaman $peminjaman)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -63,14 +47,17 @@ class PeminjamanController extends Controller
             'status' => 'required|in:dipinjam,dikembalikan'
         ]);
 
+        $peminjaman = Peminjaman::findOrFail($id);
         $peminjaman->update($request->all());
 
-        return redirect()->route('peminjamans.index')->with('success', 'Data peminjaman berhasil diupdate.');
+        return redirect()->route('admin.peminjaman.index')->with('success', 'Data peminjaman berhasil diupdate.');
     }
 
-    public function destroy(Peminjaman $peminjaman)
+    public function destroy($id)
     {
+        $peminjaman = Peminjaman::findOrFail($id);
         $peminjaman->delete();
-        return redirect()->route('peminjamans.index')->with('success', 'Data peminjaman berhasil dihapus.');
+
+        return redirect()->route('admin.peminjaman.index')->with('success', 'Data peminjaman berhasil dihapus.');
     }
 }
