@@ -3,119 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Petugas - PASIM SITE</title>
+    <title>@yield('page-title', 'Dashboard Mahasiswa')</title>
+
+    {{-- CSS Bootstrap / Tailwind (pilih salah satu sesuai project kamu) --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    {{-- Optional: Font dan Icon --}}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
-        :root {
-            --sidebar-width: 260px;
-            --header-height: 60px;
-            --primary-color: #4e73df;
-            --sidebar-bg: #1e293b;
-            --sidebar-hover: #334155;
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f6fa;
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fc; }
-        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg); padding-top: 20px; }
-        .sidebar-brand { padding: 0 20px 30px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-brand h4 { color: white; font-weight: 700; font-size: 1.5rem; }
-        .sidebar-menu { list-style: none; padding: 20px 0; }
-        .sidebar-menu a { display: flex; align-items: center; padding: 12px 20px; color: rgba(255,255,255,0.8); text-decoration: none; }
-        .sidebar-menu a:hover { background: var(--sidebar-hover); color: white; }
-        .sidebar-menu a i { margin-right: 12px; font-size: 1.2rem; }
-        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
-        .content-area { padding: 30px; }
-        .card { border: none; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; padding: 20px; }
-        .card i { font-size: 2rem; color: #4e73df; }
-        .category-card { width: 150px; height: 200px; display: inline-block; margin: 10px; text-align: center; padding: 15px; border: 1px solid #ddd; border-radius: 10px; }
-        .category-card img { width: 100%; height: 120px; object-fit: cover; }
+
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background-color: #0d6efd;
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+        }
+
+        .sidebar h4 {
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar a {
+            color: #ffffffcc;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .sidebar a.active,
+        .sidebar a:hover {
+            background-color: #ffffff33;
+            color: #fff;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 20px;
+        }
+
+        .navbar {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            padding: 15px 25px;
+            margin-bottom: 25px;
+        }
+
+        .content {
+            background: #fff;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
-<body>
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <h4><i class="bi bi-mortarboard-fill"></i> PASIM SITE</h4>
-        </div>
-        <ul class="sidebar-menu">
-            <li><a href="#"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-            <li><a href="#"><i class="bi bi-person"></i> Profile</a></li>
-            <li><a href="#"><i class="bi bi-book"></i> Kelola Buku</a></li>
-            <li><a href="#"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-        </ul>
-    </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="content-area">
-            <h2>Selamat Datang Kembali, Regil</h2>
-            <p class="text-muted">Memahami dan investasi buku</p>
-            <h3>Kategori</h3>
+<body>
+    {{-- Sidebar --}}
+    <div class="sidebar">
+        <h4>Mahasiswa</h4>
+        <a href="{{ route('mahasiswa.dashboard') }}" class="{{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+        <a href="{{ route('mahasiswa.peminjaman.index') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.index') ? 'active' : '' }}">
+            <i class="bi bi-book"></i> Peminjaman
+        </a>
+        <a href="{{ route('mahasiswa.peminjaman.riwayat') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.riwayat') ? 'active' : '' }}">
+            <i class="bi bi-clock-history"></i> Riwayat
+        </a>
+        <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+            @csrf
+        </form>
+    </div>
+
+    {{-- Main Content --}}
+    <div class="main-content">
+        {{-- Navbar --}}
+        <div class="navbar d-flex justify-content-between align-items-center">
+            <h5 class="m-0">@yield('page-title', 'Dashboard Mahasiswa')</h5>
             <div>
-                <div class="category-card">
-                    <img src="https://via.placeholder.com/150x120" alt="Buku">
-                    <h6>Pemrograman C++</h6>
-                </div>
-                <div class="category-card">
-                    <img src="https://via.placeholder.com/150x120" alt="Buku">
-                    <h6>Pemrograman Teori</h6>
-                </div>
-                <div class="category-card">
-                    <img src="https://via.placeholder.com/150x120" alt="Buku">
-                    <h6>Pemrograman C++</h6>
-                </div>
-                <div class="category-card">
-                    <img src="https://via.placeholder.com/150x120" alt="Buku">
-                    <h6>Pemrograman Teori</h6>
-                </div>
+                <span class="text-muted me-3">{{ Auth::user()->name ?? 'Mahasiswa' }}</span>
+                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'Mahasiswa') }}" class="rounded-circle" width="40" height="40" alt="User">
             </div>
         </div>
-    </main>
 
+        {{-- Konten Dinamis --}}
+        <div class="content">
+            @yield('content')
+        </div>
+    </div>
+
+    {{-- JS Bootstrap --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
