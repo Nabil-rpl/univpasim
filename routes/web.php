@@ -9,7 +9,10 @@ use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\PeminjamanController;
 use App\Http\Controllers\Admin\QRCodeController;
 use App\Http\Controllers\Petugas\LaporanController;
+use App\Http\Controllers\Petugas\PetugasController;
 use App\Http\Controllers\Petugas\QRCodeController as PetugasQRCodeController;
+use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
+
 
 // ============================================
 // 🏠 HALAMAN UTAMA
@@ -69,15 +72,25 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
 // ============================================
 // 👮 PETUGAS
 // ============================================
-Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->as('petugas.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'petugas'])->name('dashboard');
-    Route::resource('laporan', LaporanController::class);
+Route::middleware(['auth', 'role:petugas'])
+    ->prefix('petugas')
+    ->as('petugas.')
+    ->group(function () {
 
-    // ✅ QR Code Petugas
-    Route::get('/qrcode', [PetugasQRCodeController::class, 'index'])->name('qrcode.index');
-    Route::get('/qrcode/generate/{type}/{id}', [PetugasQRCodeController::class, 'generate'])->name('qrcode.generate');
-    Route::delete('/qrcode/{id}', [PetugasQRCodeController::class, 'destroy'])->name('qrcode.destroy');
-});
+        // 📊 Dashboard Petugas
+        Route::get('/dashboard', [PetugasController::class, 'index'])->name('dashboard');
+
+        // 📚 CRUD Buku (Petugas)
+        Route::resource('buku', PetugasBukuController::class);
+
+        // 📄 Laporan
+        Route::resource('laporan', LaporanController::class);
+
+        // 🔳 QR Code
+        Route::get('/qrcode', [PetugasQRCodeController::class, 'index'])->name('qrcode.index');
+        Route::get('/qrcode/generate/{type}/{id}', [PetugasQRCodeController::class, 'generate'])->name('qrcode.generate');
+        Route::delete('/qrcode/{id}', [PetugasQRCodeController::class, 'destroy'])->name('qrcode.destroy');
+    });
 
 // ============================================
 // 🎓 MAHASISWA
