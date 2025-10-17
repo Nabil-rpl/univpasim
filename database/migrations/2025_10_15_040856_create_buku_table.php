@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->string('penerbit');
             $table->integer('tahun_terbit');
             $table->integer('stok')->default(1);
+            $table->string('foto')->nullable(); // kolom untuk menyimpan nama/path foto buku
             $table->timestamps();
         });
     }

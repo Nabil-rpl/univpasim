@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Laporan;
 use App\Models\QrCode;
+use App\Models\Buku;
 
 class PetugasController extends Controller
 {
@@ -20,10 +21,12 @@ class PetugasController extends Controller
     {
         $user = Auth::user();
 
-        // Hanya tampilkan laporan dan QR milik petugas login
+        // Ambil data berdasarkan petugas login
         $laporans = Laporan::where('dibuat_oleh', $user->id)->get();
-        $qrcodes = QrCode::where('dibuat_oleh', $user->id)->get();
+        $qrcodes  = QrCode::where('dibuat_oleh', $user->id)->get();
+        $buku     = Buku::all(); // ✅ ini variabel yang benar
 
-        return view('petugas.dashboard', compact('laporans', 'qrcodes'));
+        // Kirim ke view
+        return view('petugas.dashboard', compact('laporans', 'qrcodes', 'buku'));
     }
 }
