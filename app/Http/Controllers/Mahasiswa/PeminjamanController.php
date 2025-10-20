@@ -9,11 +9,17 @@ use App\Models\Mahasiswa as MahasiswaModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PeminjamanController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth', 'role:mahasiswa']);
+    }
+
     /**
-     * Tampilkan riwayat peminjaman mahasiswa (halaman index)
+     * Tampilkan daftar peminjaman mahasiswa (halaman index)
      */
     public function index()
     {
@@ -24,7 +30,7 @@ class PeminjamanController extends Controller
             return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan.');
         }
 
-        // Ambil semua data peminjaman mahasiswa
+        // Ambil data peminjaman mahasiswa dengan pagination
         $peminjamans = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
             ->with(['buku', 'petugas'])
             ->orderBy('created_at', 'desc')
@@ -34,104 +40,39 @@ class PeminjamanController extends Controller
     }
 
     /**
-     * Tampilkan daftar buku yang bisa dipinjam (halaman pinjam buku)
+     * Riwayat peminjaman dengan filter
      */
-    public function daftarBuku(Request $request)
+    public function riwayat(Request $request)
     {
-        $query = Buku::query()->where('stok', '>', 0);
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('judul', 'like', "%{$search}%")
-                    ->orWhere('penulis', 'like', "%{$search}%")
-                    ->orWhere('penerbit', 'like', "%{$search}%");
-            });
-        }
-
-        $bukus = $query->orderBy('judul')->paginate(12);
-
-        // Data mahasiswa login
-        $user = Auth::user();
-        $mahasiswa = MahasiswaModel::where('email', $user->email)->first();
-
-        // Buku yang sedang dipinjam
-        $peminjamanAktif = [];
-        if ($mahasiswa) {
-            $peminjamanAktif = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
-                ->where('status', 'dipinjam')
-                ->pluck('buku_id')
-                ->toArray();
-        }
-
-        return view('mahasiswa.peminjaman.daftar-buku', compact('bukus', 'mahasiswa', 'peminjamanAktif'));
-    }
-
-    /**
-     * Proses pinjam buku
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'buku_id' => 'required|exists:buku,id',
-        ]);
-
         $user = Auth::user();
         $mahasiswa = MahasiswaModel::where('email', $user->email)->first();
 
         if (!$mahasiswa) {
-            return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan. Silakan hubungi admin.');
+            return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan.');
         }
 
-        DB::beginTransaction();
-        try {
-            $buku = Buku::findOrFail($request->buku_id);
+        // Query peminjaman
+        $query = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
+            ->with(['buku', 'petugas']);
 
-            // Cek stok buku
-            if ($buku->stok <= 0) {
-                return redirect()->back()->with('error', 'Stok buku tidak tersedia.');
-            }
-
-            // Cek apakah mahasiswa sudah meminjam buku ini dan belum dikembalikan
-            $sudahPinjam = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
-                ->where('buku_id', $buku->id)
-                ->where('status', 'dipinjam')
-                ->exists();
-
-            if ($sudahPinjam) {
-                return redirect()->back()->with('error', 'Anda sudah meminjam buku ini.');
-            }
-
-            // Cek batas maksimal peminjaman
-            $jumlahPinjaman = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
-                ->where('status', 'dipinjam')
-                ->count();
-
-            if ($jumlahPinjaman >= 3) {
-                return redirect()->back()->with('error', 'Anda sudah mencapai batas maksimal peminjaman (3 buku).');
-            }
-
-            // Buat peminjaman baru
-            Peminjaman::create([
-                'mahasiswa_id' => $mahasiswa->id,
-                'buku_id' => $buku->id,
-                'petugas_id' => null,
-                'tanggal_pinjam' => now(),
-                'tanggal_kembali' => null,
-                'status' => 'dipinjam',
-            ]);
-
-            // Kurangi stok buku
-            $buku->decrement('stok');
-
-            DB::commit();
-            return redirect()->route('mahasiswa.peminjaman.index')
-                ->with('success', "Berhasil meminjam buku '{$buku->judul}'.");
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
+
+        // Filter berdasarkan tanggal
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_pinjam', '>=', $request->tanggal_dari);
+        }
+
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_pinjam', '<=', $request->tanggal_sampai);
+        }
+
+        // Ambil semua data (tanpa pagination) untuk riwayat
+        $peminjaman = $query->orderBy('created_at', 'desc')->get();
+
+        return view('mahasiswa.peminjaman.riwayat', compact('peminjaman', 'mahasiswa'));
     }
 
     /**
@@ -142,55 +83,99 @@ class PeminjamanController extends Controller
         $user = Auth::user();
         $mahasiswa = MahasiswaModel::where('email', $user->email)->first();
 
+        if (!$mahasiswa) {
+            return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan.');
+        }
+
         $peminjaman = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
             ->where('id', $id)
             ->with(['buku', 'petugas'])
             ->firstOrFail();
 
-        return view('mahasiswa.peminjaman.show', compact('peminjaman'));
+        return view('mahasiswa.peminjaman.show', compact('peminjaman', 'mahasiswa'));
     }
-    public function riwayat()
-    {
-        $mahasiswa = auth()->user();
-        $peminjaman = \App\Models\Peminjaman::where('mahasiswa_id', $mahasiswa->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
 
-        return view('mahasiswa.peminjaman.riwayat', compact('peminjaman', 'mahasiswa'));
-    }
+    /**
+     * Proses pinjam buku (dipanggil dari route mahasiswa.buku.pinjam)
+     */
     public function pinjam($id)
     {
-        $mahasiswa = auth()->user();
+        try {
+            // Log untuk debugging
+            Log::info('Pinjam buku dipanggil', ['buku_id' => $id, 'user_id' => Auth::id()]);
 
-        // Cek apakah buku ada
-        $buku = \App\Models\Buku::findOrFail($id);
+            $user = Auth::user();
+            
+            // Cari mahasiswa berdasarkan email user
+            $mahasiswa = MahasiswaModel::where('email', $user->email)->first();
 
-        // Cek stok
-        if ($buku->stok <= 0) {
-            return redirect()->back()->with('error', 'Stok buku habis!');
+            if (!$mahasiswa) {
+                Log::error('Mahasiswa tidak ditemukan', ['email' => $user->email]);
+                return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan. Silakan hubungi admin.');
+            }
+
+            Log::info('Mahasiswa ditemukan', ['mahasiswa_id' => $mahasiswa->id]);
+
+            DB::beginTransaction();
+            
+            $buku = Buku::findOrFail($id);
+            Log::info('Buku ditemukan', ['buku' => $buku->judul, 'stok' => $buku->stok]);
+
+            // Cek stok buku
+            if ($buku->stok <= 0) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Stok buku tidak tersedia.');
+            }
+
+            // Cek apakah mahasiswa sudah meminjam buku ini dan belum dikembalikan
+            $sudahPinjam = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
+                ->where('buku_id', $buku->id)
+                ->where('status', 'dipinjam')
+                ->exists();
+
+            if ($sudahPinjam) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Anda sudah meminjam buku ini dan belum mengembalikannya.');
+            }
+
+            // Cek batas maksimal peminjaman
+            $jumlahPinjaman = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
+                ->where('status', 'dipinjam')
+                ->count();
+
+            if ($jumlahPinjaman >= 3) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Anda sudah mencapai batas maksimal peminjaman (3 buku).');
+            }
+
+            // Buat peminjaman baru
+            $peminjaman = Peminjaman::create([
+                'mahasiswa_id' => $mahasiswa->id,
+                'buku_id' => $buku->id,
+                'petugas_id' => null,
+                'tanggal_pinjam' => now(),
+                'tanggal_kembali' => null,
+                'status' => 'dipinjam',
+            ]);
+
+            Log::info('Peminjaman dibuat', ['peminjaman_id' => $peminjaman->id]);
+
+            // Kurangi stok buku
+            $buku->decrement('stok');
+            Log::info('Stok buku dikurangi', ['stok_baru' => $buku->fresh()->stok]);
+
+            DB::commit();
+            
+            return redirect()->route('mahasiswa.peminjaman.index')
+                ->with('success', "Berhasil meminjam buku '{$buku->judul}'.");
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error saat meminjam buku', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        // Cek apakah sudah meminjam buku ini dan belum dikembalikan
-        $sudahPinjam = \App\Models\Peminjaman::where('mahasiswa_id', $mahasiswa->id)
-            ->where('buku_id', $buku->id)
-            ->where('status', 'dipinjam')
-            ->exists();
-
-        if ($sudahPinjam) {
-            return redirect()->back()->with('error', 'Kamu sudah meminjam buku ini dan belum mengembalikannya.');
-        }
-
-        // Simpan data peminjaman
-        \App\Models\Peminjaman::create([
-            'mahasiswa_id' => $mahasiswa->id,
-            'buku_id' => $buku->id,
-            'tanggal_pinjam' => now(),
-            'status' => 'dipinjam',
-        ]);
-
-        // Kurangi stok buku
-        $buku->decrement('stok');
-
-        return redirect()->route('mahasiswa.peminjaman.index')->with('success', 'Buku berhasil dipinjam!');
     }
 }

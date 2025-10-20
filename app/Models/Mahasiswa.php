@@ -18,7 +18,13 @@ class Mahasiswa extends Model
         'jurusan',
     ];
 
-    // Relasi one-to-one dengan User
+    // Relasi ke peminjaman
+    public function peminjaman()
+    {
+        return $this->hasMany(Peminjaman::class, 'mahasiswa_id');
+    }
+
+    // Relasi ke user (jika ada)
     public function user()
     {
         return $this->hasOne(User::class, 'email', 'email');

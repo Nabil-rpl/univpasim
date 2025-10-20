@@ -1,134 +1,42 @@
-@extends('layouts.app')
+@extends('layouts.mahasiswa')
 
 @section('page-title', 'Riwayat Peminjaman')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="mb-1">📖 Riwayat Peminjaman</h2>
-                    <p class="text-muted mb-0">Semua riwayat peminjaman buku Anda</p>
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('mahasiswa.peminjaman.index') }}" class="btn btn-primary">
-                        <i class="bi bi-bookmark-plus"></i> Pinjam Buku
-                    </a>
-                    <a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    @if($peminjamans->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th width="5%">No</th>
-                                        <th width="30%">Buku</th>
-                                        <th width="15%">Tanggal Pinjam</th>
-                                        <th width="15%">Tanggal Kembali</th>
-                                        <th width="15%">Status</th>
-                                        <th width="10%">Durasi</th>
-                                        <th width="10%" class="text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($peminjamans as $index => $p)
-                                        <tr>
-                                            <td>{{ $peminjamans->firstItem() + $index }}</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="book-icon me-3">
-                                                        <i class="bi bi-book-fill"></i>
-                                                    </div>
-                                                    <div>
-                                                        <strong class="d-block">{{ $p->buku->judul }}</strong>
-                                                        <small class="text-muted">{{ $p->buku->penulis }}</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <i class="bi bi-calendar-event text-primary me-1"></i>
-                                                {{ $p->tanggal_pinjam->format('d/m/Y') }}
-                                            </td>
-                                            <td>
-                                                @if($p->tanggal_kembali)
-                                                    <i class="bi bi-calendar-check text-success me-1"></i>
-                                                    {{ $p->tanggal_kembali->format('d/m/Y') }}
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($p->status == 'dipinjam')
-                                                    <span class="badge bg-warning text-dark">
-                                                        <i class="bi bi-clock"></i> Dipinjam
-                                                    </span>
-                                                @else
-                                                    <span class="badge bg-success">
-                                                        <i class="bi bi-check-circle"></i> Dikembalikan
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($p->tanggal_kembali)
-                                                    {{ $p->tanggal_pinjam->diffInDays($p->tanggal_kembali) }} hari
-                                                @else
-                                                    {{ $p->tanggal_pinjam->diffInDays(now()) }} hari
-                                                @endif
-                                            </td>
-                                            <td class="text-center">
-                                                <a href="{{ route('mahasiswa.peminjaman.show', $p->id) }}" 
-                                                   class="btn btn-sm btn-info"
-                                                   title="Detail">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination -->
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <div class="text-muted">
-                                Menampilkan {{ $peminjamans->firstItem() }} - {{ $peminjamans->lastItem() }} 
-                                dari {{ $peminjamans->total() }} data
-                            </div>
-                            {{ $peminjamans->links() }}
-                        </div>
-                    @else
-                        <div class="empty-state py-5">
-                            <i class="bi bi-inbox"></i>
-                            <h4>Belum Ada Riwayat Peminjaman</h4>
-                            <p>Anda belum pernah meminjam buku</p>
-                            <a href="{{ route('mahasiswa.peminjaman.index') }}" class="btn btn-primary mt-3">
-                                <i class="bi bi-bookmark-plus"></i> Pinjam Buku Sekarang
-                            </a>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
 .card {
     border: none;
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
+
+.stats-card {
+    border-radius: 15px;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid;
+    margin-bottom: 20px;
+}
+
+.stats-card.primary { border-left-color: #2563eb; }
+.stats-card.success { border-left-color: #10b981; }
+.stats-card.warning { border-left-color: #f59e0b; }
+
+.stats-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.bg-primary-gradient { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
+.bg-success-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+.bg-warning-gradient { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
 
 .table {
     margin-bottom: 0;
@@ -140,6 +48,7 @@
     font-size: 0.85rem;
     letter-spacing: 0.5px;
     border-bottom: 2px solid #e2e8f0;
+    background: #f8fafc;
 }
 
 .book-icon {
@@ -154,13 +63,15 @@
     font-size: 1.5rem;
 }
 
-.badge {
+.badge-status {
     padding: 0.5rem 0.75rem;
     font-weight: 600;
+    border-radius: 20px;
 }
 
 .empty-state {
     text-align: center;
+    padding: 60px 20px;
 }
 
 .empty-state i {
@@ -179,14 +90,221 @@
     color: #a0aec0;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
+.btn-custom {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s;
 }
 
-.btn-primary:hover {
+.btn-custom:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.filter-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
 }
 </style>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-clock-history me-2"></i>Riwayat Peminjaman</h2>
+                    <p class="text-muted mb-0">Semua riwayat peminjaman buku Anda</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('mahasiswa.buku.index') }}" class="btn btn-primary btn-custom">
+                        <i class="bi bi-book me-2"></i>Lihat Buku
+                    </a>
+                    <a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-secondary btn-custom">
+                        <i class="bi bi-arrow-left me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistik Cards -->
+    @php
+        $totalPeminjaman = $peminjaman->count();
+        $sedangDipinjam = $peminjaman->where('status', 'dipinjam')->count();
+        $sudahDikembalikan = $peminjaman->where('status', 'dikembalikan')->count();
+    @endphp
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stats-card primary">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Total Peminjaman</h6>
+                        <h2 class="mb-0 fw-bold">{{ $totalPeminjaman }}</h2>
+                    </div>
+                    <div class="stats-icon bg-primary-gradient">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stats-card warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Sedang Dipinjam</h6>
+                        <h2 class="mb-0 fw-bold">{{ $sedangDipinjam }}</h2>
+                    </div>
+                    <div class="stats-icon bg-warning-gradient">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stats-card success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Sudah Dikembalikan</h6>
+                        <h2 class="mb-0 fw-bold">{{ $sudahDikembalikan }}</h2>
+                    </div>
+                    <div class="stats-icon bg-success-gradient">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-card">
+        <form method="GET" action="{{ route('mahasiswa.peminjaman.riwayat') }}">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Semua Status</option>
+                        <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Sedang Dipinjam</option>
+                        <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Sudah Dikembalikan</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Dari Tanggal</label>
+                    <input type="date" name="tanggal_dari" class="form-control" value="{{ request('tanggal_dari') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Sampai Tanggal</label>
+                    <input type="date" name="tanggal_sampai" class="form-control" value="{{ request('tanggal_sampai') }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    @if($peminjaman->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th width="5%">No</th>
+                                        <th width="35%">Buku</th>
+                                        <th width="13%">Tanggal Pinjam</th>
+                                        <th width="13%">Tanggal Kembali</th>
+                                        <th width="12%">Status</th>
+                                        <th width="10%">Durasi</th>
+                                        <th width="12%" class="text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($peminjaman as $index => $p)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="book-icon me-3">
+                                                        <i class="bi bi-book-fill"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong class="d-block">{{ $p->buku->judul }}</strong>
+                                                        <small class="text-muted">{{ $p->buku->penulis }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <i class="bi bi-calendar-event text-primary me-1"></i>
+                                                {{ $p->tanggal_pinjam->format('d M Y') }}
+                                            </td>
+                                            <td>
+                                                @if($p->tanggal_kembali)
+                                                    <i class="bi bi-calendar-check text-success me-1"></i>
+                                                    {{ $p->tanggal_kembali->format('d M Y') }}
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($p->status == 'dipinjam')
+                                                    @php
+                                                        $hariPinjam = $p->tanggal_pinjam->diffInDays(now());
+                                                        $badgeClass = $hariPinjam > 7 ? 'bg-danger' : 'bg-warning text-dark';
+                                                    @endphp
+                                                    <span class="badge badge-status {{ $badgeClass }}">
+                                                        <i class="bi bi-hourglass-split me-1"></i>Dipinjam
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-status bg-success">
+                                                        <i class="bi bi-check-circle me-1"></i>Dikembalikan
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($p->tanggal_kembali)
+                                                    {{ $p->tanggal_pinjam->diffInDays($p->tanggal_kembali) }} hari
+                                                @else
+                                                    {{ $p->tanggal_pinjam->diffInDays(now()) }} hari
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ route('mahasiswa.peminjaman.show', $p->id) }}" 
+                                                   class="btn btn-sm btn-info"
+                                                   title="Detail">
+                                                    <i class="bi bi-eye me-1"></i>Detail
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <h4>Belum Ada Riwayat Peminjaman</h4>
+                            <p>Anda belum pernah meminjam buku</p>
+                            <a href="{{ route('mahasiswa.buku.index') }}" class="btn btn-primary btn-custom mt-3">
+                                <i class="bi bi-book me-2"></i>Lihat Koleksi Buku
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

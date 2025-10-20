@@ -14,9 +14,10 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    @stack('styles')
 
     <!-- Custom CSS -->
     <style>
@@ -43,7 +44,6 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -172,14 +172,12 @@
             font-size: 0.7rem;
         }
 
-        /* Main */
         .main-content {
             margin-left: var(--sidebar-width);
             min-height: 100vh;
             transition: all 0.3s;
         }
 
-        /* Navbar */
         .top-navbar {
             background: white;
             height: var(--header-height);
@@ -341,7 +339,6 @@
             padding: 35px;
         }
 
-        /* Dropdown Custom */
         .dropdown-menu {
             border: none;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
@@ -415,7 +412,6 @@
             display: block;
         }
 
-        /* Scrollbar */
         .sidebar::-webkit-scrollbar {
             width: 6px;
         }
@@ -433,7 +429,6 @@
             background: rgba(37, 99, 235, 0.5);
         }
 
-        /* Animasi */
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -475,8 +470,6 @@
             animation-delay: 0.6s;
         }
     </style>
-
-    @stack('styles')
 </head>
 
 <body>
@@ -507,14 +500,18 @@
                     class="{{ request()->routeIs('petugas.buku.*') ? 'active' : '' }}">
                     <i class="bi bi-book-fill"></i> <span>Manajemen Buku</span>
                 </a>
-
             </li>
             <li>
-                <a href="{{ route('petugas.buku.index') }}"
-                    class="{{ request()->routeIs('petugas.peminjamans.*') ? 'active' : '' }}">
+                <a href="{{ route('petugas.peminjaman.index') }}"
+                    class="{{ request()->routeIs('petugas.peminjaman.*') ? 'active' : '' }}">
                     <i class="bi bi-journal-bookmark-fill"></i>
                     <span>Peminjaman</span>
-                    <span class="badge">5</span>
+                    @php
+                        $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
+                    @endphp
+                    @if($peminjamanAktif > 0)
+                        <span class="badge">{{ $peminjamanAktif }}</span>
+                    @endif
                 </a>
             </li>
             <li>
@@ -525,7 +522,8 @@
 
             <div class="menu-section-title">Lainnya</div>
             <li>
-                <a href="#">
+                <a href="{{ route('petugas.laporan.index') }}"
+                    class="{{ request()->routeIs('petugas.laporan.*') ? 'active' : '' }}">
                     <i class="bi bi-bar-chart-fill"></i> <span>Laporan</span>
                 </a>
             </li>
@@ -534,7 +532,6 @@
                     <i class="bi bi-gear-fill"></i> <span>Pengaturan</span>
                 </a>
             </li>
-            {{-- 🔻 Tambahkan tombol logout di sini --}}
             <li>
                 <a href="{{ route('logout') }}" class="text-danger"
                     onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
@@ -567,7 +564,9 @@
             <div class="navbar-right">
                 <button class="notification-btn">
                     <i class="bi bi-bell-fill"></i>
-                    <span class="notification-badge">3</span>
+                    @if($peminjamanAktif > 0)
+                        <span class="notification-badge">{{ $peminjamanAktif }}</span>
+                    @endif
                 </button>
 
                 <div class="dropdown">
@@ -577,7 +576,7 @@
                         </div>
                         <div class="user-details">
                             <span class="user-name">{{ Auth::user()->name ?? 'Petugas' }}</span>
-                            <span class="user-role">{{ Auth::user()->role ?? 'Petugas' }}</span>
+                            <span class="user-role">{{ ucfirst(Auth::user()->role ?? 'Petugas') }}</span>
                         </div>
                         <i class="bi bi-chevron-down"></i>
                     </div>
@@ -600,7 +599,6 @@
                                 @csrf
                             </form>
                         </li>
-
                     </ul>
                 </div>
             </div>
@@ -638,7 +636,6 @@
             });
         }
 
-        // Smooth scroll animation
         document.querySelectorAll('.sidebar-menu a').forEach(link => {
             link.addEventListener('click', function(e) {
                 if (this.getAttribute('href') === '#') {
