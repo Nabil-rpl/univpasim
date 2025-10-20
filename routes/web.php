@@ -8,12 +8,12 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\PeminjamanController;
 use App\Http\Controllers\Admin\QRCodeController;
-use App\Http\Controllers\Admin\MahasiswaController; // ✅ Tambahkan import ini
+use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Petugas\LaporanController;
 use App\Http\Controllers\Petugas\PetugasController;
 use App\Http\Controllers\Petugas\QRCodeController as PetugasQRCodeController;
 use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
-
+use App\Http\Controllers\Mahasiswa\MahasiswaController as MahasiswaUserController; // ✅ alias untuk menghindari konflik
 
 // ============================================
 // 🏠 HALAMAN UTAMA
@@ -50,14 +50,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     // ✅ CRUD User
     Route::resource('users', UserController::class);
     
-    // ✅ CRUD Mahasiswa - TAMBAHKAN INI
+    // ✅ CRUD Mahasiswa
     Route::resource('mahasiswa', MahasiswaController::class);
     Route::get('/mahasiswa/export', [MahasiswaController::class, 'export'])->name('mahasiswa.export');
     
     // ✅ CRUD Buku
     Route::resource('buku', BukuController::class);
 
-    // ✅ CRUD Peminjaman (hanya 1 halaman index)
+    // ✅ CRUD Peminjaman
     Route::controller(PeminjamanController::class)->group(function () {
         Route::get('/peminjaman', 'index')->name('peminjaman.index');
         Route::post('/peminjaman', 'store')->name('peminjaman.store');
@@ -103,5 +103,10 @@ Route::middleware(['auth', 'role:petugas'])
 // 🎓 MAHASISWA
 // ============================================
 Route::middleware(['auth', 'role:mahasiswa'])->prefix('mahasiswa')->as('mahasiswa.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'mahasiswa'])->name('dashboard');
+    Route::get('/dashboard', [MahasiswaUserController::class, 'index'])->name('dashboard');
+    Route::get('/buku', [MahasiswaUserController::class, 'buku'])->name('buku.index');
+    Route::get('/buku/{id}', [MahasiswaUserController::class, 'showBuku'])->name('buku.show');
+    Route::get('/peminjaman', [MahasiswaUserController::class, 'peminjaman'])->name('peminjaman.index');
+    Route::get('/peminjaman/riwayat', [MahasiswaUserController::class, 'riwayat'])->name('peminjaman.riwayat');
+    Route::get('/peminjaman/{id}', [MahasiswaUserController::class, 'showPeminjaman'])->name('peminjaman.show');
 });
