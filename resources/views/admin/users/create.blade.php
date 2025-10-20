@@ -22,6 +22,13 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
             @if($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -100,7 +107,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6 mb-3 d-none" id="nim-field">
+                            <div class="col-md-6 mb-3 {{ old('role') == 'mahasiswa' ? '' : 'd-none' }}" id="nim-field">
                                 <label for="nim" class="form-label">
                                     <i class="bi bi-card-text me-1"></i>NIM <span class="text-danger" id="nim-required">*</span>
                                 </label>
@@ -120,6 +127,27 @@
                             </div>
                         </div>
 
+                        <!-- Field Jurusan (hanya untuk mahasiswa) -->
+                        <div class="row {{ old('role') == 'mahasiswa' ? '' : 'd-none' }}" id="jurusan-field">
+                            <div class="col-12 mb-3">
+                                <label for="jurusan" class="form-label">
+                                    <i class="bi bi-building me-1"></i>Jurusan <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="text" 
+                                           class="form-control @error('jurusan') is-invalid @enderror" 
+                                           id="jurusan" 
+                                           name="jurusan" 
+                                           value="{{ old('jurusan') }}" 
+                                           placeholder="Contoh: Teknik Informatika">
+                                    <i class="bi bi-book input-icon"></i>
+                                    @error('jurusan')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label">
@@ -131,7 +159,7 @@
                                            id="password" 
                                            name="password" 
                                            required
-                                           minlength="6">
+                                           minlength="8">
                                     <i class="bi bi-shield-lock-fill input-icon"></i>
                                     <button class="password-toggle" type="button" id="togglePassword">
                                         <i class="bi bi-eye-fill" id="eyeIcon"></i>
@@ -152,7 +180,7 @@
                                            id="password_confirmation" 
                                            name="password_confirmation" 
                                            required
-                                           minlength="6">
+                                           minlength="8">
                                     <i class="bi bi-shield-lock-fill input-icon"></i>
                                     <button class="password-toggle" type="button" id="togglePasswordConfirm">
                                         <i class="bi bi-eye-fill" id="eyeIconConfirm"></i>
@@ -182,18 +210,15 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* General Styles */
 body {
     font-family: 'Inter', sans-serif;
     background: #f8fafc;
 }
 
-/* Container */
 .container-fluid {
     padding: 20px;
 }
 
-/* Card */
 .card {
     border: none;
     border-radius: 16px;
@@ -202,7 +227,6 @@ body {
     animation: slideIn 0.6s ease-out;
 }
 
-/* Animation for Card */
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -221,7 +245,6 @@ body {
     padding: 20px;
 }
 
-/* Alerts */
 .custom-alert {
     border: none;
     border-radius: 12px;
@@ -249,7 +272,6 @@ body {
     padding-left: 18px;
 }
 
-/* Form Elements */
 .form-label {
     font-weight: 600;
     color: #1e293b;
@@ -352,7 +374,6 @@ body {
     background: #eff6ff;
 }
 
-/* Buttons */
 .btn {
     border-radius: 12px;
     font-weight: 600;
@@ -411,7 +432,6 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* Animations */
 @keyframes alertSlide {
     from {
         opacity: 0;
@@ -423,36 +443,13 @@ body {
     }
 }
 
-.form-group {
-    animation: inputSlide 0.6s ease-out both;
-}
-
-.form-group:nth-child(1) { animation-delay: 0.2s; }
-.form-group:nth-child(2) { animation-delay: 0.3s; }
-.form-group:nth-child(3) { animation-delay: 0.4s; }
-.form-group:nth-child(4) { animation-delay: 0.5s; }
-
-@keyframes inputSlide {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Responsive */
 @media (max-width: 768px) {
     .col-lg-6 {
         max-width: 100%;
     }
-
     .card-body {
         padding: 20px;
     }
-
     .btn {
         padding: 10px 16px;
         font-size: 13px;
@@ -463,25 +460,17 @@ body {
     .container-fluid {
         padding: 15px;
     }
-
     .card-header {
         padding: 15px;
     }
-
-    .form-title {
-        font-size: 24px;
-    }
-
     .form-control, .form-select {
         padding: 10px 16px 10px 40px;
         font-size: 13px;
     }
-
     .input-icon {
         left: 12px;
         font-size: 16px;
     }
-
     .password-toggle {
         right: 12px;
         font-size: 16px;
@@ -490,33 +479,35 @@ body {
 </style>
 
 <script>
-// Toggle NIM field visibility based on role selection
 document.addEventListener('DOMContentLoaded', function() {
     const roleSelect = document.getElementById('role');
     const nimField = document.getElementById('nim-field');
+    const jurusanField = document.getElementById('jurusan-field');
     const nimRequired = document.getElementById('nim-required');
     const nimInput = document.getElementById('nim');
+    const jurusanInput = document.getElementById('jurusan');
 
-    function toggleNimField() {
+    function toggleMahasiswaFields() {
         if (roleSelect.value === 'mahasiswa') {
             nimField.classList.remove('d-none');
+            jurusanField.classList.remove('d-none');
             nimInput.required = true;
+            jurusanInput.required = true;
             nimRequired.innerHTML = '<span class="text-danger">*</span>';
         } else {
             nimField.classList.add('d-none');
+            jurusanField.classList.add('d-none');
             nimInput.required = false;
+            jurusanInput.required = false;
             nimInput.value = '';
+            jurusanInput.value = '';
             nimRequired.innerHTML = '';
         }
     }
 
-    // Initial check
-    toggleNimField();
+    toggleMahasiswaFields();
+    roleSelect.addEventListener('change', toggleMahasiswaFields);
 
-    // Listen for changes
-    roleSelect.addEventListener('change', toggleNimField);
-
-    // Toggle Password Visibility
     const togglePassword = document.getElementById('togglePassword');
     const password = document.getElementById('password');
     const eyeIcon = document.getElementById('eyeIcon');
@@ -531,7 +522,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Toggle Password Confirmation Visibility
     const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
     const passwordConfirm = document.getElementById('password_confirmation');
     const eyeIconConfirm = document.getElementById('eyeIconConfirm');
@@ -546,7 +536,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Auto hide alerts after 5 seconds
     setTimeout(function() {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
@@ -555,7 +544,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, 5000);
 
-    // Loading animation on submit
     const createForm = document.querySelector('.create-user-form');
     const submitBtn = document.querySelector('.btn-submit');
 
@@ -566,7 +554,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Input focus effect
     const inputs = document.querySelectorAll('.form-control');
     inputs.forEach(input => {
         input.addEventListener('focus', function() {

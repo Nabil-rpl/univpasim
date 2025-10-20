@@ -100,6 +100,16 @@
             width: 24px;
         }
 
+        /* Menu Section Header */
+        .menu-section {
+            padding: 20px 20px 10px;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
         /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width);
@@ -206,6 +216,17 @@
             width: 20px;
         }
 
+        /* Badge for menu items */
+        .menu-badge {
+            margin-left: auto;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -278,34 +299,54 @@
         </div>
         
         <ul class="sidebar-menu">
+            <!-- Dashboard -->
             <li>
                 <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
+
+            <!-- Management Section -->
+            <div class="menu-section">Management</div>
+            
             <li>
                 <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                     <i class="bi bi-people"></i>
-                    <span>Manajemen User</span>
+                    <span>Kelola User</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.mahasiswa.index') }}" class="{{ request()->routeIs('mahasiswa.data.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Data Mahasiswa</span>
+                    <span class="menu-badge">New</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.buku.index') }}" class="{{ request()->routeIs('admin.bukus.*') ? 'active' : '' }}">
                     <i class="bi bi-book"></i>
-                    <span>Manajemen Buku</span>
+                    <span>Kelola Buku</span>
                 </a>
             </li>
+
+            <!-- Transactions Section -->
+            <div class="menu-section">Transaksi</div>
+            
             <li>
-                <a href="{{ route('admin.peminjaman.index') }}" class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.peminjaman.index') }}" class="{{ request()->routeIs('admin.peminjamans.*') ? 'active' : '' }}">
                     <i class="bi bi-journal-text"></i>
                     <span>Peminjaman</span>
                 </a>
             </li>
+
+            <!-- Settings Section -->
+            <div class="menu-section">Pengaturan</div>
+            
             <li>
                 <a href="#">
                     <i class="bi bi-gear"></i>
-                    <span>Pengaturan</span>
+                    <span>Konfigurasi</span>
                 </a>
             </li>
         </ul>

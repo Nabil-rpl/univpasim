@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\PeminjamanController;
 use App\Http\Controllers\Admin\QRCodeController;
+use App\Http\Controllers\Admin\MahasiswaController; // ✅ Tambahkan import ini
 use App\Http\Controllers\Petugas\LaporanController;
 use App\Http\Controllers\Petugas\PetugasController;
 use App\Http\Controllers\Petugas\QRCodeController as PetugasQRCodeController;
@@ -46,8 +47,14 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
 
-    // ✅ CRUD User & Buku
+    // ✅ CRUD User
     Route::resource('users', UserController::class);
+    
+    // ✅ CRUD Mahasiswa - TAMBAHKAN INI
+    Route::resource('mahasiswa', MahasiswaController::class);
+    Route::get('/mahasiswa/export', [MahasiswaController::class, 'export'])->name('mahasiswa.export');
+    
+    // ✅ CRUD Buku
     Route::resource('buku', BukuController::class);
 
     // ✅ CRUD Peminjaman (hanya 1 halaman index)
