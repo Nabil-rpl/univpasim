@@ -149,4 +149,48 @@ class PeminjamanController extends Controller
 
         return view('mahasiswa.peminjaman.show', compact('peminjaman'));
     }
+    public function riwayat()
+    {
+        $mahasiswa = auth()->user();
+        $peminjaman = \App\Models\Peminjaman::where('mahasiswa_id', $mahasiswa->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('mahasiswa.peminjaman.riwayat', compact('peminjaman', 'mahasiswa'));
+    }
+    public function pinjam($id)
+    {
+        $mahasiswa = auth()->user();
+
+        // Cek apakah buku ada
+        $buku = \App\Models\Buku::findOrFail($id);
+
+        // Cek stok
+        if ($buku->stok <= 0) {
+            return redirect()->back()->with('error', 'Stok buku habis!');
+        }
+
+        // Cek apakah sudah meminjam buku ini dan belum dikembalikan
+        $sudahPinjam = \App\Models\Peminjaman::where('mahasiswa_id', $mahasiswa->id)
+            ->where('buku_id', $buku->id)
+            ->where('status', 'dipinjam')
+            ->exists();
+
+        if ($sudahPinjam) {
+            return redirect()->back()->with('error', 'Kamu sudah meminjam buku ini dan belum mengembalikannya.');
+        }
+
+        // Simpan data peminjaman
+        \App\Models\Peminjaman::create([
+            'mahasiswa_id' => $mahasiswa->id,
+            'buku_id' => $buku->id,
+            'tanggal_pinjam' => now(),
+            'status' => 'dipinjam',
+        ]);
+
+        // Kurangi stok buku
+        $buku->decrement('stok');
+
+        return redirect()->route('mahasiswa.peminjaman.index')->with('success', 'Buku berhasil dipinjam!');
+    }
 }

@@ -50,7 +50,7 @@
                     <i class="bi bi-book-half"></i>
                 </div>
                 <div class="stat-content">
-                    <h3 class="stat-number">{{ $jumlahBuku }}</h3>
+                    <h3 class="stat-number">{{ $totalBuku }}</h3>
                     <p class="stat-label">Total Buku</p>
                 </div>
             </div>
