@@ -13,7 +13,7 @@ use App\Http\Controllers\Petugas\LaporanController;
 use App\Http\Controllers\Petugas\PetugasController;
 use App\Http\Controllers\Petugas\QRCodeController as PetugasQRCodeController;
 use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
-use App\Http\Controllers\Mahasiswa\MahasiswaController;
+use App\Http\Controllers\Mahasiswa\MahasiswaController as MahasiswaUserController; // ✅ alias untuk menghindari konflik
 
 // ============================================
 // 🏠 HALAMAN UTAMA
@@ -79,31 +79,34 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
 // ============================================
 // 👮 PETUGAS
 // ============================================
-Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->as('petugas.')->group(function () {
+Route::middleware(['auth', 'role:petugas'])
+    ->prefix('petugas')
+    ->as('petugas.')
+    ->group(function () {
 
-    // 📊 Dashboard Petugas
-    Route::get('/dashboard', [PetugasController::class, 'index'])->name('dashboard');
+        // 📊 Dashboard Petugas
+        Route::get('/dashboard', [PetugasController::class, 'index'])->name('dashboard');
 
-    // 📚 CRUD Buku (Petugas)
-    Route::resource('buku', PetugasBukuController::class);
+        // 📚 CRUD Buku (Petugas)
+        Route::resource('buku', PetugasBukuController::class);
 
-    // 📄 Laporan
-    Route::resource('laporan', LaporanController::class);
+        // 📄 Laporan
+        Route::resource('laporan', LaporanController::class);
 
-    // 🔳 QR Code
-    Route::get('/qrcode', [PetugasQRCodeController::class, 'index'])->name('qrcode.index');
-    Route::get('/qrcode/generate/{type}/{id}', [PetugasQRCodeController::class, 'generate'])->name('qrcode.generate');
-    Route::delete('/qrcode/{id}', [PetugasQRCodeController::class, 'destroy'])->name('qrcode.destroy');
-});
+        // 🔳 QR Code
+        Route::get('/qrcode', [PetugasQRCodeController::class, 'index'])->name('qrcode.index');
+        Route::get('/qrcode/generate/{type}/{id}', [PetugasQRCodeController::class, 'generate'])->name('qrcode.generate');
+        Route::delete('/qrcode/{id}', [PetugasQRCodeController::class, 'destroy'])->name('qrcode.destroy');
+    });
 
 // ============================================
 // 🎓 MAHASISWA
 // ============================================
 Route::middleware(['auth', 'role:mahasiswa'])->prefix('mahasiswa')->as('mahasiswa.')->group(function () {
-    Route::get('/dashboard', [MahasiswaController::class, 'index'])->name('dashboard');
-    Route::get('/buku', [MahasiswaController::class, 'buku'])->name('buku.index');
-    Route::get('/buku/{id}', [MahasiswaController::class, 'showBuku'])->name('buku.show');
-    Route::get('/peminjaman', [MahasiswaController::class, 'peminjaman'])->name('peminjaman.index');
-    Route::get('/peminjaman/riwayat', [MahasiswaController::class, 'riwayat'])->name('peminjaman.riwayat');
-    Route::get('/peminjaman/{id}', [MahasiswaController::class, 'showPeminjaman'])->name('peminjaman.show');
+    Route::get('/dashboard', [MahasiswaUserController::class, 'index'])->name('dashboard');
+    Route::get('/buku', [MahasiswaUserController::class, 'buku'])->name('buku.index');
+    Route::get('/buku/{id}', [MahasiswaUserController::class, 'showBuku'])->name('buku.show');
+    Route::get('/peminjaman', [MahasiswaUserController::class, 'peminjaman'])->name('peminjaman.index');
+    Route::get('/peminjaman/riwayat', [MahasiswaUserController::class, 'riwayat'])->name('peminjaman.riwayat');
+    Route::get('/peminjaman/{id}', [MahasiswaUserController::class, 'showPeminjaman'])->name('peminjaman.show');
 });
