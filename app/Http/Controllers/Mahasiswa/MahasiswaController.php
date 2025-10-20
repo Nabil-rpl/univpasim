@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Buku;
 use App\Models\Peminjaman;
+use App\Models\Mahasiswa;
 
 class MahasiswaController extends Controller
 {
@@ -16,38 +17,36 @@ class MahasiswaController extends Controller
         $this->middleware(['auth', 'role:mahasiswa']);
     }
 
-    /**
-     * Dashboard mahasiswa
-     */
     public function index()
     {
-        $mahasiswa = Auth::user(); // Ambil user yang login
+        $user = Auth::user(); // data user login
+        $mahasiswa = Mahasiswa::where('nim', $user->nim)->first(); // ambil detail mahasiswa
 
         // Ambil semua data buku dan peminjaman
-        $jumlahBuku = Buku::count();
+        $totalBuku = Buku::count();
 
         // Buku yang tersedia = total buku - buku yang sedang dipinjam
         $bukuDipinjam = Peminjaman::where('status', 'dipinjam')->count();
-        $bukuTersedia = $jumlahBuku - $bukuDipinjam;
+        $bukuTersedia = $totalBuku - $bukuDipinjam;
 
         // Data peminjaman milik mahasiswa yang login
-        $peminjaman = Peminjaman::where('mahasiswa_id', $mahasiswa->id)->get();
+        $peminjaman = Peminjaman::where('mahasiswa_id', $user->id)->get();
         $jumlahPeminjaman = $peminjaman->count();
 
         // Jumlah peminjaman aktif (status = dipinjam)
-        $peminjamanAktif = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
+        $peminjamanAktif = Peminjaman::where('mahasiswa_id', $user->id)
             ->where('status', 'dipinjam')
             ->count();
 
         // Riwayat peminjaman terakhir (5 data terbaru)
-        $riwayatPeminjaman = Peminjaman::where('mahasiswa_id', $mahasiswa->id)
+        $riwayatPeminjaman = Peminjaman::where('mahasiswa_id', $user->id)
             ->latest()
             ->take(5)
             ->get();
 
         return view('mahasiswa.dashboard', compact(
             'mahasiswa',
-            'jumlahBuku',
+            'totalBuku',
             'bukuTersedia',
             'peminjamanAktif',
             'riwayatPeminjaman',
@@ -55,27 +54,18 @@ class MahasiswaController extends Controller
         ));
     }
 
-    /**
-     * Daftar semua buku yang bisa dipinjam
-     */
     public function buku()
     {
         $buku = Buku::orderBy('judul', 'asc')->paginate(10);
         return view('mahasiswa.buku.index', compact('buku'));
     }
 
-    /**
-     * Detail buku
-     */
     public function showBuku($id)
     {
         $buku = Buku::findOrFail($id);
         return view('mahasiswa.buku.show', compact('buku'));
     }
 
-    /**
-     * Histori peminjaman mahasiswa
-     */
     public function peminjaman()
     {
         $mahasiswa = Auth::user();
