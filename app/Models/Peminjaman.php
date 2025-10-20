@@ -11,25 +11,35 @@ class Peminjaman extends Model
 
     protected $table = 'peminjaman';
 
-    protected $fillable = ['mahasiswa_id', 'buku_id', 'petugas_id', 'tanggal_pinjam', 'tanggal_kembali', 'status'];
+    protected $fillable = [
+        'mahasiswa_id',
+        'buku_id',
+        'petugas_id',
+        'tanggal_pinjam',
+        'tanggal_kembali',
+        'status',
+    ];
 
+    protected $casts = [
+        'tanggal_pinjam' => 'date',
+        'tanggal_kembali' => 'date',
+    ];
+
+    // Relasi ke mahasiswa
     public function mahasiswa()
     {
-        return $this->belongsTo(Mahasiswa::class);
+        return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id');
     }
 
+    // Relasi ke buku
     public function buku()
     {
-        return $this->belongsTo(Buku::class);
+        return $this->belongsTo(Buku::class, 'buku_id');
     }
 
+    // Relasi ke petugas (user)
     public function petugas()
     {
         return $this->belongsTo(User::class, 'petugas_id');
-    }
-
-    public function pengembalian()
-    {
-        return $this->hasOne(Pengembalian::class);
     }
 }

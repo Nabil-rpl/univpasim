@@ -19,6 +19,7 @@ use App\Http\Controllers\Petugas\LaporanController;
 use App\Http\Controllers\Petugas\PetugasController;
 use App\Http\Controllers\Petugas\QRCodeController as PetugasQRCodeController;
 use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
+use App\Http\Controllers\Petugas\PeminjamanController as PetugasPeminjamanController;
 
 // Mahasiswa
 use App\Http\Controllers\Mahasiswa\MahasiswaController as MahasiswaUserController;
@@ -109,6 +110,16 @@ Route::middleware(['auth', 'role:petugas'])
         // CRUD Buku
         Route::resource('buku', PetugasBukuController::class);
 
+        // Peminjaman
+        Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+            Route::get('/', [PetugasPeminjamanController::class, 'index'])->name('index');
+            Route::get('/create', [PetugasPeminjamanController::class, 'create'])->name('create');
+            Route::post('/', [PetugasPeminjamanController::class, 'store'])->name('store');
+            Route::get('/{id}', [PetugasPeminjamanController::class, 'show'])->name('show');
+            Route::put('/{id}/kembalikan', [PetugasPeminjamanController::class, 'kembalikan'])->name('kembalikan');
+            Route::delete('/{id}', [PetugasPeminjamanController::class, 'destroy'])->name('destroy');
+        });
+
         // Laporan
         Route::resource('laporan', LaporanController::class);
 
@@ -133,17 +144,13 @@ Route::middleware(['auth', 'role:mahasiswa'])
         // Buku
         Route::get('/buku', [MahasiswaBukuController::class, 'index'])->name('buku.index');
         Route::get('/buku/{id}', [MahasiswaBukuController::class, 'show'])->name('buku.show');
-        Route::post('/buku/{id}/pinjam', [MahasiswaPeminjamanController::class, 'pinjam'])
-            ->name('buku.pinjam');
-
+        Route::post('/buku/{id}/pinjam', [MahasiswaPeminjamanController::class, 'pinjam'])->name('buku.pinjam');
 
         // Peminjaman
         Route::get('/peminjaman', [MahasiswaPeminjamanController::class, 'index'])->name('peminjaman.index');
+        Route::get('/peminjaman/riwayat', [MahasiswaPeminjamanController::class, 'riwayat'])->name('peminjaman.riwayat');
         Route::get('/peminjaman/{id}', [MahasiswaPeminjamanController::class, 'show'])->name('peminjaman.show');
-        Route::get('/peminjaman/riwayat', [MahasiswaPeminjamanController::class, 'riwayat'])
-            ->name('peminjaman.riwayat');
 
-
-        // Riwayat
+        // Riwayat (jika ingin route terpisah)
         Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])->name('riwayat.index');
     });

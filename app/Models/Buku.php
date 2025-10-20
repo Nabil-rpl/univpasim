@@ -17,23 +17,12 @@ class Buku extends Model
         'penerbit',
         'tahun_terbit',
         'stok',
-        'foto', // kolom foto ikut dimasukkan
+        'foto',
     ];
 
-    protected $casts = [
-        'tahun_terbit' => 'integer',
-        'stok' => 'integer',
-    ];
-
-    // 🔗 Relasi ke QR Code (satu buku punya satu kode QR)
-    public function qrCode()
+    // Relasi ke peminjaman
+    public function peminjaman()
     {
-        return $this->hasOne(QrCode::class);
-    }
-
-    // 🔗 Relasi ke Peminjaman (satu buku bisa dipinjam banyak kali)
-    public function peminjamans()
-    {
-        return $this->hasMany(Peminjaman::class);
+        return $this->hasMany(Peminjaman::class, 'buku_id');
     }
 }

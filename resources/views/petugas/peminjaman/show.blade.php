@@ -1,374 +1,285 @@
 @extends('layouts.petugas')
 
+@section('page-title', 'Detail Peminjaman')
+
 @section('content')
-<div class="container-fluid mt-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-1">Detail Peminjaman</h2>
-                    <p class="text-muted mb-0">Informasi lengkap peminjaman buku</p>
+<style>
+    .detail-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+    }
+
+    .detail-header {
+        padding-bottom: 20px;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .info-row {
+        display: flex;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        width: 200px;
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    .info-value {
+        flex: 1;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .book-cover {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e2e8f0;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -26px;
+        top: 5px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #2563eb;
+    }
+
+    .timeline-item.success::before {
+        border-color: #10b981;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-custom {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+</style>
+
+<div class="row">
+    <!-- Informasi Buku -->
+    <div class="col-lg-4 mb-4">
+        <div class="detail-card">
+            <h5 class="mb-3"><i class="bi bi-book me-2"></i>Informasi Buku</h5>
+            @if($peminjaman->buku->foto)
+                <img src="{{ asset('storage/' . $peminjaman->buku->foto) }}" 
+                     alt="{{ $peminjaman->buku->judul }}" 
+                     class="book-cover mb-3">
+            @else
+                <div class="book-cover mb-3 d-flex align-items-center justify-content-center bg-light">
+                    <i class="bi bi-book" style="font-size: 4rem; color: #cbd5e1;"></i>
                 </div>
-                <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Kembali
-                </a>
-            </div>
+            @endif
+            
+            <h5 class="mb-2">{{ $peminjaman->buku->judul }}</h5>
+            <p class="text-muted mb-1">
+                <i class="bi bi-person me-2"></i>{{ $peminjaman->buku->penulis }}
+            </p>
+            <p class="text-muted mb-1">
+                <i class="bi bi-building me-2"></i>{{ $peminjaman->buku->penerbit }}
+            </p>
+            <p class="text-muted mb-0">
+                <i class="bi bi-calendar me-2"></i>{{ $peminjaman->buku->tahun_terbit }}
+            </p>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <!-- Status Card -->
-            <div class="card mb-3 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">Status Peminjaman</h5>
-                            <p class="text-muted mb-0">ID: #{{ $peminjaman->id }}</p>
-                        </div>
-                        <div>
-                            @if($peminjaman->status == 'dipinjam')
-                                <span class="badge bg-warning text-dark fs-6">
-                                    <i class="bi bi-clock"></i> Sedang Dipinjam
-                                </span>
-                            @else
-                                <span class="badge bg-success fs-6">
-                                    <i class="bi bi-check-circle"></i> Sudah Dikembalikan
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mahasiswa Info -->
-            <div class="card mb-3 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-person me-2"></i>Informasi Mahasiswa</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 text-center mb-3 mb-md-0">
-                            <div class="avatar-circle-lg">
-                                <i class="bi bi-person-fill"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-9">
-                            <div class="info-group">
-                                <div class="info-item">
-                                    <label>Nama Mahasiswa</label>
-                                    <p>{{ $peminjaman->mahasiswa->nama }}</p>
-                                </div>
-                                <div class="info-item">
-                                    <label>NIM</label>
-                                    <p><span class="badge bg-info">{{ $peminjaman->mahasiswa->nim }}</span></p>
-                                </div>
-                                <div class="info-item">
-                                    <label>Email</label>
-                                    <p>{{ $peminjaman->mahasiswa->email }}</p>
-                                </div>
-                                <div class="info-item mb-0">
-                                    <label>Jurusan</label>
-                                    <p>{{ $peminjaman->mahasiswa->jurusan ?? '-' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Book Info -->
-            <div class="card mb-3 shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-book me-2"></i>Informasi Buku</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 text-center mb-3 mb-md-0">
-                            <div class="book-cover-detail">
-                                <i class="bi bi-book-fill"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-9">
-                            <div class="info-group">
-                                <div class="info-item">
-                                    <label>Judul Buku</label>
-                                    <p>{{ $peminjaman->buku->judul }}</p>
-                                </div>
-                                <div class="info-item">
-                                    <label>Penulis</label>
-                                    <p>{{ $peminjaman->buku->penulis }}</p>
-                                </div>
-                                <div class="info-item">
-                                    <label>Penerbit</label>
-                                    <p>{{ $peminjaman->buku->penerbit }}</p>
-                                </div>
-                                <div class="info-item mb-0">
-                                    <label>Tahun Terbit</label>
-                                    <p>{{ $peminjaman->buku->tahun_terbit }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Borrowing Details -->
-            <div class="card mb-3 shadow-sm">
-                <div class="card-header bg-warning">
-                    <h5 class="mb-0"><i class="bi bi-calendar-range me-2"></i>Detail Peminjaman</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="detail-box">
-                                <i class="bi bi-calendar-plus detail-icon text-primary"></i>
-                                <div>
-                                    <label>Tanggal Pinjam</label>
-                                    <p>{{ $peminjaman->tanggal_pinjam->format('d F Y') }}</p>
-                                    <small class="text-muted">{{ $peminjaman->tanggal_pinjam->diffForHumans() }}</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="detail-box">
-                                @if($peminjaman->tanggal_kembali)
-                                    <i class="bi bi-calendar-check detail-icon text-success"></i>
-                                    <div>
-                                        <label>Tanggal Kembali</label>
-                                        <p>{{ $peminjaman->tanggal_kembali->format('d F Y') }}</p>
-                                        <small class="text-muted">{{ $peminjaman->tanggal_kembali->diffForHumans() }}</small>
-                                    </div>
-                                @else
-                                    <i class="bi bi-calendar-x detail-icon text-warning"></i>
-                                    <div>
-                                        <label>Tanggal Kembali</label>
-                                        <p>Belum Dikembalikan</p>
-                                        <small class="text-muted">Sudah {{ $peminjaman->tanggal_pinjam->diffInDays(now()) }} hari</small>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    @if($peminjaman->tanggal_kembali)
-                        <hr class="my-3">
-                        <div class="alert alert-info mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Durasi Peminjaman:</strong> 
-                            {{ $peminjaman->tanggal_pinjam->diffInDays($peminjaman->tanggal_kembali) }} hari
-                        </div>
+    <!-- Detail Peminjaman -->
+    <div class="col-lg-8">
+        <div class="detail-card">
+            <div class="detail-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-file-text me-2"></i>Detail Peminjaman</h4>
+                    @if($peminjaman->status == 'dipinjam')
+                        @php
+                            $hariPinjam = $peminjaman->tanggal_pinjam->diffInDays(now());
+                            $badgeClass = $hariPinjam > 7 ? 'bg-danger' : 'bg-warning text-dark';
+                        @endphp
+                        <span class="status-badge {{ $badgeClass }}">
+                            <i class="bi bi-hourglass-split me-1"></i>Sedang Dipinjam ({{ $hariPinjam }} hari)
+                        </span>
+                    @else
+                        <span class="status-badge bg-success">
+                            <i class="bi bi-check-circle me-1"></i>Sudah Dikembalikan
+                        </span>
                     @endif
                 </div>
             </div>
 
-            <!-- Petugas Info -->
-            @if($peminjaman->petugas)
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Petugas yang Melayani</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-circle me-3">
-                                <i class="bi bi-person"></i>
-                            </div>
-                            <div>
-                                <h6 class="mb-0">{{ $peminjaman->petugas->name }}</h6>
-                                <p class="text-muted mb-0">{{ $peminjaman->petugas->email }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
             @endif
 
-            <!-- Actions -->
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Aksi Cepat</span>
-                        <div class="d-flex gap-2">
-                            @if($peminjaman->status == 'dipinjam')
-                                <form action="{{ route('petugas.peminjaman.show', $peminjaman->id) }}" 
-                                      method="POST"
-                                      onsubmit="return confirm('Konfirmasi pengembalian buku?')">
-                                    @csrf
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="bi bi-arrow-return-left"></i> Kembalikan Buku
-                                    </button>
-                                </form>
-                            @endif
-                            
-                            <button type="button" 
-                                    class="btn btn-danger" 
-                                    onclick="confirmDelete()">
-                                <i class="bi bi-trash"></i> Hapus Data
-                            </button>
-                        </div>
-                    </div>
+            @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+
+            <!-- Data Mahasiswa -->
+            <h6 class="text-primary mb-3"><i class="bi bi-person-badge me-2"></i>Data Peminjam</h6>
+            <div class="info-row">
+                <div class="info-label">Nama Mahasiswa</div>
+                <div class="info-value">{{ $peminjaman->mahasiswa->nama }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">NIM</div>
+                <div class="info-value">{{ $peminjaman->mahasiswa->nim }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Jurusan</div>
+                <div class="info-value">{{ $peminjaman->mahasiswa->jurusan ?? '-' }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ $peminjaman->mahasiswa->email }}</div>
+            </div>
+
+            <!-- Data Peminjaman -->
+            <h6 class="text-primary mb-3 mt-4"><i class="bi bi-calendar-check me-2"></i>Data Peminjaman</h6>
+            <div class="info-row">
+                <div class="info-label">Tanggal Pinjam</div>
+                <div class="info-value">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    {{ $peminjaman->tanggal_pinjam->format('d F Y') }}
+                    <span class="text-muted">({{ $peminjaman->tanggal_pinjam->diffForHumans() }})</span>
                 </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Tanggal Kembali</div>
+                <div class="info-value">
+                    @if($peminjaman->tanggal_kembali)
+                        <i class="bi bi-calendar-check me-2"></i>
+                        {{ $peminjaman->tanggal_kembali->format('d F Y') }}
+                        <span class="text-muted">({{ $peminjaman->tanggal_kembali->diffForHumans() }})</span>
+                    @else
+                        <span class="text-muted">Belum dikembalikan</span>
+                    @endif
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Durasi Pinjam</div>
+                <div class="info-value">
+                    @if($peminjaman->status == 'dipinjam')
+                        {{ $peminjaman->tanggal_pinjam->diffInDays(now()) }} hari
+                    @else
+                        {{ $peminjaman->tanggal_pinjam->diffInDays($peminjaman->tanggal_kembali) }} hari
+                    @endif
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Petugas</div>
+                <div class="info-value">
+                    @if($peminjaman->petugas)
+                        <i class="bi bi-person-check me-2"></i>{{ $peminjaman->petugas->name }}
+                    @else
+                        <span class="text-muted">-</span>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            @if($peminjaman->status == 'dikembalikan')
+            <h6 class="text-primary mb-3 mt-4"><i class="bi bi-clock-history me-2"></i>Timeline</h6>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <strong>Buku Dipinjam</strong>
+                    <p class="text-muted mb-0">{{ $peminjaman->tanggal_pinjam->format('d F Y, H:i') }}</p>
+                </div>
+                <div class="timeline-item success">
+                    <strong>Buku Dikembalikan</strong>
+                    <p class="text-muted mb-0">{{ $peminjaman->tanggal_kembali->format('d F Y, H:i') }}</p>
+                </div>
+            </div>
+            @endif
+
+            <!-- Action Buttons -->
+            <div class="action-buttons mt-4">
+                <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-secondary btn-custom">
+                    <i class="bi bi-arrow-left me-2"></i>Kembali
+                </a>
+
+                @if($peminjaman->status == 'dipinjam')
+                <form action="{{ route('petugas.peminjaman.kembalikan', $peminjaman->id) }}" 
+                      method="POST" class="d-inline"
+                      onsubmit="return confirm('Konfirmasi pengembalian buku oleh {{ $peminjaman->mahasiswa->nama }}?')">
+                    @csrf
+                    @method('PUT')
+                    <button type="submit" class="btn btn-success btn-custom">
+                        <i class="bi bi-check-circle me-2"></i>Kembalikan Buku
+                    </button>
+                </form>
+                @endif
+
+                <form action="{{ route('petugas.peminjaman.destroy', $peminjaman->id) }}" 
+                      method="POST" class="d-inline"
+                      onsubmit="return confirm('Yakin ingin menghapus data peminjaman ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger btn-custom">
+                        <i class="bi bi-trash me-2"></i>Hapus Data
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Form Delete (Hidden) -->
-<form id="delete-form" action="{{ route('petugas.peminjaman.destroy', $peminjaman->id) }}" method="POST" style="display: none;">
-    @csrf
-    @method('DELETE')
-</form>
-
-<style>
-.card {
-    border: none;
-    border-radius: 15px;
-}
-
-.card-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 1.25rem;
-}
-
-.card-header h5 {
-    font-weight: 600;
-}
-
-.avatar-circle-lg {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 3rem;
-    margin: 0 auto;
-}
-
-.book-cover-detail {
-    width: 100px;
-    height: 130px;
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 3rem;
-    margin: 0 auto;
-}
-
-.info-group {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 12px;
-}
-
-.info-item {
-    margin-bottom: 1.25rem;
-}
-
-.info-item label {
-    font-weight: 600;
-    color: #4a5568;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-    display: block;
-}
-
-.info-item p {
-    color: #2d3748;
-    font-size: 1rem;
-    margin-bottom: 0;
-}
-
-.detail-box {
-    display: flex;
-    align-items: start;
-    gap: 1rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-}
-
-.detail-icon {
-    font-size: 2rem;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;
-    border-radius: 10px;
-    flex-shrink: 0;
-}
-
-.detail-box label {
-    font-weight: 600;
-    color: #4a5568;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-    display: block;
-}
-
-.detail-box p {
-    color: #2d3748;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0;
-}
-
-.avatar-circle {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.badge {
-    padding: 0.5rem 1rem;
-    font-weight: 600;
-}
-
-.alert {
-    border: none;
-    border-radius: 12px;
-}
-
-.btn-success {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-    border: none;
-}
-
-.btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-    border: none;
-}
-
-.btn-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
-}
-</style>
-
-<script>
-function confirmDelete() {
-    if (confirm('Apakah Anda yakin ingin menghapus data peminjaman ini?\n\nJika buku belum dikembalikan, stok akan otomatis dikembalikan.')) {
-        document.getElementById('delete-form').submit();
-    }
-}
-</script>
 @endsection
