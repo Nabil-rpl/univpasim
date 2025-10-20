@@ -37,7 +37,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="text-uppercase mb-1">Total User</h6>
-                                    <h3 class="mb-0">{{ $users->count() }}</h3>
+                                    <h3 class="mb-0">{{ $totalUsers }}</h3>
                                 </div>
                                 <i class="bi bi-people fs-2 opacity-50"></i>
                             </div>
@@ -50,7 +50,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="text-uppercase mb-1">Admin</h6>
-                                    <h3 class="mb-0">{{ $users->where('role', 'admin')->count() }}</h3>
+                                    <h3 class="mb-0">{{ $totalAdmin }}</h3>
                                 </div>
                                 <i class="bi bi-shield-check fs-2 opacity-50"></i>
                             </div>
@@ -63,7 +63,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="text-uppercase mb-1">Petugas</h6>
-                                    <h3 class="mb-0">{{ $users->where('role', 'petugas')->count() }}</h3>
+                                    <h3 class="mb-0">{{ $totalPetugas }}</h3>
                                 </div>
                                 <i class="bi bi-person-badge fs-2 opacity-50"></i>
                             </div>
@@ -76,7 +76,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="text-uppercase mb-1">Mahasiswa</h6>
-                                    <h3 class="mb-0">{{ $users->where('role', 'mahasiswa')->count() }}</h3>
+                                    <h3 class="mb-0">{{ $totalMahasiswa }}</h3>
                                 </div>
                                 <i class="bi bi-mortarboard fs-2 opacity-50"></i>
                             </div>
@@ -85,10 +85,43 @@
                 </div>
             </div>
 
+            <!-- Search & Filter -->
+            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                <div class="card-body">
+                    <form method="GET" action="{{ route('admin.users.index') }}" class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Cari User</label>
+                            <input type="text" 
+                                   name="search" 
+                                   class="form-control" 
+                                   placeholder="Cari nama, email, atau NIM..."
+                                   value="{{ request('search') }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Filter Role</label>
+                            <select name="role" class="form-select">
+                                <option value="">Semua Role</option>
+                                <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                <option value="petugas" {{ request('role') == 'petugas' ? 'selected' : '' }}>Petugas</option>
+                                <option value="mahasiswa" {{ request('role') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search me-1"></i>Cari
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- User Table -->
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 text-dark fw-bold">Daftar User</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-dark fw-bold">Daftar User</h5>
+                        <span class="badge bg-primary">{{ $users->total() }} Total</span>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -106,13 +139,18 @@
                             <tbody>
                                 @forelse($users as $index => $user)
                                 <tr class="table-row">
-                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $users->firstItem() + $index }}</td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="avatar-circle me-2">
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                {{ strtoupper(substr($user->display_name, 0, 1)) }}
                                             </div>
-                                            <strong>{{ $user->display_name }}</strong>
+                                            <div>
+                                                <strong>{{ $user->display_name }}</strong>
+                                                @if($user->role === 'mahasiswa' && $user->mahasiswa)
+                                                    <br><small class="text-muted">{{ $user->mahasiswa->nim }}</small>
+                                                @endif
+                                            </div>
                                         </div>
                                     </td>
                                     <td>{{ $user->email }}</td>
@@ -173,6 +211,16 @@
                         </table>
                     </div>
                 </div>
+                @if($users->hasPages())
+                <div class="card-footer bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            Menampilkan {{ $users->firstItem() }} - {{ $users->lastItem() }} dari {{ $users->total() }} user
+                        </div>
+                        {{ $users->links() }}
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
     </div>

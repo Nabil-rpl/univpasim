@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\PeminjamanController;
 use App\Http\Controllers\Admin\QRCodeController;
+use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Petugas\LaporanController;
 use App\Http\Controllers\Petugas\PetugasController;
 use App\Http\Controllers\Petugas\QRCodeController as PetugasQRCodeController;
@@ -46,8 +47,14 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
 
-    // ✅ CRUD User & Buku
+    // ✅ CRUD User
     Route::resource('users', UserController::class);
+    
+    // ✅ CRUD Mahasiswa
+    Route::resource('mahasiswa', MahasiswaController::class);
+    Route::get('/mahasiswa/export', [MahasiswaController::class, 'export'])->name('mahasiswa.export');
+    
+    // ✅ CRUD Buku
     Route::resource('buku', BukuController::class);
 
     // ✅ CRUD Peminjaman
@@ -97,8 +104,6 @@ Route::middleware(['auth', 'role:mahasiswa'])->prefix('mahasiswa')->as('mahasisw
     Route::get('/buku', [MahasiswaController::class, 'buku'])->name('buku.index');
     Route::get('/buku/{id}', [MahasiswaController::class, 'showBuku'])->name('buku.show');
     Route::get('/peminjaman', [MahasiswaController::class, 'peminjaman'])->name('peminjaman.index');
-
-    // ✅ Tambahkan ini:
     Route::get('/peminjaman/riwayat', [MahasiswaController::class, 'riwayat'])->name('peminjaman.riwayat');
     Route::get('/peminjaman/{id}', [MahasiswaController::class, 'showPeminjaman'])->name('peminjaman.show');
 });
