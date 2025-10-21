@@ -80,14 +80,14 @@
         <a href="{{ route('mahasiswa.dashboard') }}" class="{{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}">
             <i class="bi bi-house-door"></i> Dashboard
         </a>
-        <a href="{{ route('mahasiswa.peminjaman.index') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.index') ? 'active' : '' }}">
-            <i class="bi bi-book"></i> Peminjaman
-        </a>
         <a href="{{ route('mahasiswa.peminjaman.riwayat') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.riwayat') ? 'active' : '' }}">
             <i class="bi bi-clock-history"></i> Riwayat
         </a>
         <a href="{{ route('mahasiswa.buku.index') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.riwayat') ? 'active' : '' }}">
             <i class="bi bi-clock-history"></i> Data Buku
+        </a>
+        <a href="{{ route('mahasiswa.pengaturan.index') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.riwayat') ? 'active' : '' }}">
+            <i class="bi bi-clock-history"></i> Pengaturan
         </a>
         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="bi bi-box-arrow-right"></i> Logout

@@ -111,7 +111,7 @@ Route::middleware(['auth', 'role:petugas'])
 
         // CRUD Buku
         Route::resource('buku', PetugasBukuController::class);
-        
+
         // Regenerate QR Code
         Route::post('buku/{buku}/regenerate-qr', [PetugasBukuController::class, 'regenerateQR'])
             ->name('buku.regenerateQR');
@@ -173,4 +173,8 @@ Route::middleware(['auth', 'role:mahasiswa'])
         Route::get('/qr-scanner', [QRScannerController::class, 'index'])->name('qr.scanner');
         Route::post('/qr-scanner/preview', [QRScannerController::class, 'preview'])->name('qr.preview');
         Route::post('/qr-scanner/process', [QRScannerController::class, 'process'])->name('qr.process');
+
+        // Pengaturan Mahasiswa
+        Route::get('/pengaturan', [\App\Http\Controllers\Mahasiswa\PengaturanController::class, 'index'])->name('pengaturan.index');
+        Route::post('/pengaturan/update', [\App\Http\Controllers\Mahasiswa\PengaturanController::class, 'update'])->name('pengaturan.update');
     });

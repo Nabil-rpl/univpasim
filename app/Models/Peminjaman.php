@@ -25,9 +25,10 @@ class Peminjaman extends Model
 
     protected $casts = [
         'tanggal_pinjam' => 'datetime',
-        'tanggal_deadline' => 'date',
+        'tanggal_deadline' => 'datetime',
         'tanggal_kembali' => 'datetime',
     ];
+    
 
     // Relasi
     public function mahasiswa()
