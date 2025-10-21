@@ -72,6 +72,11 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+
+    .deadline-info {
+        font-size: 0.75rem;
+        margin-top: 2px;
+    }
 </style>
 
 <!-- Statistik Cards -->
@@ -122,7 +127,7 @@
         <div class="stats-card danger">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h6 class="text-muted mb-2">Terlambat (>7 hari)</h6>
+                    <h6 class="text-muted mb-2">Terlambat</h6>
                     <h2 class="mb-0 fw-bold">{{ $stats['terlambat'] }}</h2>
                 </div>
                 <div class="stats-icon bg-danger-gradient">
@@ -189,6 +194,13 @@
 </div>
 @endif
 
+@if(session('info'))
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <i class="bi bi-info-circle me-2"></i>{{ session('info') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
 <!-- Table -->
 <div class="table-card">
     <div class="table-responsive">
@@ -199,6 +211,7 @@
                     <th>Mahasiswa</th>
                     <th>Buku</th>
                     <th>Tanggal Pinjam</th>
+                    <th>Durasi & Deadline</th>
                     <th>Tanggal Kembali</th>
                     <th>Status</th>
                     <th>Petugas</th>
@@ -210,30 +223,54 @@
                 <tr>
                     <td>{{ $peminjamans->firstItem() + $index }}</td>
                     <td>
-                        <strong>{{ $item->mahasiswa->nama }}</strong><br>
-                        <small class="text-muted">{{ $item->mahasiswa->nim }}</small>
+                        <strong>{{ $item->mahasiswa->name }}</strong><br>
+                        <small class="text-muted">NIM: {{ $item->mahasiswa->nim ?? '-' }}</small>
                     </td>
                     <td>
                         <strong>{{ $item->buku->judul }}</strong><br>
                         <small class="text-muted">{{ $item->buku->penulis }}</small>
                     </td>
-                    <td>{{ $item->tanggal_pinjam->format('d M Y') }}</td>
+                    <td>
+                        <strong>{{ $item->tanggal_pinjam->format('d M Y') }}</strong><br>
+                        <small class="text-muted">{{ $item->tanggal_pinjam->format('H:i') }}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-info">{{ $item->durasi_hari }} Hari</span><br>
+                        @if($item->tanggal_deadline)
+                            <small class="deadline-info {{ $item->isTerlambat() ? 'text-danger' : 'text-muted' }}">
+                                <i class="bi bi-calendar-x me-1"></i>
+                                {{ $item->tanggal_deadline->format('d M Y') }}
+                            </small>
+                        @endif
+                    </td>
                     <td>
                         @if($item->tanggal_kembali)
-                            {{ $item->tanggal_kembali->format('d M Y') }}
+                            <strong>{{ $item->tanggal_kembali->format('d M Y') }}</strong><br>
+                            <small class="text-muted">{{ $item->tanggal_kembali->format('H:i') }}</small>
                         @else
-                            <span class="text-muted">-</span>
+                            <span class="text-muted">Belum dikembalikan</span>
                         @endif
                     </td>
                     <td>
                         @if($item->status == 'dipinjam')
-                            @php
-                                $hariPinjam = $item->tanggal_pinjam->diffInDays(now());
-                                $badgeClass = $hariPinjam > 7 ? 'bg-danger' : 'bg-warning';
-                            @endphp
-                            <span class="badge badge-status {{ $badgeClass }}">
-                                <i class="bi bi-hourglass-split me-1"></i>Dipinjam ({{ $hariPinjam }} hari)
-                            </span>
+                            @if($item->isTerlambat())
+                                @php
+                                    $hariTerlambat = $item->getHariTerlambat();
+                                    $denda = $item->hitungDenda();
+                                @endphp
+                                <span class="badge badge-status bg-danger">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Terlambat {{ $hariTerlambat }} hari
+                                </span>
+                                <br>
+                                <small class="text-danger fw-bold">
+                                    Denda: Rp {{ number_format($denda, 0, ',', '.') }}
+                                </small>
+                            @else
+                                <span class="badge badge-status bg-warning">
+                                    <i class="bi bi-hourglass-split me-1"></i>Dipinjam
+                                </span>
+                            @endif
                         @else
                             <span class="badge badge-status bg-success">
                                 <i class="bi bi-check-circle me-1"></i>Dikembalikan
@@ -242,9 +279,9 @@
                     </td>
                     <td>
                         @if($item->petugas)
-                            {{ $item->petugas->name }}
+                            <strong>{{ $item->petugas->name }}</strong>
                         @else
-                            <span class="text-muted">-</span>
+                            <span class="badge bg-secondary">Sistem</span>
                         @endif
                     </td>
                     <td class="text-center">
@@ -255,20 +292,15 @@
                             </a>
                             
                             @if($item->status == 'dipinjam')
-                            <form action="{{ route('petugas.peminjaman.kembalikan', $item->id) }}" 
-                                  method="POST" class="d-inline"
-                                  onsubmit="return confirm('Konfirmasi pengembalian buku?')">
-                                @csrf
-                                @method('PUT')
-                                <button type="submit" class="btn btn-sm btn-success btn-action" title="Kembalikan">
-                                    <i class="bi bi-check-circle"></i>
-                                </button>
-                            </form>
+                            <a href="{{ route('petugas.pengembalian.show', $item->id) }}" 
+                               class="btn btn-sm btn-success btn-action" title="Proses Pengembalian">
+                                <i class="bi bi-box-arrow-in-down"></i>
+                            </a>
                             @endif
                             
                             <form action="{{ route('petugas.peminjaman.destroy', $item->id) }}" 
                                   method="POST" class="d-inline"
-                                  onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                  onsubmit="return confirm('Yakin ingin menghapus data peminjaman ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger btn-action" title="Hapus">
@@ -280,9 +312,10 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="text-center py-4">
+                    <td colspan="9" class="text-center py-4">
                         <i class="bi bi-inbox" style="font-size: 3rem; color: #cbd5e1;"></i>
-                        <p class="text-muted mt-2">Tidak ada data peminjaman</p>
+                        <p class="text-muted mt-2 mb-0">Tidak ada data peminjaman</p>
+                        <small class="text-muted">Gunakan filter atau tambah data peminjaman baru</small>
                     </td>
                 </tr>
                 @endforelse
@@ -291,6 +324,7 @@
     </div>
 
     <!-- Pagination -->
+    @if($peminjamans->hasPages())
     <div class="d-flex justify-content-between align-items-center mt-3">
         <div class="text-muted">
             Menampilkan {{ $peminjamans->firstItem() ?? 0 }} - {{ $peminjamans->lastItem() ?? 0 }} 
@@ -300,5 +334,6 @@
             {{ $peminjamans->links() }}
         </div>
     </div>
+    @endif
 </div>
 @endsection

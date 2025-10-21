@@ -20,12 +20,14 @@ use App\Http\Controllers\Petugas\PetugasController;
 use App\Http\Controllers\Petugas\QRCodeController as PetugasQRCodeController;
 use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
 use App\Http\Controllers\Petugas\PeminjamanController as PetugasPeminjamanController;
+use App\Http\Controllers\Petugas\PengembalianController; // ✅ Tambahkan ini
 
 // Mahasiswa
 use App\Http\Controllers\Mahasiswa\MahasiswaController as MahasiswaUserController;
 use App\Http\Controllers\Mahasiswa\BukuController as MahasiswaBukuController;
 use App\Http\Controllers\Mahasiswa\PeminjamanController as MahasiswaPeminjamanController;
 use App\Http\Controllers\Mahasiswa\RiwayatController as MahasiswaRiwayatController;
+use App\Http\Controllers\Mahasiswa\QRScannerController;
 
 
 // ============================================
@@ -109,6 +111,10 @@ Route::middleware(['auth', 'role:petugas'])
 
         // CRUD Buku
         Route::resource('buku', PetugasBukuController::class);
+        
+        // Regenerate QR Code
+        Route::post('buku/{buku}/regenerate-qr', [PetugasBukuController::class, 'regenerateQR'])
+            ->name('buku.regenerateQR');
 
         // Peminjaman
         Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
@@ -118,6 +124,15 @@ Route::middleware(['auth', 'role:petugas'])
             Route::get('/{id}', [PetugasPeminjamanController::class, 'show'])->name('show');
             Route::put('/{id}/kembalikan', [PetugasPeminjamanController::class, 'kembalikan'])->name('kembalikan');
             Route::delete('/{id}', [PetugasPeminjamanController::class, 'destroy'])->name('destroy');
+        });
+
+        // ✅ Pengembalian Routes - TAMBAHAN BARU
+        Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
+            Route::get('/', [PengembalianController::class, 'index'])->name('index');
+            Route::get('/search', [PengembalianController::class, 'search'])->name('search');
+            Route::get('/riwayat', [PengembalianController::class, 'riwayat'])->name('riwayat');
+            Route::get('/{peminjaman_id}', [PengembalianController::class, 'show'])->name('show');
+            Route::post('/{peminjaman_id}', [PengembalianController::class, 'store'])->name('store');
         });
 
         // Laporan
@@ -153,4 +168,9 @@ Route::middleware(['auth', 'role:mahasiswa'])
 
         // Riwayat (jika ingin route terpisah)
         Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])->name('riwayat.index');
+
+        // QR Scanner Routes
+        Route::get('/qr-scanner', [QRScannerController::class, 'index'])->name('qr.scanner');
+        Route::post('/qr-scanner/preview', [QRScannerController::class, 'preview'])->name('qr.preview');
+        Route::post('/qr-scanner/process', [QRScannerController::class, 'process'])->name('qr.process');
     });

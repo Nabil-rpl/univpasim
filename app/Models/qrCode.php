@@ -9,25 +9,28 @@ class QRCode extends Model
 {
     use HasFactory;
 
-    // ✅ Tentukan nama tabel manual
-    protected $table = 'qr_codes';
+    protected $table = 'qr_codes'; // ✅ Ubah dari 'qrcodes' ke 'qr_codes'
 
     protected $fillable = [
         'kode_unik',
         'gambar_qr',
-        'user_id',
+        'dibuat_oleh',
         'buku_id',
     ];
 
-    // Relasi ke user (petugas)
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    // Relasi ke buku
+    /**
+     * Relasi ke Buku
+     */
     public function buku()
     {
-        return $this->belongsTo(Buku::class);
+        return $this->belongsTo(Buku::class, 'buku_id');
+    }
+
+    /**
+     * Relasi ke User (pembuat QR Code)
+     */
+    public function pembuat()
+    {
+        return $this->belongsTo(User::class, 'dibuat_oleh');
     }
 }

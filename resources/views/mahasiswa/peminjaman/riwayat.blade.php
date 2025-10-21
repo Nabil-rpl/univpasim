@@ -109,15 +109,34 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     margin-bottom: 20px;
 }
+
+.alert {
+    border: none;
+    border-radius: 12px;
+}
 </style>
 
-<div class="container-fluid">
+<div class="container mt-4">
+    <!-- Alerts -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="mb-1"><i class="bi bi-clock-history me-2"></i>Riwayat Peminjaman</h2>
+                    <h3 class="mb-1"><i class="bi bi-clock-history me-2"></i>Riwayat Peminjaman</h3>
                     <p class="text-muted mb-0">Semua riwayat peminjaman buku Anda</p>
                 </div>
                 <div class="d-flex gap-2">
@@ -153,7 +172,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="stats-card warning">
                 <div class="d-flex justify-content-between align-items-center">
@@ -167,7 +185,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="stats-card success">
                 <div class="d-flex justify-content-between align-items-center">
@@ -223,18 +240,19 @@
                                 <thead>
                                     <tr>
                                         <th width="5%">No</th>
-                                        <th width="35%">Buku</th>
+                                        <th width="30%">Buku</th>
                                         <th width="13%">Tanggal Pinjam</th>
+                                        <th width="13%">Tanggal Deadline</th>
                                         <th width="13%">Tanggal Kembali</th>
                                         <th width="12%">Status</th>
-                                        <th width="10%">Durasi</th>
+                                        <th width="12%">Denda</th>
                                         <th width="12%" class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($peminjaman as $index => $p)
                                         <tr>
-                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $peminjaman->firstItem() + $index }}</td>
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="book-icon me-3">
@@ -251,6 +269,10 @@
                                                 {{ $p->tanggal_pinjam->format('d M Y') }}
                                             </td>
                                             <td>
+                                                <i class="bi bi-calendar-date text-warning me-1"></i>
+                                                {{ $p->tanggal_deadline->format('d M Y') }}
+                                            </td>
+                                            <td>
                                                 @if($p->tanggal_kembali)
                                                     <i class="bi bi-calendar-check text-success me-1"></i>
                                                     {{ $p->tanggal_kembali->format('d M Y') }}
@@ -261,8 +283,8 @@
                                             <td>
                                                 @if($p->status == 'dipinjam')
                                                     @php
-                                                        $hariPinjam = $p->tanggal_pinjam->diffInDays(now());
-                                                        $badgeClass = $hariPinjam > 7 ? 'bg-danger' : 'bg-warning text-dark';
+                                                        $isOverdue = $p->tanggal_deadline->isPast();
+                                                        $badgeClass = $isOverdue ? 'bg-danger' : 'bg-warning text-dark';
                                                     @endphp
                                                     <span class="badge badge-status {{ $badgeClass }}">
                                                         <i class="bi bi-hourglass-split me-1"></i>Dipinjam
@@ -274,10 +296,16 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($p->tanggal_kembali)
-                                                    {{ $p->tanggal_pinjam->diffInDays($p->tanggal_kembali) }} hari
+                                                @if($p->status == 'dipinjam' && $p->tanggal_deadline->isPast())
+                                                    @php
+                                                        $hariTerlambat = $p->tanggal_deadline->diffInDays(now());
+                                                        $denda = $hariTerlambat * 5000; // From PengembalianController
+                                                    @endphp
+                                                    <span class="text-danger">Rp {{ number_format($denda, 0, ',', '.') }}</span>
+                                                @elseif($p->pengembalian && $p->pengembalian->denda > 0)
+                                                    <span class="text-danger">Rp {{ number_format($p->pengembalian->denda, 0, ',', '.') }}</span>
                                                 @else
-                                                    {{ $p->tanggal_pinjam->diffInDays(now()) }} hari
+                                                    <span class="text-muted">-</span>
                                                 @endif
                                             </td>
                                             <td class="text-center">
@@ -291,6 +319,9 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="mt-3">
+                            {{ $peminjaman->links() }}
                         </div>
                     @else
                         <div class="empty-state">
@@ -307,4 +338,15 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Auto hide alerts
+    setTimeout(function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            var bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+</script>
 @endsection

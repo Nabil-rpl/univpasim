@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Petugas;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Models\Buku;
+use App\Models\QRCode;
+use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeGenerator;
 
 class BukuController extends Controller
 {
@@ -44,11 +48,14 @@ class BukuController extends Controller
             $validated['foto'] = $path;
         }
 
-        Buku::create($validated);
+        // Simpan buku
+        $buku = Buku::create($validated);
 
-        return redirect()->route('petugas.buku.index')->with('success', 'Buku berhasil ditambahkan!');
+        // Generate QR Code otomatis
+        $this->generateQRCode($buku);
+
+        return redirect()->route('petugas.buku.index')->with('success', 'Buku dan QR Code berhasil ditambahkan!');
     }
-
 
     public function edit(Buku $buku)
     {
@@ -85,17 +92,60 @@ class BukuController extends Controller
         return view('petugas.buku.show', compact('buku'));
     }
 
-
-
     public function destroy(Buku $buku)
     {
+        // Hapus QR Code jika ada
+        if ($buku->qrCode && $buku->qrCode->gambar_qr) {
+            Storage::delete('public/' . $buku->qrCode->gambar_qr);
+        }
+
         $buku->delete();
         return redirect()->route('petugas.buku.index')->with('success', 'Buku berhasil dihapus!');
     }
 
-    // app/Models/Buku.php
-    public function qrCode()
+    /**
+     * Generate QR Code untuk buku (SVG Format)
+     */
+    private function generateQRCode($buku)
     {
-        return $this->hasOne(\App\Models\QRCode::class, 'buku_id');
+        // Generate kode unik
+        $kodeUnik = 'BOOK-' . $buku->id . '-' . Str::random(8);
+
+        // ✅ Generate QR Code sebagai SVG (tidak perlu imagick)
+        $qrCodeImage = QrCodeGenerator::format('svg')
+            ->size(300)
+            ->errorCorrection('H')
+            ->generate($kodeUnik);
+
+        // Simpan QR Code ke storage
+        $fileName = 'qr_codes/qr-' . $buku->id . '-' . time() . '.svg';
+        Storage::disk('public')->put($fileName, $qrCodeImage);
+
+        // Simpan ke database
+        QRCode::create([
+            'kode_unik' => $kodeUnik,
+            'gambar_qr' => $fileName,
+            'dibuat_oleh' => Auth::id(),
+            'buku_id' => $buku->id,
+        ]);
+    }
+
+    /**
+     * Regenerate QR Code untuk buku tertentu
+     */
+    public function regenerateQR(Buku $buku)
+    {
+        // Hapus QR lama jika ada
+        if ($buku->qrCode) {
+            if ($buku->qrCode->gambar_qr) {
+                Storage::delete('public/' . $buku->qrCode->gambar_qr);
+            }
+            $buku->qrCode->delete();
+        }
+
+        // Generate QR baru
+        $this->generateQRCode($buku);
+
+        return redirect()->back()->with('success', 'QR Code berhasil di-generate ulang!');
     }
 }

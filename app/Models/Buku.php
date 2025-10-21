@@ -20,9 +20,14 @@ class Buku extends Model
         'foto',
     ];
 
-    // Relasi ke peminjaman
     public function peminjaman()
     {
         return $this->hasMany(Peminjaman::class, 'buku_id');
+    }
+
+    // ✅ Tambahkan relasi ini
+    public function qrCode()
+    {
+        return $this->hasOne(QRCode::class, 'buku_id');
     }
 }
