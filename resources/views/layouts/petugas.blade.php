@@ -509,7 +509,7 @@
                     @php
                         $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
                     @endphp
-                    @if($peminjamanAktif > 0)
+                    @if ($peminjamanAktif > 0)
                         <span class="badge">{{ $peminjamanAktif }}</span>
                     @endif
                 </a>
@@ -528,7 +528,8 @@
                 </a>
             </li>
             <li>
-                <a href="#">
+                <a href="{{ route('petugas.profile.index') }}"
+                    class="{{ request()->routeIs('petugas.profile.*') ? 'active' : '' }}">
                     <i class="bi bi-gear-fill"></i> <span>Pengaturan</span>
                 </a>
             </li>
@@ -564,7 +565,7 @@
             <div class="navbar-right">
                 <button class="notification-btn">
                     <i class="bi bi-bell-fill"></i>
-                    @if($peminjamanAktif > 0)
+                    @if ($peminjamanAktif > 0)
                         <span class="notification-badge">{{ $peminjamanAktif }}</span>
                     @endif
                 </button>

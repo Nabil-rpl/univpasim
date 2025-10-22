@@ -294,8 +294,7 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <h4><i class="bi bi-mortarboard-fill"></i> AdminPanel</h4>
-            <p>Management System</p>
+            <h4><i class="bi bi-mortarboard-fill"></i> AdminPASIM</h4>
         </div>
         
         <ul class="sidebar-menu">
@@ -317,14 +316,14 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.mahasiswa.index') }}" class="{{ request()->routeIs('mahasiswa.data.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.mahasiswa.index') }}" class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}">
                     <i class="bi bi-person-badge"></i>
                     <span>Data Mahasiswa</span>
                     <span class="menu-badge">New</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.buku.index') }}" class="{{ request()->routeIs('admin.bukus.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.buku.index') }}" class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
                     <i class="bi bi-book"></i>
                     <span>Kelola Buku</span>
                 </a>
@@ -334,7 +333,7 @@
             <div class="menu-section">Transaksi</div>
             
             <li>
-                <a href="{{ route('admin.peminjaman.index') }}" class="{{ request()->routeIs('admin.peminjamans.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.peminjaman.index') }}" class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}">
                     <i class="bi bi-journal-text"></i>
                     <span>Peminjaman</span>
                 </a>
@@ -344,9 +343,9 @@
             <div class="menu-section">Pengaturan</div>
             
             <li>
-                <a href="#">
-                    <i class="bi bi-gear"></i>
-                    <span>Konfigurasi</span>
+                <a href="{{ route('admin.profile.index') }}" class="{{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Profil</span>
                 </a>
             </li>
         </ul>
@@ -389,13 +388,16 @@
                         </div>
                         <div class="user-details">
                             <span class="user-name">{{ Auth::user()->name ?? 'Admin' }}</span>
-                            <span class="user-role">{{ Auth::user()->role ?? 'Administrator' }}</span>
+                            <span class="user-role">{{ ucfirst(Auth::user()->role ?? 'Administrator') }}</span>
                         </div>
                         <i class="bi bi-chevron-down"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Pengaturan</a></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.profile.index') }}">
+                                <i class="bi bi-person"></i> Profil Saya
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form action="{{ route('logout') }}" method="POST">
