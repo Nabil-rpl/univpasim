@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('penulis');
             $table->string('penerbit');
             $table->integer('tahun_terbit');
+            $table->string('kategori')->nullable(); // kolom baru untuk kategori buku berdasarkan jurusan kuliah
             $table->integer('stok')->default(1);
             $table->string('foto')->nullable(); // kolom untuk menyimpan nama/path foto buku
             $table->timestamps();
