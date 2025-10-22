@@ -339,13 +339,13 @@
                 </a>
             </li>
 
-            <!-- Settings Section -->
-            <div class="menu-section">Pengaturan</div>
+            <!-- Reports Section -->
+            <div class="menu-section">Laporan</div>
             
             <li>
-                <a href="{{ route('admin.profile.index') }}" class="{{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
-                    <i class="bi bi-person-circle"></i>
-                    <span>Profil</span>
+                <a href="{{ route('admin.laporan.index') }}" class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-text"></i>
+                    <span>Laporan Petugas</span>
                 </a>
             </li>
         </ul>

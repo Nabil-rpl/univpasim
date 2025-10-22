@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\PeminjamanController;
 use App\Http\Controllers\Admin\QRCodeController;
 use App\Http\Controllers\Admin\MahasiswaController;
+use App\Http\Controllers\Admin\LaporanController as AdminLaporanController; // ✅ TAMBAHAN BARU
 
 // Petugas
 use App\Http\Controllers\Petugas\LaporanController;
@@ -103,6 +104,12 @@ Route::middleware(['auth', 'role:admin'])
             Route::put('/qrcodes/{id}', 'update')->name('qrcodes.update');
             Route::delete('/qrcodes/{id}', 'destroy')->name('qrcodes.destroy');
         });
+
+        // ✅ LAPORAN - TAMBAHAN BARU (Admin Read Only)
+        Route::controller(AdminLaporanController::class)->group(function () {
+            Route::get('/laporan', 'index')->name('laporan.index');
+            Route::get('/laporan/{laporan}', 'show')->name('laporan.show');
+        });
     });
 
 
@@ -151,7 +158,7 @@ Route::middleware(['auth', 'role:petugas'])
         });
 
 
-        // Laporan
+        // Laporan (Petugas Full CRUD)
         Route::resource('laporan', LaporanController::class);
 
         // QR Code
