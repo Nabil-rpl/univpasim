@@ -469,6 +469,14 @@
         .sidebar-menu li:nth-child(6) {
             animation-delay: 0.6s;
         }
+
+        .sidebar-menu li:nth-child(7) {
+            animation-delay: 0.7s;
+        }
+
+        .sidebar-menu li:nth-child(8) {
+            animation-delay: 0.8s;
+        }
     </style>
 </head>
 
@@ -509,14 +517,15 @@
                     @php
                         $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
                     @endphp
-                    @if($peminjamanAktif > 0)
+                    @if ($peminjamanAktif > 0)
                         <span class="badge">{{ $peminjamanAktif }}</span>
                     @endif
                 </a>
             </li>
             <li>
-                <a href="#">
-                    <i class="bi bi-people-fill"></i> <span>Data Anggota</span>
+                <a href="{{ route('petugas.pengembalian.index') }}"
+                    class="{{ request()->routeIs('petugas.pengembalian.*') ? 'active' : '' }}">
+                    <i class="bi bi-arrow-return-left"></i> <span>Pengembalian</span>
                 </a>
             </li>
 
@@ -524,14 +533,10 @@
             <li>
                 <a href="{{ route('petugas.laporan.index') }}"
                     class="{{ request()->routeIs('petugas.laporan.*') ? 'active' : '' }}">
-                    <i class="bi bi-bar-chart-fill"></i> <span>Laporan</span>
+                    <i class="bi bi-file-text-fill"></i> <span>Laporan</span>
                 </a>
             </li>
-            <li>
-                <a href="#">
-                    <i class="bi bi-gear-fill"></i> <span>Pengaturan</span>
-                </a>
-            </li>
+        
             <li>
                 <a href="{{ route('logout') }}" class="text-danger"
                     onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
@@ -564,7 +569,7 @@
             <div class="navbar-right">
                 <button class="notification-btn">
                     <i class="bi bi-bell-fill"></i>
-                    @if($peminjamanAktif > 0)
+                    @if ($peminjamanAktif > 0)
                         <span class="notification-badge">{{ $peminjamanAktif }}</span>
                     @endif
                 </button>
@@ -581,11 +586,12 @@
                         <i class="bi bi-chevron-down"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-person-circle"></i> Profil Saya</a>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('petugas.profile.index') }}">
+                                <i class="bi bi-person-circle"></i> Profil Saya
+                            </a>
                         </li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Pengaturan</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> Bantuan</a>
-                        </li>
+                       
                         <li>
                             <hr class="dropdown-divider">
                         </li>

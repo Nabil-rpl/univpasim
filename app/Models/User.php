@@ -54,4 +54,11 @@ class User extends Authenticatable
         }
         return $value;
     }
+
+    // Tambahkan method ini di class User
+public function laporan()
+{
+    return $this->hasMany(Laporan::class, 'dibuat_oleh');
 }
+}
+

@@ -117,10 +117,10 @@
 
             <!-- User Table -->
             <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-header bg-white border-0 py-3">
+                <div class="card-header bg-gradient-primary text-white border-0 py-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 text-dark fw-bold">Daftar User</h5>
-                        <span class="badge bg-primary">{{ $users->total() }} Total</span>
+                        <h5 class="mb-0 fw-bold">Daftar User</h5>
+                        <span class="badge bg-white text-primary">{{ $users->total() }} Total</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -201,9 +201,9 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-4">
+                                    <td colspan="6" class="text-center py-5">
                                         <i class="bi bi-inbox fs-1 text-muted"></i>
-                                        <p class="text-muted mt-2">Belum ada data user</p>
+                                        <p class="text-muted mt-2 mb-0">Belum ada data user</p>
                                     </td>
                                 </tr>
                                 @endforelse
@@ -212,12 +212,15 @@
                     </div>
                 </div>
                 @if($users->hasPages())
-                <div class="card-footer bg-white border-0">
-                    <div class="d-flex justify-content-between align-items-center">
+                <div class="card-footer bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div class="text-muted small">
-                            Menampilkan {{ $users->firstItem() }} - {{ $users->lastItem() }} dari {{ $users->total() }} user
+                            <i class="bi bi-info-circle me-1"></i>
+                            Menampilkan <strong>{{ $users->firstItem() }}</strong> - <strong>{{ $users->lastItem() }}</strong> dari <strong>{{ $users->total() }}</strong> user
                         </div>
-                        {{ $users->links() }}
+                        <div>
+                            {{ $users->appends(request()->query())->links('pagination::bootstrap-5') }}
+                        </div>
                     </div>
                 </div>
                 @endif
@@ -316,13 +319,15 @@ h2 {
     border: none;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(30, 64, 175, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     animation: slideIn 0.6s ease-out;
 }
 
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
 .card-header {
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-    color: white;
     border-radius: 12px 12px 0 0;
     padding: 16px;
 }
@@ -371,14 +376,14 @@ h2 {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
-    box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(30, 64, 175, 0.4);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .btn-action {
@@ -427,6 +432,68 @@ h2 {
     animation: spin 0.7s linear infinite;
 }
 
+/* Custom Pagination Styles */
+.pagination {
+    margin: 0;
+    gap: 4px;
+}
+
+.pagination .page-link {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    background: #f1f5f9;
+    transition: all 0.3s ease;
+    margin: 0 2px;
+}
+
+.pagination .page-link:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    border: none;
+}
+
+.pagination .page-item.disabled .page-link {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    border: none;
+}
+
+.pagination .page-link:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    outline: none;
+}
+
+/* Pagination Icons */
+.pagination .page-link[aria-label="Previous"]::before {
+    content: "‹";
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.pagination .page-link[aria-label="Next"]::before {
+    content: "›";
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.pagination .page-link[aria-label="Previous"],
+.pagination .page-link[aria-label="Next"] {
+    padding: 8px 12px;
+}
+
 /* Animations */
 @keyframes slideIn {
     from {
@@ -473,6 +540,21 @@ h2 {
         padding: 5px 8px;
         font-size: 11px;
     }
+
+    .pagination .page-link {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .card-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .card-footer > div {
+        width: 100%;
+        text-align: center;
+    }
 }
 
 @media (max-width: 576px) {
@@ -502,6 +584,11 @@ h2 {
     .table th, .table td {
         font-size: 12px;
         padding: 8px;
+    }
+
+    .pagination .page-link {
+        padding: 5px 8px;
+        font-size: 11px;
     }
 }
 </style>

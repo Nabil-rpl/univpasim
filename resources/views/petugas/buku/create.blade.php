@@ -35,6 +35,17 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="kategori" class="form-label">Kategori (Jurusan Kuliah)</label>
+                    <select class="form-control @error('kategori') is-invalid @enderror" name="kategori" required>
+                        <option value="">Pilih Kategori</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category }}" {{ old('kategori') == $category ? 'selected' : '' }}>{{ $category }}</option>
+                        @endforeach
+                    </select>
+                    @error('kategori') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="mb-3">
                     <label for="stok" class="form-label">Stok Buku</label>
                     <input type="number" class="form-control @error('stok') is-invalid @enderror" name="stok" value="{{ old('stok', 1) }}" required>
                     @error('stok') <div class="invalid-feedback">{{ $message }}</div> @enderror

@@ -3,25 +3,40 @@
 @section('page-title', 'Dashboard Mahasiswa')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid dashboard-container">
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="welcome-card">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h2 class="mb-2">Selamat Datang, {{ auth()->user()->name }}! 👋</h2>
-                        <p class="text-muted mb-0">
+                <div class="welcome-gradient"></div>
+                <div class="welcome-content">
+                    <div class="welcome-text">
+                        <div class="greeting-badge">
+                            <i class="bi bi-stars"></i>
+                            <span>Dashboard</span>
+                        </div>
+                        <h1 class="welcome-title">Selamat Datang, {{ auth()->user()->name }}! 👋</h1>
+                        <p class="welcome-subtitle">
                             @if($mahasiswa)
-                                NIM: {{ $mahasiswa->nim }} | Jurusan: {{ $mahasiswa->jurusan ?? '-' }}
+                                <span class="info-chip">
+                                    <i class="bi bi-person-badge"></i>
+                                    {{ $mahasiswa->nim }}
+                                </span>
+                                <span class="info-chip">
+                                    <i class="bi bi-mortarboard"></i>
+                                    {{ $mahasiswa->jurusan ?? '-' }}
+                                </span>
                             @else
                                 <span class="text-danger">Data mahasiswa tidak ditemukan. Hubungi admin.</span>
                             @endif
                         </p>
                     </div>
-                    <a href="{{ route('mahasiswa.peminjaman.index') }}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-book"></i> Pinjam Buku
-                    </a>
+                    <div class="welcome-action">
+                        <a href="{{ route('mahasiswa.buku.index') }}" class="btn-primary-custom">
+                            <i class="bi bi-book"></i>
+                            <span>Pinjam Buku</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -29,78 +44,127 @@
 
     <!-- Alert Messages -->
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+        <div class="alert alert-success-custom alert-dismissible fade show" role="alert">
+            <div class="alert-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="alert-content">
+                {{ session('success') }}
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+        <div class="alert alert-danger-custom alert-dismissible fade show" role="alert">
+            <div class="alert-icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="alert-content">
+                {{ session('error') }}
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
     <!-- Stats Cards -->
-    <div class="row mb-4 g-3">
+    <div class="row mb-4 g-4">
         <div class="col-md-4">
-            <div class="stat-card stat-primary">
-                <div class="stat-icon">
+            <div class="stat-card">
+                <div class="stat-decoration stat-decoration-1"></div>
+                <div class="stat-icon-wrapper">
+                    <div class="stat-icon stat-icon-1">
+                        <i class="bi bi-book-half"></i>
+                    </div>
+                </div>
+                <div class="stat-details">
+                    <h3 class="stat-number">{{ $totalBuku }}</h3>
+                    <p class="stat-label">Total Buku Tersedia</p>
+                </div>
+                <div class="stat-bg-icon">
                     <i class="bi bi-book-half"></i>
                 </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">{{ $totalBuku }}</h3>
-                    <p class="stat-label">Total Buku</p>
-                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="stat-card stat-success">
-                <div class="stat-icon">
+            <div class="stat-card">
+                <div class="stat-decoration stat-decoration-2"></div>
+                <div class="stat-icon-wrapper">
+                    <div class="stat-icon stat-icon-2">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-details">
+                    <h3 class="stat-number">{{ $bukuTersedia }}</h3>
+                    <p class="stat-label">Buku Siap Dipinjam</p>
+                </div>
+                <div class="stat-bg-icon">
                     <i class="bi bi-check-circle"></i>
                 </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">{{ $bukuTersedia }}</h3>
-                    <p class="stat-label">Buku Tersedia</p>
-                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="stat-card stat-warning">
-                <div class="stat-icon">
-                    <i class="bi bi-bookmark-star"></i>
+            <div class="stat-card">
+                <div class="stat-decoration stat-decoration-3"></div>
+                <div class="stat-icon-wrapper">
+                    <div class="stat-icon stat-icon-3">
+                        <i class="bi bi-bookmark-star"></i>
+                    </div>
                 </div>
-                <div class="stat-content">
+                <div class="stat-details">
                     <h3 class="stat-number">{{ $peminjamanAktif }}</h3>
                     <p class="stat-label">Sedang Dipinjam</p>
+                </div>
+                <div class="stat-bg-icon">
+                    <i class="bi bi-bookmark-star"></i>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions & Recent Activity -->
-    <div class="row g-3">
+    <div class="row g-4">
         <!-- Quick Actions -->
         <div class="col-lg-4">
-            <div class="card action-card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-lightning-charge me-2"></i>Aksi Cepat</h5>
+            <div class="card-custom action-card-custom">
+                <div class="card-header-custom">
+                    <div class="card-icon-header">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <h5>Aksi Cepat</h5>
                 </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ route('mahasiswa.peminjaman.index') }}" class="btn btn-outline-primary">
-                            <i class="bi bi-book"></i> Pinjam Buku Baru
+                <div class="card-body-custom">
+                    <div class="action-buttons">
+                        <a href="{{ route('mahasiswa.buku.index') }}" class="action-btn action-btn-primary">
+                            <div class="action-btn-icon">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <div class="action-btn-text">
+                                <strong>Pinjam Buku Baru</strong>
+                                <small>Jelajahi koleksi buku</small>
+                            </div>
+                            <i class="bi bi-chevron-right action-btn-arrow"></i>
                         </a>
-                        <a href="{{ route('mahasiswa.peminjaman.riwayat') }}" class="btn btn-outline-info">
-                            <i class="bi bi-clock-history"></i> Lihat Riwayat
+                        <a href="{{ route('mahasiswa.peminjaman.riwayat') }}" class="action-btn action-btn-secondary">
+                            <div class="action-btn-icon">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div class="action-btn-text">
+                                <strong>Lihat Riwayat</strong>
+                                <small>Histori peminjaman Anda</small>
+                            </div>
+                            <i class="bi bi-chevron-right action-btn-arrow"></i>
                         </a>
                     </div>
                     
                     @if($peminjamanAktif > 0)
-                        <div class="alert alert-info mt-3 mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <small>Anda memiliki <strong>{{ $peminjamanAktif }}</strong> buku yang sedang dipinjam.</small>
+                        <div class="info-box">
+                            <div class="info-box-icon">
+                                <i class="bi bi-info-circle-fill"></i>
+                            </div>
+                            <div class="info-box-text">
+                                Anda memiliki <strong>{{ $peminjamanAktif }}</strong> buku yang sedang dipinjam.
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -109,58 +173,64 @@
 
         <!-- Recent Activity -->
         <div class="col-lg-8">
-            <div class="card activity-card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Riwayat Peminjaman Terakhir</h5>
+            <div class="card-custom activity-card-custom">
+                <div class="card-header-custom">
+                    <div class="card-icon-header">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h5>Riwayat Peminjaman Terakhir</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body-custom">
                     @if($riwayatPeminjaman->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Buku</th>
-                                        <th>Tanggal Pinjam</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($riwayatPeminjaman as $p)
-                                        <tr>
-                                            <td>
-                                                <strong>{{ $p->buku->judul }}</strong><br>
-                                                <small class="text-muted">{{ $p->buku->penulis }}</small>
-                                            </td>
-                                            <td>{{ $p->tanggal_pinjam->format('d/m/Y') }}</td>
-                                            <td>
-                                                @if($p->status == 'dipinjam')
-                                                    <span class="badge bg-warning">Dipinjam</span>
-                                                @else
-                                                    <span class="badge bg-success">Dikembalikan</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('mahasiswa.peminjaman.show', $p->id) }}" class="btn btn-sm btn-info">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        <div class="activity-list">
+                            @foreach($riwayatPeminjaman as $p)
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="bi bi-book"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h6 class="activity-title">{{ $p->buku->judul }}</h6>
+                                        <p class="activity-subtitle">{{ $p->buku->penulis }}</p>
+                                        <div class="activity-meta">
+                                            <span class="meta-item">
+                                                <i class="bi bi-calendar3"></i>
+                                                {{ $p->tanggal_pinjam->format('d/m/Y') }}
+                                            </span>
+                                            @if($p->status == 'dipinjam')
+                                                <span class="badge-custom badge-warning">
+                                                    <i class="bi bi-clock"></i>
+                                                    Dipinjam
+                                                </span>
+                                            @else
+                                                <span class="badge-custom badge-success">
+                                                    <i class="bi bi-check-circle"></i>
+                                                    Dikembalikan
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('mahasiswa.peminjaman.show', $p->id) }}" class="activity-action">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            @endforeach
                         </div>
-                        <div class="text-center mt-3">
-                            <a href="{{ route('mahasiswa.peminjaman.riwayat') }}" class="btn btn-sm btn-outline-primary">
-                                Lihat Semua Riwayat <i class="bi bi-arrow-right"></i>
+                        <div class="text-center mt-4">
+                            <a href="{{ route('mahasiswa.peminjaman.riwayat') }}" class="btn-outline-custom">
+                                Lihat Semua Riwayat
+                                <i class="bi bi-arrow-right ms-2"></i>
                             </a>
                         </div>
                     @else
-                        <div class="text-center py-4">
-                            <i class="bi bi-inbox fs-1 text-muted"></i>
-                            <p class="text-muted mt-2">Belum ada riwayat peminjaman</p>
-                            <a href="{{ route('mahasiswa.peminjaman.index') }}" class="btn btn-primary btn-sm">
-                                Pinjam Buku Sekarang
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="bi bi-inbox"></i>
+                            </div>
+                            <h6 class="empty-title">Belum Ada Riwayat</h6>
+                            <p class="empty-text">Anda belum melakukan peminjaman buku</p>
+                            <a href="{{ route('mahasiswa.peminjaman.index') }}" class="btn-primary-custom mt-3">
+                                <i class="bi bi-book"></i>
+                                <span>Pinjam Buku Sekarang</span>
                             </a>
                         </div>
                     @endif
@@ -172,119 +242,543 @@
 
 <style>
 :root {
-    --primary: #667eea;
-    --success: #48bb78;
-    --warning: #f6ad55;
-    --info: #4299e1;
+    --primary-blue: #60A5FA;
+    --light-blue: #DBEAFE;
+    --extra-light-blue: #EFF6FF;
+    --dark-blue: #3B82F6;
+    --pure-white: #FFFFFF;
+    --text-dark: #1E293B;
+    --text-light: #64748B;
+    --shadow-sm: 0 1px 3px rgba(96, 165, 250, 0.12);
+    --shadow-md: 0 4px 20px rgba(96, 165, 250, 0.15);
+    --shadow-lg: 0 10px 40px rgba(96, 165, 250, 0.2);
 }
 
+.dashboard-container {
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, var(--extra-light-blue) 0%, #F8FAFC 100%);
+    min-height: 100vh;
+}
+
+/* Welcome Card */
 .welcome-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    position: relative;
+    background: var(--pure-white);
+    border-radius: 24px;
+    padding: 3rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
 }
 
-.welcome-card h2 {
+.welcome-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary-blue), var(--dark-blue));
+}
+
+.welcome-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.greeting-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--light-blue);
+    color: var(--dark-blue);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.welcome-title {
+    font-size: 2rem;
     font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
 }
 
-.stat-card {
-    background: white;
-    border-radius: 15px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+.welcome-subtitle {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+.info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--extra-light-blue);
+    color: var(--text-light);
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+}
+
+.btn-primary-custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    color: var(--pure-white);
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(96, 165, 250, 0.4);
+    color: var(--pure-white);
+}
+
+/* Custom Alerts */
+.alert-success-custom,
+.alert-danger-custom {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    transition: transform 0.3s ease;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 16px;
+    border: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-success-custom {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    color: #065F46;
+}
+
+.alert-danger-custom {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+    color: #991B1B;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+}
+
+.alert-content {
+    flex: 1;
+    font-weight: 500;
+}
+
+/* Stat Cards */
+.stat-card {
+    position: relative;
+    background: var(--pure-white);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-decoration {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    opacity: 0.1;
+}
+
+.stat-decoration-1 {
+    background: var(--primary-blue);
+    top: -50px;
+    right: -50px;
+}
+
+.stat-decoration-2 {
+    background: var(--dark-blue);
+    top: -30px;
+    right: -30px;
+}
+
+.stat-decoration-3 {
+    background: var(--primary-blue);
+    bottom: -40px;
+    right: -40px;
+}
+
+.stat-icon-wrapper {
+    margin-bottom: 1.5rem;
 }
 
 .stat-icon {
     width: 70px;
     height: 70px;
-    border-radius: 15px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 2rem;
+    color: var(--pure-white);
+    box-shadow: var(--shadow-md);
 }
 
-.stat-primary .stat-icon {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+.stat-icon-1 {
+    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
 }
 
-.stat-success .stat-icon {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-    color: white;
+.stat-icon-2 {
+    background: linear-gradient(135deg, #93C5FD, var(--primary-blue));
 }
 
-.stat-warning .stat-icon {
-    background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
-    color: white;
+.stat-icon-3 {
+    background: linear-gradient(135deg, var(--dark-blue), #2563EB);
 }
 
 .stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
-    color: #2d3748;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
 }
 
 .stat-label {
-    margin: 0;
-    color: #718096;
-    font-weight: 600;
-}
-
-.card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.card-header {
-    background: transparent;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 1.25rem;
-}
-
-.card-header h5 {
-    font-weight: 600;
-    color: #2d3748;
-}
-
-.table {
     font-size: 0.95rem;
+    color: var(--text-light);
+    font-weight: 600;
+    margin: 0;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary), #764ba2);
-    border: none;
+.stat-bg-icon {
+    position: absolute;
+    bottom: -20px;
+    right: -10px;
+    font-size: 8rem;
+    color: var(--extra-light-blue);
+    opacity: 0.3;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+/* Custom Cards */
+.card-custom {
+    background: var(--pure-white);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
 }
 
-.alert {
-    border: none;
+.card-header-custom {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--extra-light-blue);
+}
+
+.card-icon-header {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    color: var(--pure-white);
     border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.card-header-custom h5 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.card-body-custom {
+    padding: 2rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 16px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn-primary {
+    background: linear-gradient(135deg, var(--light-blue), var(--extra-light-blue));
+    color: var(--dark-blue);
+}
+
+.action-btn-secondary {
+    background: var(--extra-light-blue);
+    color: var(--primary-blue);
+}
+
+.action-btn:hover {
+    transform: translateX(8px);
+    box-shadow: var(--shadow-md);
+}
+
+.action-btn-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--pure-white);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.action-btn-text {
+    flex: 1;
+}
+
+.action-btn-text strong {
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.action-btn-text small {
+    color: var(--text-light);
+}
+
+.action-btn-arrow {
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+}
+
+.action-btn:hover .action-btn-arrow {
+    transform: translateX(5px);
+}
+
+/* Info Box */
+.info-box {
+    display: flex;
+    gap: 1rem;
+    background: var(--extra-light-blue);
+    padding: 1.25rem;
+    border-radius: 16px;
+    margin-top: 1.5rem;
+    border-left: 4px solid var(--primary-blue);
+}
+
+.info-box-icon {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+}
+
+.info-box-text {
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Activity List */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: var(--extra-light-blue);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+    background: var(--light-blue);
+    transform: translateX(5px);
+}
+
+.activity-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    color: var(--pure-white);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.25rem;
+}
+
+.activity-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+.activity-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.activity-action {
+    width: 40px;
+    height: 40px;
+    background: var(--pure-white);
+    color: var(--primary-blue);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.activity-action:hover {
+    background: var(--primary-blue);
+    color: var(--pure-white);
+    transform: scale(1.1);
+}
+
+/* Badges */
+.badge-custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-warning {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.badge-success {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+/* Outline Button */
+.btn-outline-custom {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 2px solid var(--primary-blue);
+    color: var(--primary-blue);
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-custom:hover {
+    background: var(--primary-blue);
+    color: var(--pure-white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.empty-icon {
+    font-size: 5rem;
+    color: var(--light-blue);
+    margin-bottom: 1.5rem;
+}
+
+.empty-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.empty-text {
+    color: var(--text-light);
+    margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .welcome-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .activity-item {
+        flex-wrap: wrap;
+    }
 }
 </style>
 
 <script>
 // Auto hide alerts
 setTimeout(function() {
-    var alerts = document.querySelectorAll('.alert');
+    var alerts = document.querySelectorAll('.alert-success-custom, .alert-danger-custom');
     alerts.forEach(function(alert) {
         var bsAlert = new bootstrap.Alert(alert);
         bsAlert.close();
