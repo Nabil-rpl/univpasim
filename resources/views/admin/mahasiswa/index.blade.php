@@ -15,7 +15,6 @@
                     <a href="{{ route('admin.mahasiswa.export') }}" class="btn btn-success">
                         <i class="bi bi-download"></i> Export CSV
                     </a>
-        
                 </div>
             </div>
 
@@ -128,14 +127,30 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div class="text-muted">
-                    Menampilkan {{ $mahasiswas->firstItem() ?? 0 }} - {{ $mahasiswas->lastItem() ?? 0 }} 
-                    dari {{ $mahasiswas->total() }} data
+            <!-- Modern Pagination -->
+            @if($mahasiswas->hasPages())
+            <div class="pagination-wrapper mt-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <div class="pagination-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Menampilkan <strong>{{ $mahasiswas->firstItem() ?? 0 }}</strong> - <strong>{{ $mahasiswas->lastItem() ?? 0 }}</strong> 
+                            dari <strong>{{ $mahasiswas->total() }}</strong> total data
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <nav aria-label="Pagination Navigation" class="d-flex justify-content-md-end justify-content-center">
+                            {{ $mahasiswas->appends(request()->query())->links('pagination::bootstrap-4') }}
+                        </nav>
+                    </div>
                 </div>
-                {{ $mahasiswas->links() }}
             </div>
+            @else
+            <div class="pagination-info mt-4">
+                <i class="bi bi-info-circle me-2"></i>
+                Total <strong>{{ $mahasiswas->total() }}</strong> data mahasiswa
+            </div>
+            @endif
         </div>
     </div>
 </div>
@@ -177,6 +192,149 @@
     border-color: #667eea;
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
+
+/* Modern Pagination Styles */
+.pagination-wrapper {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.pagination-info {
+    background: white;
+    border-radius: 8px;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.pagination {
+    margin: 0;
+    gap: 4px;
+    justify-content: center;
+}
+
+.pagination .page-item {
+    margin: 0;
+}
+
+.pagination .page-link {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    background: white;
+    transition: all 0.3s ease;
+    margin: 0 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    min-width: 42px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination .page-link:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+    text-decoration: none;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    border: none;
+    transform: translateY(-1px);
+}
+
+.pagination .page-item.disabled .page-link {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    border: none;
+    box-shadow: none;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+    background: #e2e8f0;
+    color: #94a3b8;
+    transform: none;
+    box-shadow: none;
+}
+
+.pagination .page-link:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    outline: none;
+    z-index: 3;
+}
+
+/* Navigation arrows */
+.pagination .page-link[aria-label="Previous"],
+.pagination .page-link[aria-label="Next"] {
+    padding: 10px 12px;
+    font-size: 16px;
+}
+
+.pagination .page-link[aria-label="Previous"]:before {
+    content: "‹";
+    font-weight: bold;
+}
+
+.pagination .page-link[aria-label="Next"]:before {
+    content: "›";
+    font-weight: bold;
+}
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+    .pagination-wrapper {
+        padding: 15px;
+    }
+    
+    .pagination .page-link {
+        padding: 8px 12px;
+        font-size: 13px;
+        min-width: 38px;
+    }
+
+    .pagination .page-link[aria-label="Previous"],
+    .pagination .page-link[aria-label="Next"] {
+        padding: 8px 10px;
+    }
+
+    .pagination-info {
+        padding: 10px 14px;
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    /* Hide some pagination links on mobile */
+    .pagination .page-item:not(.active):not(:first-child):not(:last-child):not(:nth-child(2)):not(:nth-last-child(2)) {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .pagination {
+        gap: 2px;
+    }
+
+    .pagination .page-link {
+        padding: 6px 10px;
+        font-size: 12px;
+        min-width: 34px;
+        margin: 0 1px;
+    }
+}
 </style>
 
 <script>
@@ -197,6 +355,19 @@ document.addEventListener('DOMContentLoaded', function() {
             bsAlert.close();
         });
     }, 5000);
+
+    // Add smooth scroll to top when pagination is clicked
+    const paginationLinks = document.querySelectorAll('.pagination .page-link');
+    paginationLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            setTimeout(() => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }, 100);
+        });
+    });
 });
 </script>
-@endsection
+@endsection 

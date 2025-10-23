@@ -17,7 +17,7 @@ class QRCodeController extends Controller
      */
     public function index()
     {
-        $qrcodes = QRCode::where('user_id', Auth::id())->get();
+        $qrcodes = QRCode::where('dibuat_oleh', Auth::id())->get();
         return view('petugas.qrcode.index', compact('qrcodes'));
     }
 
@@ -29,27 +29,30 @@ class QRCodeController extends Controller
         // Contoh hanya untuk buku, tapi bisa ditambah untuk mahasiswa, dsb.
         if ($type === 'buku') {
             $item = Buku::findOrFail($id);
-            $kode_unik = 'BUKU-' . strtoupper(uniqid());
+            
+            // Cek apakah sudah ada QR code untuk buku ini
+            $existingQR = QRCode::where('buku_id', $item->id)->first();
+            if ($existingQR) {
+                return back()->with('info', 'QR Code untuk buku ini sudah ada.');
+            }
 
-            // Buat isi QR
-            $dataQR = [
-                'id' => $item->id,
-                'judul' => $item->judul,
-                'kode_unik' => $kode_unik,
-            ];
+            $kode_unik = 'BOOK-' . $item->id . '-' . strtoupper(uniqid());
 
-            // Generate gambar QR
-            $qrImage = QrCodeGenerator::format('png')->size(300)->generate(json_encode($dataQR));
+            // ✅ SOLUSI 1: Gunakan SVG format (tidak perlu imagick)
+            $qrSvg = QrCodeGenerator::format('svg')
+                ->size(300)
+                ->errorCorrection('H')
+                ->generate($kode_unik);
 
-            // Simpan ke storage
-            $filename = 'qr_codes/' . $kode_unik . '.png';
-            Storage::put('public/' . $filename, $qrImage);
+            // Simpan sebagai SVG
+            $filename = 'qr_codes/qr-' . $item->id . '-' . time() . '.svg';
+            Storage::disk('public')->put($filename, $qrSvg);
 
             // Simpan ke database
             QRCode::create([
                 'kode_unik' => $kode_unik,
                 'gambar_qr' => $filename,
-                'user_id' => Auth::id(),
+                'dibuat_oleh' => Auth::id(),
                 'buku_id' => $item->id,
             ]);
 
@@ -65,12 +68,12 @@ class QRCodeController extends Controller
     public function destroy($id)
     {
         $qr = QRCode::where('id', $id)
-            ->where('user_id', Auth::id())
+            ->where('dibuat_oleh', Auth::id())
             ->firstOrFail();
 
         // Hapus file QR dari storage
-        if ($qr->gambar_qr && Storage::exists('public/' . $qr->gambar_qr)) {
-            Storage::delete('public/' . $qr->gambar_qr);
+        if ($qr->gambar_qr && Storage::disk('public')->exists($qr->gambar_qr)) {
+            Storage::disk('public')->delete($qr->gambar_qr);
         }
 
         $qr->delete();

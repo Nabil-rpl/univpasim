@@ -11,11 +11,20 @@ class Pengembalian extends Model
 
     protected $table = 'pengembalian';
 
-    protected $fillable = ['peminjaman_id', 'petugas_id', 'tanggal_pengembalian', 'denda'];
+    protected $fillable = [
+        'peminjaman_id',
+        'petugas_id',
+        'tanggal_pengembalian',
+        'denda',
+    ];
+
+    protected $casts = [
+        'tanggal_pengembalian' => 'date',
+    ];
 
     public function peminjaman()
     {
-        return $this->belongsTo(Peminjaman::class);
+        return $this->belongsTo(Peminjaman::class, 'peminjaman_id');
     }
 
     public function petugas()
