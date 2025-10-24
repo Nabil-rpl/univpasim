@@ -44,13 +44,23 @@ class UserController extends Controller
         $totalPetugas = User::where('role', 'petugas')->count();
         $totalMahasiswa = User::where('role', 'mahasiswa')->count();
         
+        // Cek apakah ada filter aktif
+        $hasFilter = $request->filled('search') || $request->filled('role');
+        
         return view('admin.users.index', compact(
             'users',
             'totalUsers',
             'totalAdmin',
             'totalPetugas',
-            'totalMahasiswa'
+            'totalMahasiswa',
+            'hasFilter'
         ));
+    }
+
+    // Reset filter (redirect ke index tanpa parameter)
+    public function resetFilter()
+    {
+        return redirect()->route('admin.users.index');
     }
 
     // Menampilkan form tambah user
