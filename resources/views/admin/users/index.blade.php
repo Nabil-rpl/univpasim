@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('page-title', 'Dashboard Admin')
+@section('page-title', 'Dashboard User')
 
 @section('content')
 <div class="container-fluid">
@@ -9,7 +9,7 @@
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="mb-1 text-dark fw-bold">Dashboard Admin</h2>
+                    <h2 class="mb-1 text-dark fw-bold">Kelola Data User</h2>
                     <p class="text-muted mb-0 small">Kelola pengguna sistem dengan mudah</p>
                 </div>
                 <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-add-user">
