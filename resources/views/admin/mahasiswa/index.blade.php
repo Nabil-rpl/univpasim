@@ -4,153 +4,206 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-4">
+    <div class="row">
         <div class="col-12">
+            <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="mb-1">Data Mahasiswa</h2>
-                    <p class="text-muted mb-0">Kelola data mahasiswa</p>
+                    <h2 class="mb-1 text-dark fw-bold">Data Mahasiswa</h2>
+                    <p class="text-muted mb-0 small">Kelola data mahasiswa dengan mudah</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('admin.mahasiswa.export') }}" class="btn btn-success">
-                        <i class="bi bi-download"></i> Export CSV
-                    </a>
-                </div>
+                <a href="{{ route('admin.mahasiswa.export') }}" class="btn btn-success btn-export">
+                    <i class="bi bi-download me-2"></i>Export CSV
+                </a>
             </div>
 
+            <!-- Alert Messages -->
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                <div class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
+                    <div class="d-flex align-items-center">
+                        <div class="alert-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="flex-grow-1">{{ session('success') }}</div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+                <div class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
+                    <div class="d-flex align-items-center">
+                        <div class="alert-icon">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <div class="flex-grow-1">{{ session('error') }}</div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-        </div>
-    </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <!-- Filter & Search -->
-            <form action="{{ route('admin.mahasiswa.index') }}" method="GET" class="mb-4">
-                <div class="row g-3">
-                    <div class="col-md-5">
-                        <input type="text" 
-                               name="search" 
-                               class="form-control" 
-                               placeholder="Cari nama, email, NIM, atau jurusan..."
-                               value="{{ request('search') }}">
-                    </div>
-                    <div class="col-md-4">
-                        <select name="jurusan" class="form-select">
-                            <option value="">Semua Jurusan</option>
-                            @foreach($jurusanList as $jur)
-                                <option value="{{ $jur }}" {{ request('jurusan') == $jur ? 'selected' : '' }}>
-                                    {{ $jur }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary flex-fill">
-                                <i class="bi bi-search"></i> Cari
+            <!-- Search & Filter -->
+            <div class="card search-card mb-4">
+                <div class="card-body p-4">
+                    <form method="GET" action="{{ route('admin.mahasiswa.index') }}" class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-search me-1"></i>Cari Mahasiswa
+                            </label>
+                            <input type="text" 
+                                   name="search" 
+                                   class="form-control form-control-modern" 
+                                   placeholder="Cari nama, email, NIM, atau jurusan..."
+                                   value="{{ request('search') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-funnel me-1"></i>Filter Jurusan
+                            </label>
+                            <select name="jurusan" class="form-select form-control-modern">
+                                <option value="">Semua Jurusan</option>
+                                @foreach($jurusanList as $jur)
+                                    <option value="{{ $jur }}" {{ request('jurusan') == $jur ? 'selected' : '' }}>
+                                        {{ $jur }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end gap-2">
+                            <button type="submit" class="btn btn-primary btn-search flex-grow-1">
+                                <i class="bi bi-search me-2"></i>Cari
                             </button>
-                            <a href="{{ route('admin.mahasiswa.index') }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-clockwise"></i>
-                            </a>
+                            @if(request('search') || request('jurusan'))
+                                <a href="{{ route('admin.mahasiswa.index') }}" class="btn btn-outline-secondary btn-reset">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                                </a>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Mahasiswa Table -->
+            <div class="card table-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold">
+                                <i class="bi bi-mortarboard me-2"></i>Daftar Mahasiswa
+                            </h5>
+                        </div>
+                        <div class="badge-total">{{ $mahasiswas->total() }} Total Mahasiswa</div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 modern-table">
+                            <thead>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="20%">Nama</th>
+                                    <th width="20%">Email</th>
+                                    <th width="15%">NIM</th>
+                                    <th width="15%">Jurusan</th>
+                                    <th width="15%">Tanggal Daftar</th>
+                                    <th width="10%" class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($mahasiswas as $index => $mhs)
+                                <tr class="table-row">
+                                    <td>
+                                        <div class="row-number">{{ $mahasiswas->firstItem() + $index }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle">
+                                                {{ strtoupper(substr($mhs->nama, 0, 1)) }}
+                                            </div>
+                                            <div class="ms-3">
+                                                <div class="fw-semibold text-dark">{{ $mhs->nama }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">
+                                            <i class="bi bi-envelope me-1"></i>{{ $mhs->email }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-modern badge-nim">
+                                            <i class="bi bi-hash me-1"></i>{{ $mhs->nim }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">
+                                            <i class="bi bi-building me-1"></i>{{ $mhs->jurusan ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">
+                                            <i class="bi bi-calendar3 me-1"></i>{{ $mhs->created_at->format('d/m/Y') }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-modern" role="group">
+                                            <a href="{{ route('admin.mahasiswa.show', $mhs->id) }}" 
+                                               class="btn btn-sm btn-action btn-action-info" 
+                                               title="Detail"
+                                               data-bs-toggle="tooltip">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ route('admin.mahasiswa.edit', $mhs->id) }}" 
+                                               class="btn btn-sm btn-action btn-action-warning" 
+                                               title="Edit"
+                                               data-bs-toggle="tooltip">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-action btn-action-danger btn-delete" 
+                                                    onclick="confirmDelete({{ $mhs->id }}, '{{ $mhs->nama }}')"
+                                                    title="Hapus"
+                                                    data-bs-toggle="tooltip">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="bi bi-inbox"></i>
+                                            <p class="mb-0 mt-3">Belum ada data mahasiswa</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @if($mahasiswas->hasPages())
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="text-muted small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Menampilkan <strong>{{ $mahasiswas->firstItem() }}</strong> - <strong>{{ $mahasiswas->lastItem() }}</strong> dari <strong>{{ $mahasiswas->total() }}</strong> mahasiswa
+                        </div>
+                        <div>
+                            {{ $mahasiswas->appends(request()->query())->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
                 </div>
-            </form>
-
-            <!-- Table -->
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th width="5%">No</th>
-                            <th width="20%">Nama</th>
-                            <th width="20%">Email</th>
-                            <th width="15%">NIM</th>
-                            <th width="15%">Jurusan</th>
-                            <th width="15%">Tanggal Daftar</th>
-                            <th width="10%" class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($mahasiswas as $index => $mhs)
-                            <tr>
-                                <td>{{ $mahasiswas->firstItem() + $index }}</td>
-                                <td>
-                                    <strong>{{ $mhs->nama }}</strong>
-                                </td>
-                                <td>{{ $mhs->email }}</td>
-                                <td><span class="badge bg-info">{{ $mhs->nim }}</span></td>
-                                <td>{{ $mhs->jurusan ?? '-' }}</td>
-                                <td>{{ $mhs->created_at->format('d/m/Y') }}</td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.mahasiswa.show', $mhs->id) }}" 
-                                           class="btn btn-info" 
-                                           title="Detail">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <a href="{{ route('admin.mahasiswa.edit', $mhs->id) }}" 
-                                           class="btn btn-warning" 
-                                           title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button type="button" 
-                                                class="btn btn-danger" 
-                                                onclick="confirmDelete({{ $mhs->id }}, '{{ $mhs->nama }}')"
-                                                title="Hapus">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center py-4">
-                                    <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
-                                    <p class="text-muted mb-0">Tidak ada data mahasiswa</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Modern Pagination -->
-            @if($mahasiswas->hasPages())
-            <div class="pagination-wrapper mt-4">
-                <div class="row align-items-center">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                        <div class="pagination-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            Menampilkan <strong>{{ $mahasiswas->firstItem() ?? 0 }}</strong> - <strong>{{ $mahasiswas->lastItem() ?? 0 }}</strong> 
-                            dari <strong>{{ $mahasiswas->total() }}</strong> total data
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <nav aria-label="Pagination Navigation" class="d-flex justify-content-md-end justify-content-center">
-                            {{ $mahasiswas->appends(request()->query())->links('pagination::bootstrap-4') }}
-                        </nav>
+                @else
+                <div class="card-footer">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Total <strong>{{ $mahasiswas->total() }}</strong> data mahasiswa
                     </div>
                 </div>
+                @endif
             </div>
-            @else
-            <div class="pagination-info mt-4">
-                <i class="bi bi-info-circle me-2"></i>
-                Total <strong>{{ $mahasiswas->total() }}</strong> data mahasiswa
-            </div>
-            @endif
         </div>
     </div>
 </div>
@@ -162,81 +215,355 @@
 </form>
 
 <style>
-.card {
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* ========== GLOBAL STYLES ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    color: #1e293b;
+}
+
+/* ========== CONTAINER ========== */
+.container-fluid {
+    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ========== HEADER ========== */
+h2 {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: slideInDown 0.6s ease-out;
+}
+
+.btn-export {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     border: none;
-    border-radius: 15px;
-}
-
-.table {
-    margin-bottom: 0;
-}
-
-.table thead th {
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-}
-
-.btn-group-sm .btn {
-    padding: 0.25rem 0.5rem;
-}
-
-.alert {
-    border: none;
+    padding: 12px 28px;
     border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
+    transition: all 0.3s ease;
+    color: white;
 }
 
-.form-control:focus,
+.btn-export:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.4);
+    color: white;
+}
+
+/* ========== ALERTS ========== */
+.custom-alert {
+    border: none;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(10px);
+    animation: slideInRight 0.5s ease-out;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-left: 4px solid #10b981;
+    color: #065f46;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+}
+
+.alert-icon {
+    font-size: 24px;
+    margin-right: 16px;
+}
+
+/* ========== SEARCH CARD ========== */
+.search-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    animation: fadeInUp 0.6s ease-out 0.1s both;
+    background: white;
+}
+
+.form-label {
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.form-control-modern,
+.form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.form-control-modern:focus,
 .form-select:focus {
     border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
-
-/* Modern Pagination Styles */
-.pagination-wrapper {
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 20px;
-    border: 1px solid #e2e8f0;
-}
-
-.pagination-info {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
     background: white;
-    border-radius: 8px;
-    padding: 12px 16px;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
+}
+
+.btn-search {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-reset {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-reset:hover {
+    border-color: #667eea;
+    background: #667eea;
+    color: white;
+}
+
+/* ========== TABLE CARD ========== */
+.table-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+    background: white;
+}
+
+.table-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 24px 28px;
+    border: none;
+}
+
+.badge-total {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ========== TABLE ========== */
+.modern-table {
     font-size: 14px;
+}
+
+.modern-table thead {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.modern-table thead th {
+    padding: 18px 20px;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+    border: none;
+}
+
+.modern-table tbody td {
+    padding: 20px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.table-row {
+    transition: all 0.3s ease;
+}
+
+.table-row:hover {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.row-number {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    text-align: center;
+    line-height: 32px;
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+/* ========== AVATAR ========== */
+.avatar-circle {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    flex-shrink: 0;
+}
+
+/* ========== BADGES ========== */
+.badge-modern {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.badge-nim {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: white;
+}
+
+/* ========== ACTION BUTTONS ========== */
+.btn-group-modern {
+    gap: 6px;
+    display: inline-flex;
+}
+
+.btn-action {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action-info {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: white;
+}
+
+.btn-action-info:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+}
+
+.btn-action-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.btn-action-warning:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.btn-action-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.btn-action-danger:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.btn-delete.loading {
+    pointer-events: none;
+    opacity: 0.7;
+    position: relative;
+}
+
+.btn-delete.loading::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 50%;
+    left: 50%;
+    margin-left: -7px;
+    margin-top: -7px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.6s linear infinite;
+}
+
+/* ========== EMPTY STATE ========== */
+.empty-state i {
+    font-size: 64px;
+    color: #cbd5e1;
+}
+
+.empty-state p {
+    color: #94a3b8;
+    font-size: 16px;
     font-weight: 500;
+}
+
+/* ========== PAGINATION ========== */
+.card-footer {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: none;
+    padding: 20px 28px;
 }
 
 .pagination {
     margin: 0;
-    gap: 4px;
-    justify-content: center;
-}
-
-.pagination .page-item {
-    margin: 0;
+    gap: 6px;
 }
 
 .pagination .page-link {
     border: none;
-    border-radius: 8px;
-    padding: 10px 14px;
+    border-radius: 10px;
+    padding: 10px 16px;
     font-size: 14px;
     font-weight: 600;
     color: #64748b;
     background: white;
     transition: all 0.3s ease;
-    margin: 0 2px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    min-width: 42px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .pagination .page-link:hover {
@@ -244,96 +571,204 @@
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
-    text-decoration: none;
 }
 
 .pagination .page-item.active .page-link {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-    border: none;
-    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
 }
 
 .pagination .page-item.disabled .page-link {
     background: #e2e8f0;
-    color: #94a3b8;
+    color: #cbd5e1;
     cursor: not-allowed;
-    border: none;
     box-shadow: none;
 }
 
-.pagination .page-item.disabled .page-link:hover {
-    background: #e2e8f0;
-    color: #94a3b8;
-    transform: none;
-    box-shadow: none;
-}
-
-.pagination .page-link:focus {
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-    outline: none;
-    z-index: 3;
-}
-
-/* Navigation arrows */
-.pagination .page-link[aria-label="Previous"],
-.pagination .page-link[aria-label="Next"] {
-    padding: 10px 12px;
-    font-size: 16px;
-}
-
-.pagination .page-link[aria-label="Previous"]:before {
-    content: "‹";
-    font-weight: bold;
-}
-
-.pagination .page-link[aria-label="Next"]:before {
-    content: "›";
-    font-weight: bold;
-}
-
-/* Responsive pagination */
-@media (max-width: 768px) {
-    .pagination-wrapper {
-        padding: 15px;
+/* ========== ANIMATIONS ========== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
     }
-    
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes spin {
+    to { 
+        transform: rotate(360deg); 
+    }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 992px) {
+    .container-fluid {
+        padding: 20px;
+    }
+
+    h2 {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 16px;
+    }
+
+    h2 {
+        font-size: 22px;
+    }
+
+    .btn-export {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+
+    .modern-table thead th,
+    .modern-table tbody td {
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    .avatar-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .btn-action {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .badge-modern {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    .card-footer {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .card-footer > div {
+        width: 100%;
+        text-align: center;
+    }
+
     .pagination .page-link {
         padding: 8px 12px;
         font-size: 13px;
-        min-width: 38px;
-    }
-
-    .pagination .page-link[aria-label="Previous"],
-    .pagination .page-link[aria-label="Next"] {
-        padding: 8px 10px;
-    }
-
-    .pagination-info {
-        padding: 10px 14px;
-        font-size: 13px;
-        text-align: center;
-        margin-bottom: 15px;
-    }
-
-    /* Hide some pagination links on mobile */
-    .pagination .page-item:not(.active):not(:first-child):not(:last-child):not(:nth-child(2)):not(:nth-last-child(2)) {
-        display: none;
     }
 }
 
 @media (max-width: 576px) {
-    .pagination {
-        gap: 2px;
+    h2 {
+        font-size: 20px;
+    }
+
+    .btn-export {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+        border-radius: 10px;
+    }
+
+    .modern-table thead th,
+    .modern-table tbody td {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .row-number {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 12px;
+    }
+
+    .btn-action {
+        padding: 7px 9px;
+        font-size: 11px;
+    }
+
+    .badge-modern {
+        padding: 5px 10px;
+        font-size: 10px;
     }
 
     .pagination .page-link {
         padding: 6px 10px;
         font-size: 12px;
-        min-width: 34px;
-        margin: 0 1px;
     }
+
+    .form-control-modern,
+    .form-select {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .btn-search {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+
+/* ========== SMOOTH SCROLLING ========== */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ========== CUSTOM SCROLLBAR ========== */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 </style>
 
@@ -341,22 +776,33 @@
 function confirmDelete(id, nama) {
     if (confirm(`Apakah Anda yakin ingin menghapus data mahasiswa "${nama}"?\n\nData yang dihapus tidak dapat dikembalikan.`)) {
         const form = document.getElementById('delete-form');
+        const deleteBtn = event.target.closest('.btn-delete');
+        if (deleteBtn) {
+            deleteBtn.classList.add('loading');
+        }
         form.action = "{{ route('admin.mahasiswa.index') }}/" + id;
         form.submit();
     }
 }
 
-// Auto hide alerts
+// Auto hide alerts and initialize tooltips
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Auto hide alerts
     setTimeout(function() {
-        var alerts = document.querySelectorAll('.alert');
+        const alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
-            var bsAlert = new bootstrap.Alert(alert);
+            const bsAlert = new bootstrap.Alert(alert);
             bsAlert.close();
         });
     }, 5000);
 
-    // Add smooth scroll to top when pagination is clicked
+    // Smooth scroll to top on pagination click
     const paginationLinks = document.querySelectorAll('.pagination .page-link');
     paginationLinks.forEach(link => {
         link.addEventListener('click', function() {
@@ -370,4 +816,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection 
+@endsection
