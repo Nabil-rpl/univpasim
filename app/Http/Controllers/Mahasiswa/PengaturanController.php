@@ -20,35 +20,39 @@ class PengaturanController extends Controller
     }
 
     /**
-     * Proses update data mahasiswa.
+     * Proses update password mahasiswa.
      */
     public function update(Request $request)
     {
-        /** @var User $user */ // <-- Tambahkan ini
+        /** @var User $user */
         $user = Auth::user();
 
-        // ✅ Validasi data agar tidak bentrok dengan user lain
+        // ✅ Validasi hanya untuk password
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id, // biar tidak error duplikat
-            'password' => 'nullable|string|min:6|confirmed',
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'current_password.required' => 'Password lama wajib diisi',
+            'password.required' => 'Password baru wajib diisi',
+            'password.min' => 'Password baru minimal 6 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
         ]);
 
         try {
-            // ✅ Update data user
-            $user->name = $request->name;
-            $user->email = $request->email;
-
-            // ✅ Update password hanya jika diisi
-            if ($request->filled('password')) {
-                $user->password = Hash::make($request->password);
+            // ✅ Cek apakah password lama benar
+            if (!Hash::check($request->current_password, $user->password)) {
+                return redirect()
+                    ->back()
+                    ->with('error', '❌ Password lama tidak sesuai!');
             }
 
+            // ✅ Update password
+            $user->password = Hash::make($request->password);
             $user->save();
 
             return redirect()
                 ->route('mahasiswa.pengaturan.index')
-                ->with('success', '✅ Pengaturan berhasil diperbarui!');
+                ->with('success', '✅ Password berhasil diperbarui!');
         } catch (\Exception $e) {
             return redirect()
                 ->back()

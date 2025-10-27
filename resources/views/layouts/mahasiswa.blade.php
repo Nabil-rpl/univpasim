@@ -37,18 +37,89 @@
 
         .sidebar a {
             color: #ffffffcc;
-            display: block;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 8px;
             text-decoration: none;
-            transition: 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
         }
 
-        .sidebar a.active,
+        .sidebar a i {
+            font-size: 20px;
+            margin-right: 15px;
+            width: 24px;
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .sidebar a span {
+            z-index: 2;
+            position: relative;
+        }
+
+        /* Garis indikator kiri */
+        .sidebar a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 0%;
+            width: 4px;
+            background-color: #fff;
+            border-radius: 0 4px 4px 0;
+            transition: height 0.3s ease;
+        }
+
+        /* Background effect saat hover */
+        .sidebar a::after {
+            content: '';
+            position: absolute;
+            left: -100%;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.3s ease;
+            z-index: 1;
+        }
+
         .sidebar a:hover {
-            background-color: #ffffff33;
             color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        .sidebar a:hover::before {
+            height: 70%;
+        }
+
+        .sidebar a:hover::after {
+            left: 0;
+        }
+
+        .sidebar a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar a.active::before {
+            height: 80%;
+            width: 5px;
+            background-color: #676666;
+        }
+
+        .sidebar a.active i {
+            transform: scale(1.1);
         }
 
         .main-content {
@@ -78,19 +149,24 @@
     <div class="sidebar">
         <h4>Mahasiswa</h4>
         <a href="{{ route('mahasiswa.dashboard') }}" class="{{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}">
-            <i class="bi bi-house-door"></i> Dashboard
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
         </a>
         <a href="{{ route('mahasiswa.peminjaman.riwayat') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.riwayat') ? 'active' : '' }}">
-            <i class="bi bi-clock-history"></i> Riwayat
+            <i class="bi bi-clock-history"></i>
+            <span>Riwayat</span>
         </a>
-        <a href="{{ route('mahasiswa.buku.index') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.riwayat') ? 'active' : '' }}">
-            <i class="bi bi-clock-history"></i> Data Buku
+        <a href="{{ route('mahasiswa.buku.index') }}" class="{{ request()->routeIs('mahasiswa.buku.index') ? 'active' : '' }}">
+            <i class="bi bi-book"></i>
+            <span>Data Buku</span>
         </a>
-        <a href="{{ route('mahasiswa.pengaturan.index') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.riwayat') ? 'active' : '' }}">
-            <i class="bi bi-clock-history"></i> Pengaturan
+        <a href="{{ route('mahasiswa.pengaturan.index') }}" class="{{ request()->routeIs('mahasiswa.pengaturan.index') ? 'active' : '' }}">
+            <i class="bi bi-gear"></i>
+            <span>Pengaturan</span>
         </a>
         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="bi bi-box-arrow-right"></i> Logout
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
         </a>
 
         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
