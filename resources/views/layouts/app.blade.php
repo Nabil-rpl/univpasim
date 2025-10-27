@@ -16,11 +16,12 @@
     <!-- Custom CSS -->
     <style>
         :root {
-            --sidebar-width: 260px;
-            --header-height: 60px;
+            --sidebar-width: 280px;
+            --header-height: 70px;
             --primary-color: #4e73df;
-            --sidebar-bg: #1e293b;
-            --sidebar-hover: #334155;
+            --sidebar-bg: #1a1f36;
+            --sidebar-hover: #252b48;
+            --accent-color: #5e72e4;
         }
 
         * {
@@ -31,7 +32,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fc;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
             overflow-x: hidden;
         }
 
@@ -42,72 +43,156 @@
             left: 0;
             width: var(--sidebar-width);
             height: 100vh;
-            background: var(--sidebar-bg);
+            background: linear-gradient(180deg, #1a1f36 0%, #0f1419 100%);
             padding-top: 20px;
             transition: all 0.3s;
             z-index: 1000;
             overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
         }
 
         .sidebar-brand {
-            padding: 0 20px 30px;
+            padding: 0 25px 25px;
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            margin-bottom: 10px;
         }
 
         .sidebar-brand h4 {
             color: white;
             font-weight: 700;
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
 
-        .sidebar-brand p {
-            color: rgba(255,255,255,0.6);
-            font-size: 0.85rem;
-            margin-top: 5px;
+        .sidebar-brand h4 i {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .sidebar-menu {
             list-style: none;
-            padding: 20px 0;
+            padding: 20px 15px;
         }
 
         .sidebar-menu li {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
         }
 
         .sidebar-menu a {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
-            color: rgba(255,255,255,0.8);
+            padding: 14px 18px;
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+            border: 2px solid transparent;
         }
 
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
+        .sidebar-menu a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 0%;
+            width: 4px;
+            background: linear-gradient(180deg, #5e72e4 0%, #825ee4 100%);
+            border-radius: 0 4px 4px 0;
+            transition: height 0.3s ease;
+        }
+
+        .sidebar-menu a::after {
+            content: '';
+            position: absolute;
+            right: -100%;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(94, 114, 228, 0.2));
+            transition: right 0.4s ease;
+        }
+
+        .sidebar-menu a:hover {
             background: var(--sidebar-hover);
             color: white;
-            border-left: 4px solid var(--primary-color);
-            padding-left: 16px;
+            transform: translateX(8px);
+            border: 2px solid rgba(94, 114, 228, 0.3);
+        }
+
+        .sidebar-menu a:hover::before {
+            height: 70%;
+        }
+
+        .sidebar-menu a:hover::after {
+            right: 0;
+        }
+
+        .sidebar-menu a.active {
+            background: linear-gradient(90deg, rgba(94, 114, 228, 0.2) 0%, rgba(94, 114, 228, 0.05) 100%);
+            color: white;
+            border: 2px solid rgba(94, 114, 228, 0.4);
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(94, 114, 228, 0.3);
+        }
+
+        .sidebar-menu a.active::before {
+            height: 80%;
+            width: 5px;
+        }
+
+        .sidebar-menu a.active i {
+            color: #5e72e4;
+            transform: scale(1.15);
         }
 
         .sidebar-menu a i {
-            margin-right: 12px;
-            font-size: 1.2rem;
-            width: 24px;
+            margin-right: 14px;
+            font-size: 1.3rem;
+            width: 28px;
+            z-index: 2;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu a span {
+            z-index: 2;
+            position: relative;
         }
 
         /* Menu Section Header */
         .menu-section {
-            padding: 20px 20px 10px;
+            padding: 25px 20px 12px;
             color: rgba(255,255,255,0.4);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
+            letter-spacing: 2px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .menu-section::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(94, 114, 228, 0.3), transparent);
         }
 
         /* Main Content */
@@ -119,16 +204,17 @@
 
         /* Header/Navbar */
         .top-navbar {
-            background: white;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
             height: var(--header-height);
-            padding: 0 30px;
+            padding: 0 35px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             position: sticky;
             top: 0;
             z-index: 999;
+            border-bottom: 3px solid #5e72e4;
         }
 
         .navbar-left {
@@ -136,14 +222,27 @@
             align-items: center;
         }
 
+        .navbar-left h5 {
+            color: #2d3748;
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
         .menu-toggle {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: #5a5c69;
             cursor: pointer;
             margin-right: 20px;
             display: none;
+            transition: all 0.3s;
+        }
+
+        .menu-toggle:hover {
+            color: var(--accent-color);
+            transform: scale(1.1);
         }
 
         .navbar-right {
@@ -152,23 +251,39 @@
             gap: 20px;
         }
 
+        .navbar-right .btn {
+            border-radius: 10px;
+            padding: 10px 16px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .navbar-right .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 2px solid var(--accent-color);
+        }
+
         .user-info {
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: background 0.3s;
+            padding: 10px 16px;
+            border-radius: 12px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
         }
 
         .user-info:hover {
-            background: #f8f9fc;
+            background: #f0f4ff;
+            border: 2px solid rgba(94, 114, 228, 0.3);
+            transform: translateY(-2px);
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
@@ -176,6 +291,8 @@
             justify-content: center;
             color: white;
             font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
         .user-details {
@@ -186,45 +303,67 @@
         .user-name {
             font-weight: 600;
             color: #2d3748;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .user-role {
             font-size: 0.75rem;
             color: #718096;
             text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         /* Content Area */
         .content-area {
-            padding: 30px;
+            padding: 35px;
         }
 
         /* Dropdown Menu */
         .dropdown-menu {
             border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 10px;
         }
 
         .dropdown-item {
-            padding: 10px 20px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+            transform: translateX(5px);
+            color: var(--accent-color);
         }
 
         .dropdown-item i {
-            margin-right: 10px;
+            margin-right: 12px;
             width: 20px;
         }
 
         /* Badge for menu items */
         .menu-badge {
             margin-left: auto;
-            background: rgba(255,255,255,0.2);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.4);
+            z-index: 2;
+            position: relative;
+        }
+
+        /* Notification Badge */
+        .badge.bg-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.4);
         }
 
         /* Responsive */
@@ -258,8 +397,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 999;
+            backdrop-filter: blur(4px);
         }
 
         .sidebar-overlay.active {
@@ -276,12 +416,12 @@
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
+            background: linear-gradient(180deg, rgba(94, 114, 228, 0.6), rgba(94, 114, 228, 0.3));
             border-radius: 3px;
         }
 
         .sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255,255,255,0.3);
+            background: linear-gradient(180deg, rgba(94, 114, 228, 0.8), rgba(94, 114, 228, 0.5));
         }
     </style>
     
@@ -311,20 +451,20 @@
             
             <li>
                 <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-people-fill"></i>
                     <span>Kelola User</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.mahasiswa.index') }}" class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}">
-                    <i class="bi bi-person-badge"></i>
+                    <i class="bi bi-person-badge-fill"></i>
                     <span>Data Mahasiswa</span>
                     <span class="menu-badge">New</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.buku.index') }}" class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
-                    <i class="bi bi-book"></i>
+                    <i class="bi bi-book-fill"></i>
                     <span>Kelola Buku</span>
                 </a>
             </li>
@@ -344,7 +484,7 @@
             
             <li>
                 <a href="{{ route('admin.laporan.index') }}" class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
-                    <i class="bi bi-file-text"></i>
+                    <i class="bi bi-file-earmark-text-fill"></i>
                     <span>Laporan Petugas</span>
                 </a>
             </li>
@@ -359,22 +499,22 @@
                 <button class="menu-toggle" id="menuToggle">
                     <i class="bi bi-list"></i>
                 </button>
-                <h5 class="mb-0">@yield('page-title', 'Dashboard')</h5>
+                <h5>@yield('page-title', 'Dashboard')</h5>
             </div>
             
             <div class="navbar-right">
                 <!-- Notifications -->
                 <div class="dropdown">
                     <button class="btn btn-light position-relative" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-bell"></i>
+                        <i class="bi bi-bell-fill"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                             3
                         </span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><h6 class="dropdown-header">Notifikasi</h6></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle text-info"></i> User baru terdaftar</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-exclamation-triangle text-warning"></i> Update sistem tersedia</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle-fill text-info"></i> User baru terdaftar</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-exclamation-triangle-fill text-warning"></i> Update sistem tersedia</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-center" href="#">Lihat semua</a></li>
                     </ul>
@@ -395,7 +535,7 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <a class="dropdown-item" href="{{ route('admin.profile.index') }}">
-                                <i class="bi bi-person"></i> Profil Saya
+                                <i class="bi bi-person-fill"></i> Profil Saya
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>

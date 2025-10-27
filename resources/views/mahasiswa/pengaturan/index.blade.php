@@ -127,6 +127,70 @@
         font-weight: 600;
     }
 
+    /* Profile Info Box */
+    .profile-info-box {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2.5rem;
+        border: 1px solid #BFDBFE;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #60A5FA, #3B82F6);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        box-shadow: 0 8px 20px rgba(96, 165, 250, 0.3);
+    }
+
+    .profile-details {
+        flex: 1;
+    }
+
+    .profile-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1E293B;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .profile-email {
+        font-size: 0.95rem;
+        color: #64748B;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+
+    .profile-email i {
+        color: #60A5FA;
+    }
+
+    .profile-badge {
+        background: #10B981;
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
     /* Form Sections */
     .form-section {
         margin-bottom: 2.5rem;
@@ -228,34 +292,6 @@
         color: #60A5FA;
     }
 
-    /* Password Divider */
-    .password-divider {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin: 2.5rem 0;
-    }
-
-    .divider-line {
-        flex: 1;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #E0E7FF, transparent);
-    }
-
-    .divider-text {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: #EFF6FF;
-        color: #3B82F6;
-        padding: 0.5rem 1.25rem;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
     /* Submit Button */
     .btn-submit-custom {
         display: inline-flex;
@@ -294,17 +330,17 @@
         display: flex;
         align-items: start;
         gap: 1rem;
-        background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+        background: linear-gradient(135deg, #FEF3C7, #FDE68A);
         padding: 1.5rem;
         border-radius: 16px;
         margin-top: 2rem;
-        border: 1px solid #BFDBFE;
+        border: 1px solid #FCD34D;
     }
 
     .info-box-icon {
         width: 45px;
         height: 45px;
-        background: linear-gradient(135deg, #60A5FA, #3B82F6);
+        background: linear-gradient(135deg, #F59E0B, #D97706);
         color: white;
         border-radius: 12px;
         display: flex;
@@ -323,13 +359,13 @@
         margin: 0 0 0.5rem 0;
         font-size: 1rem;
         font-weight: 700;
-        color: #1E293B;
+        color: #92400E;
     }
 
     .info-box-content p {
         margin: 0;
         font-size: 0.9rem;
-        color: #475569;
+        color: #78350F;
         line-height: 1.6;
     }
 
@@ -372,6 +408,11 @@
             width: 100%;
             justify-content: center;
         }
+
+        .profile-info-box {
+            flex-direction: column;
+            text-align: center;
+        }
     }
 </style>
 
@@ -394,11 +435,11 @@
             <div class="card-header-custom">
                 <div class="header-content">
                     <div class="header-icon">
-                        <i class="bi bi-gear-fill"></i>
+                        <i class="bi bi-shield-lock-fill"></i>
                     </div>
                     <div class="header-text">
-                        <h4>Pengaturan Akun</h4>
-                        <p>Kelola informasi profil dan keamanan akun Anda</p>
+                        <h4>Keamanan Akun</h4>
+                        <p>Ubah password Anda untuk menjaga keamanan akun</p>
                     </div>
                 </div>
             </div>
@@ -418,133 +459,114 @@
                 @endif
 
                 @if(isset($user))
-                <form action="{{ route('mahasiswa.pengaturan.update') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-
-                    {{-- Informasi Pribadi Section --}}
-                    <div class="form-section">
-                        <div class="section-title">
-                            <div class="section-icon">
-                                <i class="bi bi-person-fill"></i>
-                            </div>
-                            <h5>Informasi Pribadi</h5>
+                    {{-- Profile Info (Read Only) --}}
+                    <div class="profile-info-box">
+                        <div class="profile-avatar">
+                            {{ strtoupper(substr($user->name, 0, 2)) }}
                         </div>
-
-                        {{-- Nama --}}
-                        <div class="form-group-custom">
-                            <label for="name" class="form-label-custom">
-                                <i class="bi bi-person-badge-fill"></i>
-                                Nama Lengkap
-                            </label>
-                            <input type="text" name="name" id="name" 
-                                   value="{{ old('name', $user->name ?? '') }}" 
-                                   class="form-control form-control-custom @error('name') is-invalid @enderror" 
-                                   required
-                                   placeholder="Masukkan nama lengkap Anda">
-                            @error('name')
-                                <div class="invalid-feedback">
-                                    <i class="bi bi-exclamation-circle"></i> {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        {{-- Email --}}
-                        <div class="form-group-custom">
-                            <label for="email" class="form-label-custom">
+                        <div class="profile-details">
+                            <h3 class="profile-name">{{ $user->name }}</h3>
+                            <p class="profile-email">
                                 <i class="bi bi-envelope-fill"></i>
-                                Alamat Email
-                            </label>
-                            <input type="email" name="email" id="email" 
-                                   value="{{ old('email', $user->email ?? '') }}" 
-                                   class="form-control form-control-custom @error('email') is-invalid @enderror" 
-                                   required
-                                   placeholder="contoh@email.com">
-                            @error('email')
-                                <div class="invalid-feedback">
-                                    <i class="bi bi-exclamation-circle"></i> {{ $message }}
+                                {{ $user->email }}
+                            </p>
+                            <span class="profile-badge">
+                                <i class="bi bi-person-badge-fill"></i>
+                                Mahasiswa
+                            </span>
+                        </div>
+                    </div>
+
+                    <form action="{{ route('mahasiswa.pengaturan.update') }}" method="POST">
+                        @csrf
+
+                        {{-- Keamanan Section --}}
+                        <div class="form-section">
+                            <div class="section-title">
+                                <div class="section-icon">
+                                    <i class="bi bi-shield-lock-fill"></i>
                                 </div>
-                            @enderror
-                            <small class="form-text-custom">
-                                <i class="bi bi-info-circle"></i>
-                                Email digunakan untuk login dan notifikasi
-                            </small>
-                        </div>
-                    </div>
-
-                    {{-- Password Divider --}}
-                    <div class="password-divider">
-                        <div class="divider-line"></div>
-                        <div class="divider-text">
-                            <i class="bi bi-shield-lock-fill"></i>
-                            Keamanan
-                        </div>
-                        <div class="divider-line"></div>
-                    </div>
-
-                    {{-- Keamanan Section --}}
-                    <div class="form-section">
-                        <div class="section-title">
-                            <div class="section-icon">
-                                <i class="bi bi-shield-lock-fill"></i>
+                                <h5>Ubah Password</h5>
                             </div>
-                            <h5>Ubah Password</h5>
+
+                            {{-- Password Lama --}}
+                            <div class="form-group-custom">
+                                <label for="current_password" class="form-label-custom">
+                                    <i class="bi bi-lock-fill"></i>
+                                    Password Lama
+                                </label>
+                                <input type="password" name="current_password" id="current_password" 
+                                       class="form-control form-control-custom @error('current_password') is-invalid @enderror"
+                                       placeholder="Masukkan password lama Anda"
+                                       required>
+                                @error('current_password')
+                                    <div class="invalid-feedback">
+                                        <i class="bi bi-exclamation-circle"></i> {{ $message }}
+                                    </div>
+                                @enderror
+                                <small class="form-text-custom">
+                                    <i class="bi bi-info-circle"></i>
+                                    Masukkan password lama untuk verifikasi
+                                </small>
+                            </div>
+
+                            {{-- Password Baru --}}
+                            <div class="form-group-custom">
+                                <label for="password" class="form-label-custom">
+                                    <i class="bi bi-key-fill"></i>
+                                    Password Baru
+                                </label>
+                                <input type="password" name="password" id="password" 
+                                       class="form-control form-control-custom @error('password') is-invalid @enderror"
+                                       placeholder="Masukkan password baru"
+                                       required>
+                                @error('password')
+                                    <div class="invalid-feedback">
+                                        <i class="bi bi-exclamation-circle"></i> {{ $message }}
+                                    </div>
+                                @enderror
+                                <small class="form-text-custom">
+                                    <i class="bi bi-info-circle"></i>
+                                    Minimal 6 karakter untuk keamanan
+                                </small>
+                            </div>
+
+                            {{-- Konfirmasi Password --}}
+                            <div class="form-group-custom">
+                                <label for="password_confirmation" class="form-label-custom">
+                                    <i class="bi bi-shield-check"></i>
+                                    Konfirmasi Password Baru
+                                </label>
+                                <input type="password" name="password_confirmation" id="password_confirmation"
+                                       class="form-control form-control-custom" 
+                                       placeholder="Ulangi password baru"
+                                       required>
+                                <small class="form-text-custom">
+                                    <i class="bi bi-info-circle"></i>
+                                    Masukkan kembali password baru untuk konfirmasi
+                                </small>
+                            </div>
                         </div>
 
-                        {{-- Password Baru --}}
-                        <div class="form-group-custom">
-                            <label for="password" class="form-label-custom">
-                                <i class="bi bi-key-fill"></i>
-                                Password Baru
-                            </label>
-                            <input type="password" name="password" id="password" 
-                                   class="form-control form-control-custom @error('password') is-invalid @enderror"
-                                   placeholder="Masukkan password baru">
-                            @error('password')
-                                <div class="invalid-feedback">
-                                    <i class="bi bi-exclamation-circle"></i> {{ $message }}
-                                </div>
-                            @enderror
-                            <small class="form-text-custom">
-                                <i class="bi bi-info-circle"></i>
-                                Kosongkan jika tidak ingin mengubah password
-                            </small>
+                        {{-- Info Box --}}
+                        <div class="info-box">
+                            <div class="info-box-icon">
+                                <i class="bi bi-shield-exclamation"></i>
+                            </div>
+                            <div class="info-box-content">
+                                <h6>Tips Keamanan Password</h6>
+                                <p>Gunakan password yang kuat dengan kombinasi huruf besar, huruf kecil, angka, dan simbol. Jangan gunakan password yang sama dengan akun lain. Minimal 6 karakter untuk keamanan maksimal.</p>
+                            </div>
                         </div>
 
-                        {{-- Konfirmasi Password --}}
-                        <div class="form-group-custom">
-                            <label for="password_confirmation" class="form-label-custom">
+                        {{-- Submit Button --}}
+                        <div style="margin-top: 2rem;">
+                            <button type="submit" class="btn-submit-custom">
                                 <i class="bi bi-shield-check"></i>
-                                Konfirmasi Password Baru
-                            </label>
-                            <input type="password" name="password_confirmation" id="password_confirmation"
-                                   class="form-control form-control-custom" 
-                                   placeholder="Ulangi password baru">
-                            <small class="form-text-custom">
-                                <i class="bi bi-info-circle"></i>
-                                Masukkan kembali password baru untuk konfirmasi
-                            </small>
+                                <span>Ubah Password</span>
+                            </button>
                         </div>
-                    </div>
-
-                    {{-- Info Box --}}
-                    <div class="info-box">
-                        <div class="info-box-icon">
-                            <i class="bi bi-lightbulb-fill"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <h6>Tips Keamanan</h6>
-                            <p>Gunakan password yang kuat dengan kombinasi huruf besar, huruf kecil, angka, dan simbol. Minimal 8 karakter untuk keamanan maksimal.</p>
-                        </div>
-                    </div>
-
-                    {{-- Submit Button --}}
-                    <div style="margin-top: 2rem;">
-                        <button type="submit" class="btn-submit-custom">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Simpan Perubahan</span>
-                        </button>
-                    </div>
-                </form>
+                    </form>
                 @else
                     <div class="alert-custom alert-warning-custom">
                         <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
@@ -557,18 +579,4 @@
         </div>
     </div>
 </div>
-
-{{-- JS Preview Foto --}}
-<script>
-    function previewFoto(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('preview-foto').src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-</script>
 @endsection

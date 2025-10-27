@@ -243,46 +243,6 @@
             gap: 25px;
         }
 
-        .notification-btn {
-            position: relative;
-            background: #f1f5f9;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1.3rem;
-            color: #334155;
-        }
-
-        .notification-btn:hover {
-            background: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 20px;
-            height: 20px;
-            background: #ef4444;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            color: white;
-            font-weight: bold;
-            border: 2px solid white;
-        }
-
         .user-info {
             display: flex;
             align-items: center;
@@ -388,11 +348,6 @@
 
             .page-title .title-icon {
                 display: none;
-            }
-
-            .notification-btn {
-                width: 40px;
-                height: 40px;
             }
         }
 
@@ -567,13 +522,6 @@
             </div>
 
             <div class="navbar-right">
-                <button class="notification-btn">
-                    <i class="bi bi-bell-fill"></i>
-                    @if ($peminjamanAktif > 0)
-                        <span class="notification-badge">{{ $peminjamanAktif }}</span>
-                    @endif
-                </button>
-
                 <div class="dropdown">
                     <div class="user-info" data-bs-toggle="dropdown">
                         <div class="user-avatar">
