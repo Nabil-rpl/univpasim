@@ -21,17 +21,27 @@ class PengembalianController extends Controller
             ->where('status', 'dipinjam')
             ->orderBy('tanggal_deadline', 'asc');
 
-        // Filter pencarian
+        // Filter pencarian (support untuk mahasiswa dan pengguna luar)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->whereHas('mahasiswa', function($mhs) use ($search) {
                     $mhs->where('name', 'like', "%{$search}%")
-                        ->orWhere('nim', 'like', "%{$search}%");
+                        ->orWhere('nim', 'like', "%{$search}%")
+                        ->orWhere('no_hp', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
                 })
                 ->orWhereHas('buku', function($buku) use ($search) {
-                    $buku->where('judul', 'like', "%{$search}%");
+                    $buku->where('judul', 'like', "%{$search}%")
+                         ->orWhere('penulis', 'like', "%{$search}%");
                 });
+            });
+        }
+
+        // Filter berdasarkan role peminjam
+        if ($request->filled('role')) {
+            $query->whereHas('mahasiswa', function($q) use ($request) {
+                $q->where('role', $request->role);
             });
         }
 
@@ -52,7 +62,7 @@ class PengembalianController extends Controller
                   ->orderByRaw('DATEDIFF(NOW(), tanggal_deadline) DESC');
         }
 
-        $peminjaman = $query->paginate(15);
+        $peminjaman = $query->paginate(15)->withQueryString();
 
         // Hitung statistik
         $stats = [
@@ -114,12 +124,7 @@ class PengembalianController extends Controller
             $tanggalPengembalian = Carbon::now();
             
             // Hitung denda jika terlambat
-            $denda = 0;
-            if ($tanggalPengembalian->isAfter($peminjaman->tanggal_deadline)) {
-                $hariTerlambat = $tanggalPengembalian->diffInDays($peminjaman->tanggal_deadline);
-                $dendaPerHari = 5000;
-                $denda = $hariTerlambat * $dendaPerHari;
-            }
+            $denda = $peminjaman->hitungDenda();
 
             // Buat record pengembalian
             Pengembalian::create([
@@ -140,8 +145,13 @@ class PengembalianController extends Controller
 
             DB::commit();
 
+            $message = 'Pengembalian berhasil diproses';
+            if ($denda > 0) {
+                $message .= ' dengan denda Rp ' . number_format($denda, 0, ',', '.');
+            }
+
             return redirect()->route('petugas.pengembalian.index')
-                ->with('success', 'Pengembalian berhasil diproses' . ($denda > 0 ? ' dengan denda Rp ' . number_format($denda, 0, ',', '.') : ''));
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -154,17 +164,55 @@ class PengembalianController extends Controller
     /**
      * Tampilkan riwayat pengembalian
      */
-    public function riwayat()
+    public function riwayat(Request $request)
     {
-        $pengembalian = Pengembalian::with(['peminjaman.mahasiswa', 'peminjaman.buku', 'petugas'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $query = Pengembalian::with(['peminjaman.mahasiswa', 'peminjaman.buku', 'petugas'])
+            ->orderBy('created_at', 'desc');
 
-        return view('petugas.pengembalian.riwayat', compact('pengembalian'));
+        // Filter pencarian
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('peminjaman.mahasiswa', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%")
+                  ->orWhere('no_hp', 'like', "%{$search}%");
+            })->orWhereHas('peminjaman.buku', function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter berdasarkan role
+        if ($request->filled('role')) {
+            $query->whereHas('peminjaman.mahasiswa', function($q) use ($request) {
+                $q->where('role', $request->role);
+            });
+        }
+
+        // Filter berdasarkan tanggal
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_pengembalian', '>=', $request->tanggal_dari);
+        }
+
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_pengembalian', '<=', $request->tanggal_sampai);
+        }
+
+        $pengembalian = $query->paginate(15)->withQueryString();
+
+        // Statistik
+        $stats = [
+            'total' => Pengembalian::count(),
+            'total_denda' => Pengembalian::sum('denda'),
+            'bulan_ini' => Pengembalian::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
+        ];
+
+        return view('petugas.pengembalian.riwayat', compact('pengembalian', 'stats'));
     }
 
     /**
-     * Cari peminjaman berdasarkan NIM atau Nama Mahasiswa
+     * Cari peminjaman berdasarkan NIM, Nama, atau No HP
      */
     public function search(Request $request)
     {
@@ -174,7 +222,8 @@ class PengembalianController extends Controller
             ->where('status', 'dipinjam')
             ->whereHas('mahasiswa', function($query) use ($keyword) {
                 $query->where('nim', 'like', "%{$keyword}%")
-                      ->orWhere('name', 'like', "%{$keyword}%");
+                      ->orWhere('name', 'like', "%{$keyword}%")
+                      ->orWhere('no_hp', 'like', "%{$keyword}%");
             })
             ->orderBy('tanggal_deadline', 'asc')
             ->paginate(10);

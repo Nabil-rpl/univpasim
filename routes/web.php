@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Admin\ProfileController; // ✅ TAMBAHAN BARU
+use App\Http\Controllers\Admin\ProfileController;
 
 // Admin
 use App\Http\Controllers\Admin\UserController;
@@ -14,7 +14,7 @@ use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\PeminjamanController;
 use App\Http\Controllers\Admin\QRCodeController;
 use App\Http\Controllers\Admin\MahasiswaController;
-use App\Http\Controllers\Admin\LaporanController as AdminLaporanController; // ✅ TAMBAHAN BARU
+use App\Http\Controllers\Admin\LaporanController as AdminLaporanController;
 
 // Petugas
 use App\Http\Controllers\Petugas\LaporanController;
@@ -31,6 +31,13 @@ use App\Http\Controllers\Mahasiswa\PeminjamanController as MahasiswaPeminjamanCo
 use App\Http\Controllers\Mahasiswa\RiwayatController as MahasiswaRiwayatController;
 use App\Http\Controllers\Mahasiswa\QRScannerController;
 
+// Pengguna Luar
+use App\Http\Controllers\PenggunaLuar\BukuController as PenggunaLuarBukuController;
+use App\Http\Controllers\PenggunaLuar\PeminjamanController as PenggunaLuarPeminjamanController;
+use App\Http\Controllers\PenggunaLuar\RiwayatController as PenggunaLuarRiwayatController;
+use App\Http\Controllers\PenggunaLuar\QRScannerController as PenggunaLuarQRScannerController;
+use App\Http\Controllers\PenggunaLuar\PengaturanController as PenggunaLuarPengaturanController;
+
 
 // ============================================
 // 🏠 HALAMAN UTAMA
@@ -41,6 +48,7 @@ Route::get('/', function () {
             'admin' => redirect()->route('admin.dashboard'),
             'petugas' => redirect()->route('petugas.dashboard'),
             'mahasiswa' => redirect()->route('mahasiswa.dashboard'),
+            'pengguna_luar' => redirect()->route('pengguna-luar.dashboard'),
             default => redirect()->route('login'),
         };
     }
@@ -70,7 +78,7 @@ Route::middleware(['auth', 'role:admin'])
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
 
-        // ✅ PROFILE ADMIN - TAMBAHAN BARU
+        // Profile Admin
         Route::prefix('profile')->as('profile.')->group(function () {
             Route::get('/', [ProfileController::class, 'index'])->name('index');
             Route::put('/update', [ProfileController::class, 'update'])->name('update');
@@ -105,7 +113,7 @@ Route::middleware(['auth', 'role:admin'])
             Route::delete('/qrcodes/{id}', 'destroy')->name('qrcodes.destroy');
         });
 
-        // ✅ LAPORAN - TAMBAHAN BARU (Admin Read Only)
+        // Laporan (Admin Read Only)
         Route::controller(AdminLaporanController::class)->group(function () {
             Route::get('/laporan', 'index')->name('laporan.index');
             Route::get('/laporan/{laporan}', 'show')->name('laporan.show');
@@ -150,13 +158,12 @@ Route::middleware(['auth', 'role:petugas'])
             Route::post('/{peminjaman_id}', [PengembalianController::class, 'store'])->name('store');
         });
 
-        // ✅ Profile Petugas
+        // Profile Petugas
         Route::prefix('profile')->as('profile.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Petugas\ProfileController::class, 'index'])->name('index');
             Route::put('/update', [\App\Http\Controllers\Petugas\ProfileController::class, 'update'])->name('update');
             Route::put('/update-password', [\App\Http\Controllers\Petugas\ProfileController::class, 'updatePassword'])->name('update-password');
         });
-
 
         // Laporan (Petugas Full CRUD)
         Route::resource('laporan', LaporanController::class);
@@ -200,4 +207,39 @@ Route::middleware(['auth', 'role:mahasiswa'])
         // Pengaturan Mahasiswa
         Route::get('/pengaturan', [\App\Http\Controllers\Mahasiswa\PengaturanController::class, 'index'])->name('pengaturan.index');
         Route::post('/pengaturan/update', [\App\Http\Controllers\Mahasiswa\PengaturanController::class, 'update'])->name('pengaturan.update');
+    });
+
+
+// ============================================
+// 👤 PENGGUNA LUAR
+// ============================================
+Route::middleware(['auth', 'role:pengguna_luar'])
+    ->prefix('pengguna-luar')
+    ->as('pengguna-luar.')
+    ->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', [DashboardController::class, 'penggunaLuar'])->name('dashboard');
+
+        // Buku
+        Route::get('/buku', [PenggunaLuarBukuController::class, 'index'])->name('buku.index');
+        Route::get('/buku/{id}', [PenggunaLuarBukuController::class, 'show'])->name('buku.show');
+        Route::post('/buku/{id}/pinjam', [PenggunaLuarPeminjamanController::class, 'pinjam'])->name('buku.pinjam');
+
+        // Peminjaman
+        Route::get('/peminjaman', [PenggunaLuarPeminjamanController::class, 'index'])->name('peminjaman.index');
+        Route::get('/peminjaman/riwayat', [PenggunaLuarPeminjamanController::class, 'riwayat'])->name('peminjaman.riwayat');
+        Route::get('/peminjaman/{id}', [PenggunaLuarPeminjamanController::class, 'show'])->name('peminjaman.show');
+
+        // Riwayat
+        Route::get('/riwayat', [PenggunaLuarRiwayatController::class, 'index'])->name('riwayat.index');
+
+        // QR Scanner Routes
+        Route::get('/qr-scanner', [PenggunaLuarQRScannerController::class, 'index'])->name('qr.scanner');
+        Route::post('/qr-scanner/preview', [PenggunaLuarQRScannerController::class, 'preview'])->name('qr.preview');
+        Route::post('/qr-scanner/process', [PenggunaLuarQRScannerController::class, 'process'])->name('qr.process');
+
+        // Pengaturan Pengguna Luar
+        Route::get('/pengaturan', [PenggunaLuarPengaturanController::class, 'index'])->name('pengaturan.index');
+        Route::post('/pengaturan/update', [PenggunaLuarPengaturanController::class, 'update'])->name('pengaturan.update');
     });

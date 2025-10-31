@@ -1,6 +1,6 @@
 @extends('layouts.petugas')
 
-@section('page-title', 'Tambah Peminjaman Buku')
+@section('page-title', 'Tambah Peminjaman Baru')
 
 @section('content')
 <style>
@@ -11,72 +11,44 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
 
-    .form-header {
-        padding-bottom: 20px;
-        margin-bottom: 25px;
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
         border-bottom: 2px solid #e2e8f0;
     }
 
-    .form-label {
-        font-weight: 600;
-        color: #334155;
-        margin-bottom: 8px;
-    }
-
-    .form-control, .form-select {
-        border-radius: 10px;
-        padding: 12px 15px;
-        border: 2px solid #e2e8f0;
-        transition: all 0.3s;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    .btn-custom {
-        padding: 12px 30px;
-        border-radius: 10px;
-        font-weight: 600;
-        transition: all 0.3s;
-    }
-
-    .btn-custom:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .info-box {
-        background: #f0f9ff;
-        border-left: 4px solid #2563eb;
-        padding: 15px 20px;
+    .user-option {
+        padding: 12px;
         border-radius: 8px;
-        margin-bottom: 20px;
+        transition: all 0.3s;
     }
 
-    .select2-container--default .select2-selection--single {
-        height: 45px;
-        border: 2px solid #e2e8f0;
+    .user-option:hover {
+        background: #f1f5f9;
+    }
+
+    .badge-user-role {
+        font-size: 0.7rem;
+        padding: 4px 8px;
         border-radius: 10px;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 41px;
-        padding-left: 15px;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 41px;
+        margin-left: 8px;
     }
 </style>
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="form-card">
-            <div class="form-header">
-                <h4 class="mb-1"><i class="bi bi-plus-circle me-2"></i>Tambah Peminjaman Buku</h4>
-                <p class="text-muted mb-0">Isi form di bawah ini untuk menambah data peminjaman buku</p>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0">
+                    <i class="bi bi-plus-circle text-primary me-2"></i>
+                    Tambah Peminjaman Baru
+                </h4>
+                <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Kembali
+                </a>
             </div>
 
             @if(session('error'))
@@ -88,7 +60,8 @@
 
             @if($errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong><i class="bi bi-exclamation-triangle me-2"></i>Terdapat kesalahan:</strong>
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Terdapat kesalahan:</strong>
                 <ul class="mb-0 mt-2">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -98,104 +71,223 @@
             </div>
             @endif
 
-            <div class="info-box">
-                <i class="bi bi-info-circle me-2"></i>
-                <strong>Informasi:</strong> Sistem akan otomatis mengurangi stok buku saat peminjaman dibuat.
-            </div>
-
             <form action="{{ route('petugas.peminjaman.store') }}" method="POST">
                 @csrf
 
-                <div class="mb-4">
-                    <label class="form-label">
-                        <i class="bi bi-person me-2"></i>Pilih Mahasiswa <span class="text-danger">*</span>
-                    </label>
-                    <select name="mahasiswa_id" id="mahasiswa_id" class="form-select select2" required>
-                        <option value="">-- Pilih Mahasiswa --</option>
-                        @foreach($mahasiswas as $mhs)
-                            <option value="{{ $mhs->id }}" {{ old('mahasiswa_id') == $mhs->id ? 'selected' : '' }}>
-                                {{ $mhs->nim }} - {{ $mhs->nama }} ({{ $mhs->jurusan }})
-                            </option>
-                        @endforeach
-                    </select>
-                    <small class="text-muted">Pilih mahasiswa yang akan meminjam buku</small>
+                <!-- Pilih Peminjam -->
+                <div class="section-title">
+                    <i class="bi bi-person-fill me-2"></i>Data Peminjam
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">
-                        <i class="bi bi-book me-2"></i>Pilih Buku <span class="text-danger">*</span>
+                    <label class="form-label fw-bold">
+                        Pilih Peminjam <span class="text-danger">*</span>
                     </label>
-                    <select name="buku_id" id="buku_id" class="form-select select2" required>
+                    <select name="mahasiswa_id" id="mahasiswa_id" class="form-select @error('mahasiswa_id') is-invalid @enderror" required>
+                        <option value="">-- Pilih Peminjam --</option>
+                        
+                        @php
+                            $mahasiswaList = $peminjams->where('role', 'mahasiswa');
+                            $penggunaLuarList = $peminjams->where('role', 'pengguna_luar');
+                        @endphp
+
+                        @if($mahasiswaList->count() > 0)
+                            <optgroup label="Mahasiswa">
+                                @foreach($mahasiswaList as $user)
+                                    <option value="{{ $user->id }}" 
+                                            data-role="mahasiswa"
+                                            data-nim="{{ $user->nim }}"
+                                            {{ old('mahasiswa_id') == $user->id ? 'selected' : '' }}>
+                                        {{ $user->name }} - NIM: {{ $user->nim ?? '-' }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+
+                        @if($penggunaLuarList->count() > 0)
+                            <optgroup label="Pengguna Luar">
+                                @foreach($penggunaLuarList as $user)
+                                    <option value="{{ $user->id }}" 
+                                            data-role="pengguna_luar"
+                                            data-nohp="{{ $user->no_hp }}"
+                                            {{ old('mahasiswa_id') == $user->id ? 'selected' : '' }}>
+                                        {{ $user->name }} - HP: {{ $user->no_hp ?? '-' }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    </select>
+                    @error('mahasiswa_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    
+                    <!-- Info Peminjam -->
+                    <div id="user-info" class="mt-3 p-3 bg-light rounded d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Nama</small>
+                                <strong id="user-name">-</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Tipe Pengguna</small>
+                                <span id="user-role-badge"></span>
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <small class="text-muted d-block">Email</small>
+                                <span id="user-email">-</span>
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <small class="text-muted d-block" id="user-identifier-label">-</small>
+                                <span id="user-identifier">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pilih Buku -->
+                <div class="section-title">
+                    <i class="bi bi-book-fill me-2"></i>Data Buku
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        Pilih Buku <span class="text-danger">*</span>
+                    </label>
+                    <select name="buku_id" id="buku_id" class="form-select @error('buku_id') is-invalid @enderror" required>
                         <option value="">-- Pilih Buku --</option>
                         @foreach($bukus as $buku)
-                            <option value="{{ $buku->id }}" {{ old('buku_id') == $buku->id ? 'selected' : '' }}
-                                    data-stok="{{ $buku->stok }}">
-                                {{ $buku->judul }} - {{ $buku->penulis }} (Stok: {{ $buku->stok }})
+                            <option value="{{ $buku->id }}" 
+                                    data-stok="{{ $buku->stok }}"
+                                    data-penulis="{{ $buku->penulis }}"
+                                    {{ old('buku_id') == $buku->id ? 'selected' : '' }}>
+                                {{ $buku->judul }} (Stok: {{ $buku->stok }})
                             </option>
                         @endforeach
                     </select>
-                    <small class="text-muted">Hanya menampilkan buku yang stoknya masih tersedia</small>
+                    @error('buku_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+
+                    <!-- Info Buku -->
+                    <div id="buku-info" class="mt-3 p-3 bg-light rounded d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Judul</small>
+                                <strong id="buku-judul">-</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Penulis</small>
+                                <span id="buku-penulis">-</span>
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <small class="text-muted d-block">Stok Tersedia</small>
+                                <span class="badge bg-success" id="buku-stok">0</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="alert alert-info d-none" id="stokInfo">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Stok tersedia:</strong> <span id="stokValue">0</span> buku
+                <!-- Durasi Peminjaman -->
+                <div class="section-title">
+                    <i class="bi bi-calendar-range me-2"></i>Durasi Peminjaman
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">
-                        <i class="bi bi-calendar me-2"></i>Tanggal Pinjam
+                    <label class="form-label fw-bold">
+                        Durasi (Hari) <span class="text-danger">*</span>
                     </label>
-                    <input type="text" class="form-control" value="{{ date('d F Y') }}" disabled>
-                    <small class="text-muted">Tanggal pinjam otomatis hari ini</small>
+                    <select name="durasi_hari" class="form-select @error('durasi_hari') is-invalid @enderror" required>
+                        <option value="3" {{ old('durasi_hari', 3) == 3 ? 'selected' : '' }}>3 Hari</option>
+                        <option value="7" {{ old('durasi_hari') == 7 ? 'selected' : '' }}>7 Hari</option>
+                        <option value="14" {{ old('durasi_hari') == 14 ? 'selected' : '' }}>14 Hari</option>
+                        <option value="30" {{ old('durasi_hari') == 30 ? 'selected' : '' }}>30 Hari</option>
+                    </select>
+                    @error('durasi_hari')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Pilih durasi peminjaman sesuai kebijakan perpustakaan
+                    </small>
                 </div>
 
-                <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary btn-custom">
+                <!-- Buttons -->
+                <div class="d-flex justify-content-between pt-3 border-top">
+                    <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Batal
+                    </a>
+                    <button type="submit" class="btn btn-primary">
                         <i class="bi bi-save me-2"></i>Simpan Peminjaman
                     </button>
-                    <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-secondary btn-custom">
-                        <i class="bi bi-arrow-left me-2"></i>Kembali
-                    </a>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-@push('styles')
-<!-- Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-@endpush
-
 @push('scripts')
-<!-- Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Initialize Select2
-        $('.select2').select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-            placeholder: function() {
-                return $(this).find('option:first').text();
-            }
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    const mahasiswaSelect = document.getElementById('mahasiswa_id');
+    const bukuSelect = document.getElementById('buku_id');
+    const userInfo = document.getElementById('user-info');
+    const bukuInfo = document.getElementById('buku-info');
 
-        // Show stok info when buku is selected
-        $('#buku_id').on('change', function() {
-            const selectedOption = $(this).find(':selected');
-            const stok = selectedOption.data('stok');
+    // Event handler untuk pemilihan peminjam
+    mahasiswaSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (this.value) {
+            const role = selectedOption.dataset.role;
+            const name = selectedOption.text.split(' - ')[0];
             
-            if (stok !== undefined) {
-                $('#stokValue').text(stok);
-                $('#stokInfo').removeClass('d-none');
+            document.getElementById('user-name').textContent = name;
+            
+            // Set badge berdasarkan role
+            const roleBadge = document.getElementById('user-role-badge');
+            if (role === 'mahasiswa') {
+                roleBadge.innerHTML = '<span class="badge bg-primary"><i class="bi bi-mortarboard-fill me-1"></i>Mahasiswa</span>';
+                document.getElementById('user-identifier-label').textContent = 'NIM';
+                document.getElementById('user-identifier').textContent = selectedOption.dataset.nim || '-';
             } else {
-                $('#stokInfo').addClass('d-none');
+                roleBadge.innerHTML = '<span class="badge bg-info"><i class="bi bi-person-fill me-1"></i>Pengguna Luar</span>';
+                document.getElementById('user-identifier-label').textContent = 'No. HP';
+                document.getElementById('user-identifier').textContent = selectedOption.dataset.nohp || '-';
             }
-        });
+            
+            userInfo.classList.remove('d-none');
+        } else {
+            userInfo.classList.add('d-none');
+        }
     });
+
+    // Event handler untuk pemilihan buku
+    bukuSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (this.value) {
+            const judul = selectedOption.text.split(' (Stok:')[0];
+            const penulis = selectedOption.dataset.penulis;
+            const stok = selectedOption.dataset.stok;
+            
+            document.getElementById('buku-judul').textContent = judul;
+            document.getElementById('buku-penulis').textContent = penulis;
+            document.getElementById('buku-stok').textContent = stok;
+            
+            bukuInfo.classList.remove('d-none');
+        } else {
+            bukuInfo.classList.add('d-none');
+        }
+    });
+
+    // Trigger change jika ada old value
+    if (mahasiswaSelect.value) {
+        mahasiswaSelect.dispatchEvent(new Event('change'));
+    }
+    if (bukuSelect.value) {
+        bukuSelect.dispatchEvent(new Event('change'));
+    }
+});
 </script>
 @endpush
 @endsection

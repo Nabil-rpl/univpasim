@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Laporan;
 use App\Models\QRCode;
+use App\Models\Buku;
+use App\Models\Peminjaman;
 
 class DashboardController extends Controller
 {
@@ -45,5 +47,34 @@ class DashboardController extends Controller
     public function mahasiswa()
     {
         return view('mahasiswa.dashboard');
+    }
+
+    /**
+     * Dashboard Pengguna Luar
+     */
+    public function penggunaLuar()
+    {
+        $user = Auth::user();
+
+        // Statistik
+        $totalBuku = Buku::count();
+        $bukuTersedia = Buku::where('stok', '>', 0)->count();
+        $peminjamanAktif = Peminjaman::where('mahasiswa_id', $user->id)
+            ->where('status', 'dipinjam')
+            ->count();
+
+        // Riwayat peminjaman terakhir (5 data)
+        $riwayatPeminjaman = Peminjaman::where('mahasiswa_id', $user->id)
+            ->with(['buku'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('pengguna-luar.dashboard', compact(
+            'totalBuku',
+            'bukuTersedia',
+            'peminjamanAktif',
+            'riwayatPeminjaman'
+        ));
     }
 }

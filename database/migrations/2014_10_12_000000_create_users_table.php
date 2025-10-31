@@ -11,8 +11,10 @@ return new class extends Migration {
             $table->string('name');
             $table->string('email')->unique();
             $table->string('nim')->nullable()->unique();
+            $table->string('no_hp')->nullable(); // Tambahan untuk pengguna luar
+            $table->text('alamat')->nullable(); // Tambahan untuk pengguna luar
             $table->string('password');
-            $table->enum('role', ['admin', 'petugas', 'mahasiswa'])->default('mahasiswa');
+            $table->enum('role', ['admin', 'petugas', 'mahasiswa', 'pengguna_luar'])->default('mahasiswa');
             $table->rememberToken();
             $table->timestamps();
         });

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Petugas;
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use App\Models\Buku;
-use App\Models\Mahasiswa;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +29,13 @@ class PeminjamanController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Filter berdasarkan role peminjam (mahasiswa/pengguna_luar)
+        if ($request->filled('role')) {
+            $query->whereHas('mahasiswa', function($q) use ($request) {
+                $q->where('role', $request->role);
+            });
+        }
+
         // Filter berdasarkan tanggal
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal_pinjam', '>=', $request->tanggal_dari);
@@ -38,18 +45,24 @@ class PeminjamanController extends Controller
             $query->whereDate('tanggal_pinjam', '<=', $request->tanggal_sampai);
         }
 
-        // Pencarian
+        // Pencarian (support nama, nim, no_hp, dan judul buku)
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('mahasiswa', function($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('nim', 'like', "%{$search}%");
-            })->orWhereHas('buku', function($q) use ($search) {
-                $q->where('judul', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->whereHas('mahasiswa', function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('nim', 'like', "%{$search}%")
+                      ->orWhere('no_hp', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                })
+                ->orWhereHas('buku', function($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                      ->orWhere('penulis', 'like', "%{$search}%");
+                });
             });
         }
 
-        $peminjamans = $query->orderBy('created_at', 'desc')->paginate(10);
+        $peminjamans = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
         // Statistik
         $stats = [
@@ -57,7 +70,8 @@ class PeminjamanController extends Controller
             'dipinjam' => Peminjaman::where('status', 'dipinjam')->count(),
             'dikembalikan' => Peminjaman::where('status', 'dikembalikan')->count(),
             'terlambat' => Peminjaman::where('status', 'dipinjam')
-                ->whereDate('tanggal_pinjam', '<', now()->subDays(7))
+                ->whereNotNull('tanggal_deadline')
+                ->whereDate('tanggal_deadline', '<', now())
                 ->count()
         ];
 
@@ -69,10 +83,14 @@ class PeminjamanController extends Controller
      */
     public function create()
     {
-        $mahasiswas = Mahasiswa::orderBy('nama')->get();
+        // Ambil semua user yang role-nya mahasiswa atau pengguna_luar
+        $peminjams = User::whereIn('role', ['mahasiswa', 'pengguna_luar'])
+            ->orderBy('name')
+            ->get();
+        
         $bukus = Buku::where('stok', '>', 0)->orderBy('judul')->get();
 
-        return view('petugas.peminjaman.create', compact('mahasiswas', 'bukus'));
+        return view('petugas.peminjaman.create', compact('peminjams', 'bukus'));
     }
 
     /**
@@ -81,8 +99,9 @@ class PeminjamanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'mahasiswa_id' => 'required|exists:mahasiswa,id',
+            'mahasiswa_id' => 'required|exists:users,id',
             'buku_id' => 'required|exists:buku,id',
+            'durasi_hari' => 'required|integer|min:1|max:30',
         ]);
 
         DB::beginTransaction();
@@ -101,15 +120,21 @@ class PeminjamanController extends Controller
                 ->exists();
 
             if ($sudahPinjam) {
-                return redirect()->back()->with('error', 'Mahasiswa sudah meminjam buku ini.');
+                return redirect()->back()->with('error', 'Peminjam sudah meminjam buku ini.');
             }
+
+            // Hitung tanggal deadline
+            $tanggalPinjam = now();
+            $tanggalDeadline = now()->addDays($request->durasi_hari);
 
             // Buat peminjaman
             Peminjaman::create([
                 'mahasiswa_id' => $request->mahasiswa_id,
                 'buku_id' => $request->buku_id,
                 'petugas_id' => Auth::id(),
-                'tanggal_pinjam' => now(),
+                'tanggal_pinjam' => $tanggalPinjam,
+                'durasi_hari' => $request->durasi_hari,
+                'tanggal_deadline' => $tanggalDeadline,
                 'status' => 'dipinjam',
             ]);
 

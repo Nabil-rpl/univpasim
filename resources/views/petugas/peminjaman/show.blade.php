@@ -47,6 +47,13 @@
         display: inline-block;
     }
 
+    .role-badge {
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
     .book-cover {
         width: 100%;
         height: 300px;
@@ -91,6 +98,10 @@
         border-color: #10b981;
     }
 
+    .timeline-item.danger::before {
+        border-color: #ef4444;
+    }
+
     .action-buttons {
         display: flex;
         gap: 10px;
@@ -107,6 +118,14 @@
     .btn-custom:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .denda-box {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-left: 4px solid #dc2626;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
     }
 </style>
 
@@ -145,13 +164,19 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="mb-0"><i class="bi bi-file-text me-2"></i>Detail Peminjaman</h4>
                     @if($peminjaman->status == 'dipinjam')
-                        @php
-                            $hariPinjam = $peminjaman->tanggal_pinjam->diffInDays(now());
-                            $badgeClass = $hariPinjam > 7 ? 'bg-danger' : 'bg-warning text-dark';
-                        @endphp
-                        <span class="status-badge {{ $badgeClass }}">
-                            <i class="bi bi-hourglass-split me-1"></i>Sedang Dipinjam ({{ $hariPinjam }} hari)
-                        </span>
+                        @if($peminjaman->isTerlambat())
+                            @php
+                                $hariTerlambat = $peminjaman->getHariTerlambat();
+                                $denda = $peminjaman->hitungDenda();
+                            @endphp
+                            <span class="status-badge bg-danger">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Terlambat {{ $hariTerlambat }} hari
+                            </span>
+                        @else
+                            <span class="status-badge bg-warning text-dark">
+                                <i class="bi bi-hourglass-split me-1"></i>Sedang Dipinjam
+                            </span>
+                        @endif
                     @else
                         <span class="status-badge bg-success">
                             <i class="bi bi-check-circle me-1"></i>Sudah Dikembalikan
@@ -174,23 +199,60 @@
             </div>
             @endif
 
-            <!-- Data Mahasiswa -->
-            <h6 class="text-primary mb-3"><i class="bi bi-person-badge me-2"></i>Data Peminjam</h6>
-            <div class="info-row">
-                <div class="info-label">Nama Mahasiswa</div>
-                <div class="info-value">{{ $peminjaman->mahasiswa->nama }}</div>
+            <!-- Data Peminjam -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-primary mb-0">
+                    <i class="bi bi-person-badge me-2"></i>Data Peminjam
+                </h6>
+                @if($peminjaman->mahasiswa->role == 'mahasiswa')
+                    <span class="role-badge bg-primary text-white">
+                        <i class="bi bi-mortarboard-fill me-1"></i>Mahasiswa
+                    </span>
+                @else
+                    <span class="role-badge bg-info text-white">
+                        <i class="bi bi-person-fill me-1"></i>Pengguna Luar
+                    </span>
+                @endif
             </div>
+
             <div class="info-row">
-                <div class="info-label">NIM</div>
-                <div class="info-value">{{ $peminjaman->mahasiswa->nim }}</div>
+                <div class="info-label">Nama Lengkap</div>
+                <div class="info-value">{{ $peminjaman->mahasiswa->name }}</div>
             </div>
-            <div class="info-row">
-                <div class="info-label">Jurusan</div>
-                <div class="info-value">{{ $peminjaman->mahasiswa->jurusan ?? '-' }}</div>
-            </div>
+
+            @if($peminjaman->mahasiswa->role == 'mahasiswa')
+                <div class="info-row">
+                    <div class="info-label">NIM</div>
+                    <div class="info-value">{{ $peminjaman->mahasiswa->nim ?? '-' }}</div>
+                </div>
+            @else
+                <div class="info-row">
+                    <div class="info-label">No. Handphone</div>
+                    <div class="info-value">
+                        @if($peminjaman->mahasiswa->no_hp)
+                            <i class="bi bi-telephone me-2"></i>{{ $peminjaman->mahasiswa->no_hp }}
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Alamat</div>
+                    <div class="info-value">
+                        @if($peminjaman->mahasiswa->alamat)
+                            <i class="bi bi-geo-alt me-2"></i>{{ $peminjaman->mahasiswa->alamat }}
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <div class="info-row">
                 <div class="info-label">Email</div>
-                <div class="info-value">{{ $peminjaman->mahasiswa->email }}</div>
+                <div class="info-value">
+                    <i class="bi bi-envelope me-2"></i>{{ $peminjaman->mahasiswa->email }}
+                </div>
             </div>
 
             <!-- Data Peminjaman -->
@@ -199,8 +261,36 @@
                 <div class="info-label">Tanggal Pinjam</div>
                 <div class="info-value">
                     <i class="bi bi-calendar3 me-2"></i>
-                    {{ $peminjaman->tanggal_pinjam->format('d F Y') }}
+                    {{ $peminjaman->tanggal_pinjam->format('d F Y, H:i') }}
                     <span class="text-muted">({{ $peminjaman->tanggal_pinjam->diffForHumans() }})</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Durasi Pinjam</div>
+                <div class="info-value">
+                    <span class="badge bg-info">{{ $peminjaman->durasi_hari }} Hari</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Batas Pengembalian</div>
+                <div class="info-value">
+                    @if($peminjaman->tanggal_deadline)
+                        <i class="bi bi-calendar-x me-2"></i>
+                        {{ $peminjaman->tanggal_deadline->format('d F Y') }}
+                        @if($peminjaman->status == 'dipinjam')
+                            @if($peminjaman->isTerlambat())
+                                <span class="badge bg-danger ms-2">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Lewat Deadline
+                                </span>
+                            @else
+                                <span class="badge bg-success ms-2">
+                                    <i class="bi bi-check-circle me-1"></i>Masih Dalam Waktu
+                                </span>
+                            @endif
+                        @endif
+                    @else
+                        <span class="text-muted">-</span>
+                    @endif
                 </div>
             </div>
             <div class="info-row">
@@ -208,7 +298,7 @@
                 <div class="info-value">
                     @if($peminjaman->tanggal_kembali)
                         <i class="bi bi-calendar-check me-2"></i>
-                        {{ $peminjaman->tanggal_kembali->format('d F Y') }}
+                        {{ $peminjaman->tanggal_kembali->format('d F Y, H:i') }}
                         <span class="text-muted">({{ $peminjaman->tanggal_kembali->diffForHumans() }})</span>
                     @else
                         <span class="text-muted">Belum dikembalikan</span>
@@ -216,7 +306,7 @@
                 </div>
             </div>
             <div class="info-row">
-                <div class="info-label">Durasi Pinjam</div>
+                <div class="info-label">Lama Pinjam</div>
                 <div class="info-value">
                     @if($peminjaman->status == 'dipinjam')
                         {{ $peminjaman->tanggal_pinjam->diffInDays(now()) }} hari
@@ -231,10 +321,32 @@
                     @if($peminjaman->petugas)
                         <i class="bi bi-person-check me-2"></i>{{ $peminjaman->petugas->name }}
                     @else
-                        <span class="text-muted">-</span>
+                        <span class="badge bg-secondary">Sistem</span>
                     @endif
                 </div>
             </div>
+
+            <!-- Box Denda (jika terlambat) -->
+            @if($peminjaman->status == 'dipinjam' && $peminjaman->isTerlambat())
+            <div class="denda-box">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-danger mb-1">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Keterlambatan Pengembalian
+                        </h6>
+                        <p class="mb-0 text-dark">
+                            Peminjaman telah melewati batas waktu <strong>{{ $peminjaman->getHariTerlambat() }} hari</strong>
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <small class="d-block text-muted">Total Denda</small>
+                        <h4 class="text-danger mb-0">
+                            Rp {{ number_format($peminjaman->hitungDenda(), 0, ',', '.') }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- Timeline -->
             @if($peminjaman->status == 'dikembalikan')
@@ -243,10 +355,20 @@
                 <div class="timeline-item">
                     <strong>Buku Dipinjam</strong>
                     <p class="text-muted mb-0">{{ $peminjaman->tanggal_pinjam->format('d F Y, H:i') }}</p>
+                    <small class="text-muted">
+                        Oleh: {{ $peminjaman->petugas->name ?? 'Sistem' }}
+                    </small>
                 </div>
-                <div class="timeline-item success">
+                <div class="timeline-item {{ $peminjaman->tanggal_kembali > $peminjaman->tanggal_deadline ? 'danger' : 'success' }}">
                     <strong>Buku Dikembalikan</strong>
                     <p class="text-muted mb-0">{{ $peminjaman->tanggal_kembali->format('d F Y, H:i') }}</p>
+                    @if($peminjaman->tanggal_kembali > $peminjaman->tanggal_deadline)
+                        <span class="badge bg-danger">
+                            Terlambat {{ $peminjaman->tanggal_deadline->diffInDays($peminjaman->tanggal_kembali) }} hari
+                        </span>
+                    @else
+                        <span class="badge bg-success">Tepat Waktu</span>
+                    @endif
                 </div>
             </div>
             @endif
@@ -258,15 +380,9 @@
                 </a>
 
                 @if($peminjaman->status == 'dipinjam')
-                <form action="{{ route('petugas.peminjaman.kembalikan', $peminjaman->id) }}" 
-                      method="POST" class="d-inline"
-                      onsubmit="return confirm('Konfirmasi pengembalian buku oleh {{ $peminjaman->mahasiswa->nama }}?')">
-                    @csrf
-                    @method('PUT')
-                    <button type="submit" class="btn btn-success btn-custom">
-                        <i class="bi bi-check-circle me-2"></i>Kembalikan Buku
-                    </button>
-                </form>
+                <a href="{{ route('petugas.pengembalian.show', $peminjaman->id) }}" class="btn btn-success btn-custom">
+                    <i class="bi bi-box-arrow-in-down me-2"></i>Proses Pengembalian
+                </a>
                 @endif
 
                 <form action="{{ route('petugas.peminjaman.destroy', $peminjaman->id) }}" 
