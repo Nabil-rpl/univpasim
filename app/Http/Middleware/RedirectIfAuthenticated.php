@@ -17,11 +17,23 @@ class RedirectIfAuthenticated
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {
+        // Jika tidak ada guard yang dispesifikasi, gunakan default (null)
         $guards = empty($guards) ? [null] : $guards;
 
         foreach ($guards as $guard) {
+            // Cek apakah user sudah login
             if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+                // Ambil user yang login
+                $user = Auth::guard($guard)->user();
+                
+                // Redirect berdasarkan role
+                return match($user->role) {
+                    'admin' => redirect('/admin/dashboard'),
+                    'petugas' => redirect('/petugas/dashboard'),
+                    'mahasiswa' => redirect('/mahasiswa/dashboard'),
+                    'pengguna_luar' => redirect('/pengguna-luar/dashboard'),
+                    default => redirect('/'),
+                };
             }
         }
 

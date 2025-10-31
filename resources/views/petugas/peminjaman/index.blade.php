@@ -61,6 +61,13 @@
         font-weight: 600;
     }
 
+    .badge-role {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
     .btn-action {
         padding: 6px 12px;
         border-radius: 8px;
@@ -145,7 +152,7 @@
             <div class="col-md-3">
                 <label class="form-label">Pencarian</label>
                 <input type="text" name="search" class="form-control" 
-                       placeholder="Nama mahasiswa atau judul buku..."
+                       placeholder="Nama peminjam atau judul buku..."
                        value="{{ request('search') }}">
             </div>
             <div class="col-md-2">
@@ -157,12 +164,16 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Dari Tanggal</label>
-                <input type="date" name="tanggal_dari" class="form-control" value="{{ request('tanggal_dari') }}">
+                <label class="form-label">Tipe Peminjam</label>
+                <select name="role" class="form-select">
+                    <option value="">Semua Tipe</option>
+                    <option value="mahasiswa" {{ request('role') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
+                    <option value="pengguna_luar" {{ request('role') == 'pengguna_luar' ? 'selected' : '' }}>Pengguna Luar</option>
+                </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Sampai Tanggal</label>
-                <input type="date" name="tanggal_sampai" class="form-control" value="{{ request('tanggal_sampai') }}">
+                <label class="form-label">Dari Tanggal</label>
+                <input type="date" name="tanggal_dari" class="form-control" value="{{ request('tanggal_dari') }}">
             </div>
             <div class="col-md-3 d-flex align-items-end gap-2">
                 <button type="submit" class="btn btn-primary">
@@ -208,7 +219,7 @@
             <thead class="table-light">
                 <tr>
                     <th width="5%">No</th>
-                    <th>Mahasiswa</th>
+                    <th>Peminjam</th>
                     <th>Buku</th>
                     <th>Tanggal Pinjam</th>
                     <th>Durasi & Deadline</th>
@@ -223,8 +234,27 @@
                 <tr>
                     <td>{{ $peminjamans->firstItem() + $index }}</td>
                     <td>
-                        <strong>{{ $item->mahasiswa->name }}</strong><br>
-                        <small class="text-muted">NIM: {{ $item->mahasiswa->nim ?? '-' }}</small>
+                        <div class="d-flex align-items-start gap-2">
+                            <div>
+                                <strong>{{ $item->mahasiswa->name }}</strong>
+                                
+                                @if($item->mahasiswa->role == 'mahasiswa')
+                                    <span class="badge badge-role bg-primary">
+                                        <i class="bi bi-mortarboard-fill me-1"></i>Mahasiswa
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">NIM: {{ $item->mahasiswa->nim ?? '-' }}</small>
+                                @elseif($item->mahasiswa->role == 'pengguna_luar')
+                                    <span class="badge badge-role bg-info">
+                                        <i class="bi bi-person-fill me-1"></i>Pengguna Luar
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="bi bi-telephone me-1"></i>{{ $item->mahasiswa->no_hp ?? '-' }}
+                                    </small>
+                                @endif
+                            </div>
+                        </div>
                     </td>
                     <td>
                         <strong>{{ $item->buku->judul }}</strong><br>

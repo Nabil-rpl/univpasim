@@ -59,6 +59,13 @@
         font-weight: 600;
     }
 
+    .badge-role {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
     .btn-action {
         padding: 6px 12px;
         border-radius: 8px;
@@ -177,18 +184,27 @@
 <div class="mb-3">
     <ul class="nav nav-tabs border-0">
         <li class="nav-item">
-            <a class="nav-link tab-custom active" href="#semua" data-bs-toggle="tab">
+            <a class="nav-link tab-custom {{ !request('filter') ? 'active' : '' }}" 
+               href="{{ route('petugas.pengembalian.index') }}">
                 <i class="bi bi-list-ul me-2"></i>Semua ({{ $stats['aktif'] }})
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link tab-custom" href="#terlambat" data-bs-toggle="tab">
+            <a class="nav-link tab-custom {{ request('filter') == 'terlambat' ? 'active' : '' }}" 
+               href="{{ route('petugas.pengembalian.index', ['filter' => 'terlambat']) }}">
                 <i class="bi bi-exclamation-triangle me-2"></i>Terlambat ({{ $stats['terlambat'] }})
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link tab-custom" href="#tepat-waktu" data-bs-toggle="tab">
+            <a class="nav-link tab-custom {{ request('filter') == 'tepat_waktu' ? 'active' : '' }}" 
+               href="{{ route('petugas.pengembalian.index', ['filter' => 'tepat_waktu']) }}">
                 <i class="bi bi-check-circle me-2"></i>Tepat Waktu
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link tab-custom {{ request('filter') == 'hari_ini' ? 'active' : '' }}" 
+               href="{{ route('petugas.pengembalian.index', ['filter' => 'hari_ini']) }}">
+                <i class="bi bi-calendar-event me-2"></i>Deadline Hari Ini
             </a>
         </li>
     </ul>
@@ -203,11 +219,19 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <input type="text" name="search" class="form-control" 
-                           placeholder="Cari nama mahasiswa, NIM, atau judul buku..."
+                           placeholder="Nama, NIM, No HP, atau judul buku..."
                            value="{{ request('search') }}">
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label class="form-label">Tipe Peminjam</label>
+                <select name="role" class="form-select">
+                    <option value="">Semua</option>
+                    <option value="mahasiswa" {{ request('role') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
+                    <option value="pengguna_luar" {{ request('role') == 'pengguna_luar' ? 'selected' : '' }}>Pengguna Luar</option>
+                </select>
+            </div>
+            <div class="col-md-2">
                 <label class="form-label">Filter Status</label>
                 <select name="filter" class="form-select">
                     <option value="">Semua</option>
@@ -219,17 +243,17 @@
             <div class="col-md-2">
                 <label class="form-label">Urutkan</label>
                 <select name="sort" class="form-select">
-                    <option value="deadline_asc" {{ request('sort') == 'deadline_asc' ? 'selected' : '' }}>Deadline (Terlama)</option>
+                    <option value="deadline_asc" {{ request('sort', 'deadline_asc') == 'deadline_asc' ? 'selected' : '' }}>Deadline (Terlama)</option>
                     <option value="deadline_desc" {{ request('sort') == 'deadline_desc' ? 'selected' : '' }}>Deadline (Terbaru)</option>
                     <option value="denda_desc" {{ request('sort') == 'denda_desc' ? 'selected' : '' }}>Denda (Tertinggi)</option>
                 </select>
             </div>
-            <div class="col-md-3 d-flex align-items-end gap-2">
+            <div class="col-md-2 d-flex align-items-end gap-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-funnel me-2"></i>Filter
                 </button>
                 <a href="{{ route('petugas.pengembalian.index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                    <i class="bi bi-arrow-clockwise"></i>
                 </a>
             </div>
         </div>
@@ -268,7 +292,7 @@
                 <tr>
                     <th width="5%">No</th>
                     <th width="10%">Buku</th>
-                    <th>Judul & Mahasiswa</th>
+                    <th>Judul & Peminjam</th>
                     <th>Tanggal Pinjam</th>
                     <th>Deadline</th>
                     <th>Durasi</th>
@@ -297,9 +321,24 @@
                         <small class="text-muted">{{ Str::limit($item->buku->penulis, 30) }}</small>
                         <hr class="my-1">
                         <div class="mt-1">
-                            <i class="bi bi-person text-primary me-1"></i>
-                            <strong>{{ $item->mahasiswa->name }}</strong><br>
-                            <small class="text-muted ms-3">NIM: {{ $item->mahasiswa->nim ?? '-' }}</small>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-person text-primary"></i>
+                                <strong>{{ $item->mahasiswa->name }}</strong>
+                                @if($item->mahasiswa->role == 'mahasiswa')
+                                    <span class="badge badge-role bg-primary">
+                                        <i class="bi bi-mortarboard-fill me-1"></i>Mahasiswa
+                                    </span>
+                                @else
+                                    <span class="badge badge-role bg-info">
+                                        <i class="bi bi-person-fill me-1"></i>Pengguna Luar
+                                    </span>
+                                @endif
+                            </div>
+                            @if($item->mahasiswa->role == 'mahasiswa')
+                                <small class="text-muted ms-3">NIM: {{ $item->mahasiswa->nim ?? '-' }}</small>
+                            @else
+                                <small class="text-muted ms-3">HP: {{ $item->mahasiswa->no_hp ?? '-' }}</small>
+                            @endif
                         </div>
                     </td>
                     <td>
@@ -317,7 +356,8 @@
                                     Lewat {{ $item->getHariTerlambat() }} hari
                                 </small>
                             @else
-                                <small class="text-muted">
+                                <small class="text-success">
+                                    <i class="bi bi-check-circle me-1"></i>
                                     Sisa {{ $item->tanggal_deadline->diffInDays(now()) }} hari
                                 </small>
                             @endif
@@ -402,11 +442,4 @@
     </div>
     @endif
 </div>
-
-<script>
-    // Auto refresh setiap 5 menit untuk update status real-time
-    setTimeout(function() {
-        location.reload();
-    }, 300000); // 5 menit
-</script>
 @endsection

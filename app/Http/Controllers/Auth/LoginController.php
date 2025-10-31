@@ -15,7 +15,7 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        // ✅ Validasi input dengan domain @gmail.com wajib
+        // Validasi input dengan domain @gmail.com wajib
         $credentials = $request->validate([
             'email' => [
                 'required',
@@ -30,22 +30,23 @@ class LoginController extends Controller
             'password.required' => 'Password wajib diisi.',
         ]);
 
-        // ✅ Cek kredensial login
+        // Cek kredensial login
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Jika kamu ingin redirect berdasarkan role, bisa begini:
+            // Redirect berdasarkan role
             $user = Auth::user();
-            if ($user->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
-            } elseif ($user->role === 'petugas') {
-                return redirect()->intended('/petugas/dashboard');
-            } else {
-                return redirect()->intended('/');
-            }
+            
+            return match($user->role) {
+                'admin' => redirect()->intended('/admin/dashboard'),
+                'petugas' => redirect()->intended('/petugas/dashboard'),
+                'mahasiswa' => redirect()->intended('/mahasiswa/dashboard'),
+                'pengguna_luar' => redirect()->intended('/pengguna-luar/dashboard'),
+                default => redirect()->intended('/'),
+            };
         }
 
-        // ✅ Jika gagal login
+        // Jika gagal login
         return back()->withErrors([
             'email' => 'Email atau password salah.',
         ])->withInput($request->only('email'));
@@ -57,6 +58,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'Anda telah berhasil logout.');
+        return redirect('/login')->with('success', 'Anda telah berhasil logout.');
     }
 }

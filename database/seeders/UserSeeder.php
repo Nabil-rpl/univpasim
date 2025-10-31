@@ -68,6 +68,66 @@ class UserSeeder extends Seeder
             ['nama' => 'Rizky Maulana', 'email' => 'rizky.maulana@gmail.com', 'nim' => '2024015', 'jurusan' => 'Teknik Informatika'],
         ];
 
+        // Data Pengguna Luar (Umum/Non-Mahasiswa)
+        $penggunaLuar = [
+            [
+                'name' => 'Budi Hartono',
+                'email' => 'budi.hartono@gmail.com',
+                'no_hp' => '081234567890',
+                'alamat' => 'Jl. Merdeka No. 45, Jakarta Pusat',
+                'password' => Hash::make('password'),
+                'role' => 'pengguna_luar',
+            ],
+            [
+                'name' => 'Sari Wulandari',
+                'email' => 'sari.wulandari@gmail.com',
+                'no_hp' => '082345678901',
+                'alamat' => 'Jl. Sudirman No. 123, Bandung',
+                'password' => Hash::make('password'),
+                'role' => 'pengguna_luar',
+            ],
+            [
+                'name' => 'Joko Susanto',
+                'email' => 'joko.susanto@gmail.com',
+                'no_hp' => '083456789012',
+                'alamat' => 'Jl. Ahmad Yani No. 78, Surabaya',
+                'password' => Hash::make('password'),
+                'role' => 'pengguna_luar',
+            ],
+            [
+                'name' => 'Nina Kartika',
+                'email' => 'nina.kartika@gmail.com',
+                'no_hp' => '084567890123',
+                'alamat' => 'Jl. Diponegoro No. 56, Yogyakarta',
+                'password' => Hash::make('password'),
+                'role' => 'pengguna_luar',
+            ],
+            [
+                'name' => 'Eko Prasetyo',
+                'email' => 'eko.prasetyo@gmail.com',
+                'no_hp' => '085678901234',
+                'alamat' => 'Jl. Gatot Subroto No. 89, Semarang',
+                'password' => Hash::make('password'),
+                'role' => 'pengguna_luar',
+            ],
+            [
+                'name' => 'Dwi Anggraini',
+                'email' => 'dwi.anggraini@gmail.com',
+                'no_hp' => '086789012345',
+                'alamat' => 'Jl. Pahlawan No. 34, Malang',
+                'password' => Hash::make('password'),
+                'role' => 'pengguna_luar',
+            ],
+            [
+                'name' => 'Hadi Wijaya',
+                'email' => 'hadi.wijaya@gmail.com',
+                'no_hp' => '087890123456',
+                'alamat' => 'Jl. Veteran No. 67, Solo',
+                'password' => Hash::make('password'),
+                'role' => 'pengguna_luar',
+            ],
+        ];
+
         // Insert Admin
         foreach ($admins as $admin) {
             User::create($admin);
@@ -91,6 +151,11 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'mahasiswa',
             ]);
+        }
+
+        // Insert Pengguna Luar
+        foreach ($penggunaLuar as $pengguna) {
+            User::create($pengguna);
         }
     }
 }
