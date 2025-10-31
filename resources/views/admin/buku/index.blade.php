@@ -10,7 +10,7 @@
                     <div class="icon-wrapper">
                         <i class="bi bi-book-fill"></i>
                     </div>
-                    <span>Daftar Buku</span>
+                    <span>Daftar Books</span>
                 </h2>
                 <p class="page-subtitle mb-0">Kelola koleksi buku perpustakaan Anda</p>
             </div>
