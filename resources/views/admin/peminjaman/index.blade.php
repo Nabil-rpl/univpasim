@@ -74,6 +74,50 @@
         color: white;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
+
+    .avatar-circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+        transition: background-color 0.3s;
+    }
+
+    .alert {
+        border-radius: 12px;
+        border: none;
+    }
+
+    .user-type-badge {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: 5px;
+    }
+
+    .btn-detail {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        padding: 5px 12px;
+        transition: all 0.3s;
+        border: 1px solid #667eea;
+        color: #667eea;
+        background: white;
+    }
+
+    .btn-detail:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        background: #667eea;
+        color: white;
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -223,14 +267,15 @@
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th width="5%">No</th>
-                        <th width="15%">Mahasiswa</th>
-                        <th width="20%">Buku</th>
-                        <th width="12%">Tanggal Pinjam</th>
-                        <th width="12%">Durasi & Deadline</th>
-                        <th width="12%">Tanggal Kembali</th>
-                        <th width="12%">Status</th>
-                        <th width="12%">Petugas</th>
+                        <th width="4%">No</th>
+                        <th width="13%">Peminjam</th>
+                        <th width="17%">Buku</th>
+                        <th width="11%">Tanggal Pinjam</th>
+                        <th width="11%">Durasi & Deadline</th>
+                        <th width="11%">Tanggal Kembali</th>
+                        <th width="11%">Status</th>
+                        <th width="11%">Petugas</th>
+                        <th width="11%" class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -239,18 +284,47 @@
                         <td class="text-center fw-bold">{{ $index + 1 }}</td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <div class="avatar-circle bg-primary bg-opacity-10 text-primary me-2">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
+                                @if($item->mahasiswa->role === 'mahasiswa')
+                                    <div class="avatar-circle bg-primary bg-opacity-10 text-primary me-2">
+                                        <i class="bi bi-mortarboard-fill"></i>
+                                    </div>
+                                @else
+                                    <div class="avatar-circle bg-info bg-opacity-10 text-info me-2">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                @endif
                                 <div>
-                                    <strong>{{ $item->mahasiswa->name }}</strong><br>
-                                    <small class="text-muted">NIM: {{ $item->mahasiswa->nim ?? '-' }}</small>
+                                    <strong>{{ $item->mahasiswa->name }}</strong>
+                                    @if($item->mahasiswa->role === 'mahasiswa')
+                                        <span class="user-type-badge bg-primary bg-opacity-10 text-primary">
+                                            <i class="bi bi-mortarboard"></i> Mahasiswa
+                                        </span>
+                                    @else
+                                        <span class="user-type-badge bg-info bg-opacity-10 text-info">
+                                            <i class="bi bi-person-circle"></i> Pengguna Luar
+                                        </span>
+                                    @endif
+                                    <br>
+                                    @if($item->mahasiswa->role === 'mahasiswa')
+                                        @if($item->mahasiswa->mahasiswa)
+                                            <small class="text-muted">NIM: {{ $item->mahasiswa->mahasiswa->nim }}</small>
+                                        @elseif($item->mahasiswa->nim)
+                                            <small class="text-muted">NIM: {{ $item->mahasiswa->nim }}</small>
+                                        @else
+                                            <small class="text-muted">NIM: -</small>
+                                        @endif
+                                    @else
+                                        <small class="text-muted">
+                                            <i class="bi bi-telephone-fill me-1"></i>
+                                            {{ $item->mahasiswa->no_hp ?? 'No HP tidak tersedia' }}
+                                        </small>
+                                    @endif
                                 </div>
                             </div>
                         </td>
                         <td>
                             <div class="d-flex align-items-start">
-                                <div class="avatar-circle bg-info bg-opacity-10 text-info me-2">
+                                <div class="avatar-circle bg-warning bg-opacity-10 text-warning me-2">
                                     <i class="bi bi-book"></i>
                                 </div>
                                 <div>
@@ -332,10 +406,17 @@
                                 </span>
                             @endif
                         </td>
+                        <td class="text-center">
+                            <a href="{{ route('admin.peminjaman.show', $item->id) }}" 
+                               class="btn btn-detail btn-sm"
+                               title="Lihat Detail">
+                                <i class="bi bi-eye me-1"></i>Detail
+                            </a>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5">
+                        <td colspan="9" class="text-center py-5">
                             <i class="bi bi-inbox" style="font-size: 4rem; color: #cbd5e1;"></i>
                             <p class="text-muted mt-3 mb-0 fw-semibold">Tidak ada data peminjaman</p>
                             <small class="text-muted">Belum ada transaksi peminjaman buku yang tercatat</small>
@@ -370,28 +451,6 @@
         @endif
     </div>
 </div>
-
-<style>
-.avatar-circle {
-    width: 35px;
-    height: 35px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(102, 126, 234, 0.05);
-    transition: background-color 0.3s;
-}
-
-.alert {
-    border-radius: 12px;
-    border: none;
-}
-</style>
 
 <script>
 // Auto hide alerts after 5 seconds

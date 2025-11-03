@@ -22,12 +22,14 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        // Search berdasarkan nama, email, atau NIM
+        // Search berdasarkan nama, email, NIM, atau no_hp
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%")
+                  ->orWhere('no_hp', 'like', "%{$search}%")
                   ->orWhereHas('mahasiswa', function($mq) use ($search) {
                       $mq->where('nama', 'like', "%{$search}%")
                         ->orWhere('nim', 'like', "%{$search}%");
@@ -43,9 +45,7 @@ class UserController extends Controller
         $totalAdmin = User::where('role', 'admin')->count();
         $totalPetugas = User::where('role', 'petugas')->count();
         $totalMahasiswa = User::where('role', 'mahasiswa')->count();
-        
-        // Cek apakah ada filter aktif
-        $hasFilter = $request->filled('search') || $request->filled('role');
+        $totalPenggunaLuar = User::where('role', 'pengguna_luar')->count();
         
         return view('admin.users.index', compact(
             'users',
@@ -53,14 +53,8 @@ class UserController extends Controller
             'totalAdmin',
             'totalPetugas',
             'totalMahasiswa',
-            'hasFilter'
+            'totalPenggunaLuar'
         ));
-    }
-
-    // Reset filter (redirect ke index tanpa parameter)
-    public function resetFilter()
-    {
-        return redirect()->route('admin.users.index');
     }
 
     // Menampilkan form tambah user
@@ -72,28 +66,43 @@ class UserController extends Controller
     // Menyimpan user baru
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Validasi dasar
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:admin,petugas,mahasiswa',
-            'nim' => [
-                'required_if:role,mahasiswa',
-                'nullable',
+            'role' => 'required|in:admin,petugas,mahasiswa,pengguna_luar',
+            'password' => 'required|string|min:8|confirmed',
+        ];
+
+        // Validasi khusus mahasiswa
+        if ($request->role === 'mahasiswa') {
+            $rules['nim'] = [
+                'required',
                 'string',
                 'max:20',
+                Rule::unique('users', 'nim'),
                 Rule::unique('mahasiswa', 'nim')
-            ],
-            'jurusan' => 'required_if:role,mahasiswa|nullable|string|max:100',
-            'password' => 'required|string|min:8|confirmed',
-        ], [
+            ];
+            $rules['jurusan'] = 'required|string|max:100';
+        }
+
+        // Validasi khusus pengguna luar
+        if ($request->role === 'pengguna_luar') {
+            $rules['no_hp'] = 'required|string|max:15';
+            $rules['alamat'] = 'required|string';
+        }
+
+        $validated = $request->validate($rules, [
             'name.required' => 'Nama wajib diisi',
             'email.required' => 'Email wajib diisi',
             'email.unique' => 'Email sudah terdaftar',
             'email.email' => 'Format email tidak valid',
             'role.required' => 'Role wajib dipilih',
-            'nim.required_if' => 'NIM wajib diisi untuk mahasiswa',
+            'nim.required' => 'NIM wajib diisi untuk mahasiswa',
             'nim.unique' => 'NIM sudah terdaftar',
-            'jurusan.required_if' => 'Jurusan wajib diisi untuk mahasiswa',
+            'jurusan.required' => 'Jurusan wajib diisi untuk mahasiswa',
+            'no_hp.required' => 'No HP wajib diisi untuk pengguna luar',
+            'alamat.required' => 'Alamat wajib diisi untuk pengguna luar',
             'password.required' => 'Password wajib diisi',
             'password.min' => 'Password minimal 8 karakter',
             'password.confirmed' => 'Konfirmasi password tidak cocok',
@@ -101,13 +110,24 @@ class UserController extends Controller
 
         DB::beginTransaction();
         try {
-            // Buat user
-            $user = User::create([
+            // Data user dasar
+            $userData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'role' => $validated['role'],
                 'password' => Hash::make($validated['password']),
-            ]);
+            ];
+
+            // Tambahkan data spesifik berdasarkan role
+            if ($validated['role'] === 'mahasiswa') {
+                $userData['nim'] = $validated['nim'];
+            } elseif ($validated['role'] === 'pengguna_luar') {
+                $userData['no_hp'] = $validated['no_hp'];
+                $userData['alamat'] = $validated['alamat'];
+            }
+
+            // Buat user
+            $user = User::create($userData);
 
             // Jika role mahasiswa, simpan ke tabel mahasiswa
             if ($validated['role'] === 'mahasiswa') {
@@ -115,7 +135,7 @@ class UserController extends Controller
                     'nama' => $validated['name'],
                     'email' => $validated['email'],
                     'nim' => $validated['nim'],
-                    'jurusan' => $validated['jurusan'] ?? null,
+                    'jurusan' => $validated['jurusan'],
                 ]);
             }
 
@@ -147,32 +167,47 @@ class UserController extends Controller
     // Update user
     public function update(Request $request, User $user)
     {
-        $validated = $request->validate([
+        // Validasi dasar
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
                 Rule::unique('users', 'email')->ignore($user->id)
             ],
-            'role' => 'required|in:admin,petugas,mahasiswa',
-            'nim' => [
-                'required_if:role,mahasiswa',
-                'nullable',
+            'role' => 'required|in:admin,petugas,mahasiswa,pengguna_luar',
+            'password' => 'nullable|string|min:8|confirmed',
+        ];
+
+        // Validasi khusus mahasiswa
+        if ($request->role === 'mahasiswa') {
+            $rules['nim'] = [
+                'required',
                 'string',
                 'max:20',
+                Rule::unique('users', 'nim')->ignore($user->id),
                 Rule::unique('mahasiswa', 'nim')->ignore($user->mahasiswa->id ?? null)
-            ],
-            'jurusan' => 'required_if:role,mahasiswa|nullable|string|max:100',
-            'password' => 'nullable|string|min:8|confirmed',
-        ], [
+            ];
+            $rules['jurusan'] = 'required|string|max:100';
+        }
+
+        // Validasi khusus pengguna luar
+        if ($request->role === 'pengguna_luar') {
+            $rules['no_hp'] = 'required|string|max:15';
+            $rules['alamat'] = 'required|string';
+        }
+
+        $validated = $request->validate($rules, [
             'name.required' => 'Nama wajib diisi',
             'email.required' => 'Email wajib diisi',
             'email.unique' => 'Email sudah terdaftar',
             'email.email' => 'Format email tidak valid',
             'role.required' => 'Role wajib dipilih',
-            'nim.required_if' => 'NIM wajib diisi untuk mahasiswa',
+            'nim.required' => 'NIM wajib diisi untuk mahasiswa',
             'nim.unique' => 'NIM sudah terdaftar',
-            'jurusan.required_if' => 'Jurusan wajib diisi untuk mahasiswa',
+            'jurusan.required' => 'Jurusan wajib diisi untuk mahasiswa',
+            'no_hp.required' => 'No HP wajib diisi untuk pengguna luar',
+            'alamat.required' => 'Alamat wajib diisi untuk pengguna luar',
             'password.min' => 'Password minimal 8 karakter',
             'password.confirmed' => 'Konfirmasi password tidak cocok',
         ]);
@@ -185,6 +220,19 @@ class UserController extends Controller
                 'email' => $validated['email'],
                 'role' => $validated['role'],
             ];
+
+            // Reset field yang tidak digunakan
+            $updateData['nim'] = null;
+            $updateData['no_hp'] = null;
+            $updateData['alamat'] = null;
+
+            // Set data spesifik berdasarkan role
+            if ($validated['role'] === 'mahasiswa') {
+                $updateData['nim'] = $validated['nim'];
+            } elseif ($validated['role'] === 'pengguna_luar') {
+                $updateData['no_hp'] = $validated['no_hp'];
+                $updateData['alamat'] = $validated['alamat'];
+            }
 
             // Update password hanya jika diisi
             if ($request->filled('password')) {
@@ -201,7 +249,7 @@ class UserController extends Controller
                         'nama' => $validated['name'],
                         'email' => $validated['email'],
                         'nim' => $validated['nim'],
-                        'jurusan' => $validated['jurusan'] ?? null,
+                        'jurusan' => $validated['jurusan'],
                     ]);
                 } else {
                     // Jika belum ada, buat baru
@@ -209,7 +257,7 @@ class UserController extends Controller
                         'nama' => $validated['name'],
                         'email' => $validated['email'],
                         'nim' => $validated['nim'],
-                        'jurusan' => $validated['jurusan'] ?? null,
+                        'jurusan' => $validated['jurusan'],
                     ]);
                 }
             } else {
@@ -299,7 +347,7 @@ class UserController extends Controller
         }
     }
 
-    // Export data user (optional)
+    // Export data user
     public function export(Request $request)
     {
         $query = User::with('mahasiswa');
@@ -308,7 +356,7 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        $users = $query->get();
+        $users = $query->orderBy('created_at', 'desc')->get();
 
         $filename = 'users_' . date('YmdHis') . '.csv';
         
@@ -321,17 +369,31 @@ class UserController extends Controller
             $file = fopen('php://output', 'w');
             
             // Header CSV
-            fputcsv($file, ['ID', 'Nama', 'Email', 'NIM', 'Jurusan', 'Role', 'Tanggal Daftar']);
+            fputcsv($file, ['ID', 'Nama', 'Email', 'Role', 'NIM', 'Jurusan', 'No HP', 'Alamat', 'Tanggal Daftar']);
             
             // Data
             foreach ($users as $user) {
+                $nim = '-';
+                $jurusan = '-';
+                
+                if ($user->role === 'mahasiswa') {
+                    if ($user->mahasiswa) {
+                        $nim = $user->mahasiswa->nim;
+                        $jurusan = $user->mahasiswa->jurusan ?? '-';
+                    } elseif ($user->nim) {
+                        $nim = $user->nim;
+                    }
+                }
+                
                 fputcsv($file, [
                     $user->id,
-                    $user->display_name,
+                    $user->name,
                     $user->email,
-                    $user->mahasiswa->nim ?? '-',
-                    $user->mahasiswa->jurusan ?? '-',
-                    $user->role,
+                    ucfirst(str_replace('_', ' ', $user->role)),
+                    $nim,
+                    $jurusan,
+                    $user->no_hp ?? '-',
+                    $user->alamat ?? '-',
                     $user->created_at->format('d/m/Y H:i'),
                 ]);
             }
