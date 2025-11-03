@@ -95,9 +95,10 @@ Route::middleware(['auth', 'role:admin'])
         // CRUD Buku
         Route::resource('buku', BukuController::class);
 
-        // CRUD Peminjaman
+        // CRUD Peminjaman (✅ DIPERBAIKI - DITAMBAHKAN ROUTE SHOW)
         Route::controller(PeminjamanController::class)->group(function () {
             Route::get('/peminjaman', 'index')->name('peminjaman.index');
+            Route::get('/peminjaman/{id}', 'show')->name('peminjaman.show'); // ✅ ROUTE DETAIL
             Route::post('/peminjaman', 'store')->name('peminjaman.store');
             Route::put('/peminjaman/{id}', 'update')->name('peminjaman.update');
             Route::delete('/peminjaman/{id}', 'destroy')->name('peminjaman.destroy');
@@ -119,7 +120,6 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/laporan/{laporan}', 'show')->name('laporan.show');
         });
     });
-
 
 // ============================================
 // 👮 PETUGAS

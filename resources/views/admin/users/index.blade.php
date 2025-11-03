@@ -133,13 +133,14 @@
                                 <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                                 <option value="petugas" {{ request('role') == 'petugas' ? 'selected' : '' }}>Petugas</option>
                                 <option value="mahasiswa" {{ request('role') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
+                                <option value="pengguna_luar" {{ request('role') == 'pengguna_luar' ? 'selected' : '' }}>Pengguna Luar</option>
                             </select>
                         </div>
                         <div class="col-md-4 d-flex align-items-end gap-2">
                             <button type="submit" class="btn btn-primary btn-search flex-grow-1">
                                 <i class="bi bi-search me-2"></i>Cari
                             </button>
-                            @if(isset($hasFilter) && $hasFilter)
+                            @if(request('search') || request('role'))
                                 <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary btn-reset">
                                     <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
                                 </a>
@@ -168,10 +169,11 @@
                                 <tr>
                                     <th width="5%">No</th>
                                     <th width="25%">Nama</th>
-                                    <th width="25%">Email</th>
+                                    <th width="20%">Email</th>
                                     <th width="15%">Role</th>
-                                    <th width="15%">Terdaftar</th>
-                                    <th width="15%" class="text-center">Aksi</th>
+                                    <th width="15%">Info Tambahan</th>
+                                    <th width="12%">Terdaftar</th>
+                                    <th width="8%" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -183,15 +185,10 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="avatar-circle">
-                                                {{ strtoupper(substr($user->display_name, 0, 1)) }}
+                                                {{ strtoupper(substr($user->name, 0, 1)) }}
                                             </div>
                                             <div class="ms-3">
-                                                <div class="fw-semibold text-dark">{{ $user->display_name }}</div>
-                                                @if($user->role === 'mahasiswa' && $user->mahasiswa)
-                                                    <small class="text-muted d-block">
-                                                        <i class="bi bi-hash"></i>{{ $user->mahasiswa->nim }}
-                                                    </small>
-                                                @endif
+                                                <div class="fw-semibold text-dark">{{ $user->name }}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -209,10 +206,39 @@
                                             <span class="badge badge-modern badge-petugas">
                                                 <i class="bi bi-person-badge me-1"></i>Petugas
                                             </span>
+                                        @elseif($user->role == 'pengguna_luar')
+                                            <span class="badge badge-modern badge-pengguna-luar">
+                                                <i class="bi bi-person-circle me-1"></i>Pengguna Luar
+                                            </span>
                                         @else
                                             <span class="badge badge-modern badge-mahasiswa">
                                                 <i class="bi bi-mortarboard me-1"></i>Mahasiswa
                                             </span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($user->role === 'mahasiswa')
+                                            @if($user->mahasiswa)
+                                                <small class="text-muted d-block">
+                                                    <i class="bi bi-hash"></i>{{ $user->mahasiswa->nim }}
+                                                </small>
+                                            @elseif($user->nim)
+                                                <small class="text-muted d-block">
+                                                    <i class="bi bi-hash"></i>{{ $user->nim }}
+                                                </small>
+                                            @else
+                                                <small class="text-muted">-</small>
+                                            @endif
+                                        @elseif($user->role === 'pengguna_luar')
+                                            @if($user->no_hp)
+                                                <small class="text-muted d-block">
+                                                    <i class="bi bi-telephone me-1"></i>{{ $user->no_hp }}
+                                                </small>
+                                            @else
+                                                <small class="text-muted">-</small>
+                                            @endif
+                                        @else
+                                            <small class="text-muted">-</small>
                                         @endif
                                     </td>
                                     <td>
@@ -256,7 +282,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-5">
+                                    <td colspan="7" class="text-center py-5">
                                         <div class="empty-state">
                                             <i class="bi bi-inbox"></i>
                                             <p class="mb-0 mt-3">Belum ada data user</p>
@@ -619,6 +645,11 @@ h2 {
 
 .badge-mahasiswa {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.badge-pengguna-luar {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: white;
 }
 

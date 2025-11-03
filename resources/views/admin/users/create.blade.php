@@ -5,7 +5,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8">
+        <div class="col-lg-8 col-md-10">
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0 text-dark fw-bold">Tambah User Baru</h2>
@@ -101,49 +101,95 @@
                                     <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                                     <option value="petugas" {{ old('role') == 'petugas' ? 'selected' : '' }}>Petugas</option>
                                     <option value="mahasiswa" {{ old('role') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
+                                    <option value="pengguna_luar" {{ old('role') == 'pengguna_luar' ? 'selected' : '' }}>Pengguna Luar</option>
                                 </select>
                                 @error('role')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
 
-                            <div class="col-md-6 mb-3 {{ old('role') == 'mahasiswa' ? '' : 'd-none' }}" id="nim-field">
-                                <label for="nim" class="form-label">
-                                    <i class="bi bi-card-text me-1"></i>NIM <span class="text-danger" id="nim-required">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    <input type="text" 
-                                           class="form-control @error('nim') is-invalid @enderror" 
-                                           id="nim" 
-                                           name="nim" 
-                                           value="{{ old('nim') }}" 
-                                           placeholder="Masukkan NIM mahasiswa"
-                                           maxlength="20">
-                                    <i class="bi bi-card-list input-icon"></i>
-                                    @error('nim')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                        <!-- Fields untuk Mahasiswa -->
+                        <div id="mahasiswa-fields" class="role-specific-fields">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nim" class="form-label">
+                                        <i class="bi bi-card-text me-1"></i>NIM <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <input type="text" 
+                                               class="form-control @error('nim') is-invalid @enderror" 
+                                               id="nim" 
+                                               name="nim" 
+                                               value="{{ old('nim') }}" 
+                                               placeholder="Masukkan NIM mahasiswa"
+                                               maxlength="20">
+                                        <i class="bi bi-card-list input-icon"></i>
+                                        @error('nim')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="jurusan" class="form-label">
+                                        <i class="bi bi-book me-1"></i>Jurusan <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <input type="text" 
+                                               class="form-control @error('jurusan') is-invalid @enderror" 
+                                               id="jurusan" 
+                                               name="jurusan" 
+                                               value="{{ old('jurusan') }}" 
+                                               placeholder="Contoh: Teknik Informatika"
+                                               maxlength="100">
+                                        <i class="bi bi-mortarboard input-icon"></i>
+                                        @error('jurusan')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Field Jurusan (hanya untuk mahasiswa) -->
-                        <div class="row {{ old('role') == 'mahasiswa' ? '' : 'd-none' }}" id="jurusan-field">
-                            <div class="col-12 mb-3">
-                                <label for="jurusan" class="form-label">
-                                    <i class="bi bi-building me-1"></i>Jurusan <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    <input type="text" 
-                                           class="form-control @error('jurusan') is-invalid @enderror" 
-                                           id="jurusan" 
-                                           name="jurusan" 
-                                           value="{{ old('jurusan') }}" 
-                                           placeholder="Contoh: Teknik Informatika">
-                                    <i class="bi bi-book input-icon"></i>
-                                    @error('jurusan')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                        <!-- Fields untuk Pengguna Luar -->
+                        <div id="pengguna-luar-fields" class="role-specific-fields">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="no_hp" class="form-label">
+                                        <i class="bi bi-telephone me-1"></i>No HP <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <input type="text" 
+                                               class="form-control @error('no_hp') is-invalid @enderror" 
+                                               id="no_hp" 
+                                               name="no_hp" 
+                                               value="{{ old('no_hp') }}" 
+                                               placeholder="Contoh: 08123456789"
+                                               maxlength="15">
+                                        <i class="bi bi-phone input-icon"></i>
+                                        @error('no_hp')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="alamat" class="form-label">
+                                        <i class="bi bi-geo-alt me-1"></i>Alamat <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <textarea class="form-control @error('alamat') is-invalid @enderror" 
+                                                  id="alamat" 
+                                                  name="alamat" 
+                                                  rows="3" 
+                                                  placeholder="Masukkan alamat lengkap"
+                                                  style="padding-left: 45px;">{{ old('alamat') }}</textarea>
+                                        <i class="bi bi-house input-icon"></i>
+                                        @error('alamat')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -272,6 +318,27 @@ body {
     padding-left: 18px;
 }
 
+/* Role Specific Fields */
+.role-specific-fields {
+    display: none;
+    animation: fadeInDown 0.4s ease-out;
+}
+
+.role-specific-fields.show {
+    display: block;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .form-label {
     font-weight: 600;
     color: #1e293b;
@@ -298,6 +365,7 @@ body {
     color: #94a3b8;
     font-size: 18px;
     transition: all 0.3s ease;
+    z-index: 2;
 }
 
 .form-control {
@@ -325,6 +393,16 @@ body {
 
 .form-control.is-invalid {
     border-color: #ef4444;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+textarea.form-control + .input-icon {
+    top: 20px;
+    transform: translateY(0);
 }
 
 .form-select {
@@ -367,6 +445,7 @@ body {
     padding: 6px;
     transition: all 0.3s ease;
     border-radius: 8px;
+    z-index: 3;
 }
 
 .password-toggle:hover {
@@ -444,7 +523,7 @@ body {
 }
 
 @media (max-width: 768px) {
-    .col-lg-6 {
+    .col-lg-8 {
         max-width: 100%;
     }
     .card-body {
@@ -481,33 +560,46 @@ body {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const roleSelect = document.getElementById('role');
-    const nimField = document.getElementById('nim-field');
-    const jurusanField = document.getElementById('jurusan-field');
-    const nimRequired = document.getElementById('nim-required');
+    const mahasiswaFields = document.getElementById('mahasiswa-fields');
+    const penggunaLuarFields = document.getElementById('pengguna-luar-fields');
+    
     const nimInput = document.getElementById('nim');
     const jurusanInput = document.getElementById('jurusan');
+    const noHpInput = document.getElementById('no_hp');
+    const alamatInput = document.getElementById('alamat');
 
-    function toggleMahasiswaFields() {
-        if (roleSelect.value === 'mahasiswa') {
-            nimField.classList.remove('d-none');
-            jurusanField.classList.remove('d-none');
-            nimInput.required = true;
-            jurusanInput.required = true;
-            nimRequired.innerHTML = '<span class="text-danger">*</span>';
-        } else {
-            nimField.classList.add('d-none');
-            jurusanField.classList.add('d-none');
-            nimInput.required = false;
-            jurusanInput.required = false;
-            nimInput.value = '';
-            jurusanInput.value = '';
-            nimRequired.innerHTML = '';
+    function toggleRoleFields() {
+        const selectedRole = roleSelect.value;
+        
+        // Hide all role-specific fields first
+        mahasiswaFields.classList.remove('show');
+        penggunaLuarFields.classList.remove('show');
+        
+        // Remove required attributes
+        nimInput.removeAttribute('required');
+        jurusanInput.removeAttribute('required');
+        noHpInput.removeAttribute('required');
+        alamatInput.removeAttribute('required');
+        
+        // Show and set required based on role
+        if (selectedRole === 'mahasiswa') {
+            mahasiswaFields.classList.add('show');
+            nimInput.setAttribute('required', 'required');
+            jurusanInput.setAttribute('required', 'required');
+        } else if (selectedRole === 'pengguna_luar') {
+            penggunaLuarFields.classList.add('show');
+            noHpInput.setAttribute('required', 'required');
+            alamatInput.setAttribute('required', 'required');
         }
     }
 
-    toggleMahasiswaFields();
-    roleSelect.addEventListener('change', toggleMahasiswaFields);
+    // Initial check (for old input after validation error)
+    toggleRoleFields();
 
+    // Listen for changes
+    roleSelect.addEventListener('change', toggleRoleFields);
+
+    // Toggle Password Visibility
     const togglePassword = document.getElementById('togglePassword');
     const password = document.getElementById('password');
     const eyeIcon = document.getElementById('eyeIcon');
@@ -522,6 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Toggle Password Confirmation Visibility
     const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
     const passwordConfirm = document.getElementById('password_confirmation');
     const eyeIconConfirm = document.getElementById('eyeIconConfirm');
@@ -536,6 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Auto hide alerts after 5 seconds
     setTimeout(function() {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
@@ -544,6 +638,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, 5000);
 
+    // Loading animation on submit
     const createForm = document.querySelector('.create-user-form');
     const submitBtn = document.querySelector('.btn-submit');
 
@@ -554,6 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Input focus effect
     const inputs = document.querySelectorAll('.form-control');
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
