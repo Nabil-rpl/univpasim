@@ -62,7 +62,9 @@ class PengembalianController extends Controller
                   ->orderByRaw('DATEDIFF(NOW(), tanggal_deadline) DESC');
         }
 
-        $peminjaman = $query->paginate(15)->withQueryString();
+        $peminjaman = $query->paginate(15)->appends(request()->query());
+
+
 
         // Hitung statistik
         $stats = [
@@ -197,7 +199,7 @@ class PengembalianController extends Controller
             $query->whereDate('tanggal_pengembalian', '<=', $request->tanggal_sampai);
         }
 
-        $pengembalian = $query->paginate(15)->withQueryString();
+        $pengembalian = $query->paginate(15)->appends(request()->query());
 
         // Statistik
         $stats = [
