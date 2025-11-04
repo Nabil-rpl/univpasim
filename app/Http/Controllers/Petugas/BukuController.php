@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\Buku;
 use App\Models\QRCode;
-use SimpleSoftwareIO\QrCode\Facades\QrCode as QrCodeGenerator;
 
 class BukuController extends Controller
 {
@@ -312,12 +311,14 @@ class BukuController extends Controller
 
     public function update(Request $request, Buku $buku)
     {
+        // ⚠️ PERBAIKAN: Tambahkan 'kategori' ke dalam validasi
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'penulis' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
             'tahun_terbit' => 'required|integer',
-            'stok' => 'required|integer|min:1',
+            'kategori' => 'required|string|max:255', // ✅ Ditambahkan
+            'stok' => 'required|integer|min:0', // ✅ Ubah min:1 jadi min:0 agar bisa 0 stok
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -342,6 +343,11 @@ class BukuController extends Controller
 
     public function destroy(Buku $buku)
     {
+        // Hapus foto jika ada
+        if ($buku->foto && Storage::exists('public/' . $buku->foto)) {
+            Storage::delete('public/' . $buku->foto);
+        }
+
         // Hapus QR Code jika ada
         if ($buku->qrCode && $buku->qrCode->gambar_qr) {
             Storage::delete('public/' . $buku->qrCode->gambar_qr);
@@ -360,10 +366,11 @@ class BukuController extends Controller
         $kodeUnik = 'BOOK-' . $buku->id . '-' . Str::random(8);
 
         // ✅ Generate QR Code sebagai SVG (tidak perlu imagick)
-        $qrCodeImage = QrCodeGenerator::format('svg')
-            ->size(300)
-            ->errorCorrection('H')
-            ->generate($kodeUnik);
+        $qrCodeImage = QrCode::format('svg')
+    ->size(300)
+    ->errorCorrection('H')
+    ->generate($kodeUnik);
+
 
         // Simpan QR Code ke storage
         $fileName = 'qr_codes/qr-' . $buku->id . '-' . time() . '.svg';
