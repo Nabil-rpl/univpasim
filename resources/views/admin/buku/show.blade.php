@@ -281,7 +281,13 @@
                                         <div class="d-flex align-items-center">
                                             <i class="bi bi-person-badge text-primary me-2"></i>
                                             <small class="text-muted">
-                                                Dibuat oleh: <strong>{{ $buku->qrCode->user->name ?? 'System' }}</strong>
+                                                Dibuat oleh: 
+                                                @if($buku->qrCode->petugas)
+                                                    <strong class="text-primary">{{ $buku->qrCode->petugas->name }}</strong>
+                                                    <span class="badge bg-info ms-1">Petugas</span>
+                                                @else
+                                                    <strong class="text-secondary">System</strong>
+                                                @endif
                                             </small>
                                         </div>
                                         <div class="d-flex align-items-center mt-1">
