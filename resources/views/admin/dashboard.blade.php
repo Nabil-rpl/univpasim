@@ -46,7 +46,7 @@
 
         <!-- Stats Cards Row -->
         <div class="row mb-4 g-3">
-            <div class="col-12 col-sm-6 col-lg-3">
+            <div class="col-12 col-sm-6 col-xl-3 col-lg-4">
                 <div class="stat-card stat-card-primary">
                     <div class="stat-card-inner">
                         <div class="stat-icon-box">
@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-3">
+            <div class="col-12 col-sm-6 col-xl-3 col-lg-4">
                 <div class="stat-card stat-card-success">
                     <div class="stat-card-inner">
                         <div class="stat-icon-box">
@@ -78,7 +78,7 @@
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-3">
+            <div class="col-12 col-sm-6 col-xl-3 col-lg-4">
                 <div class="stat-card stat-card-info">
                     <div class="stat-card-inner">
                         <div class="stat-icon-box">
@@ -94,7 +94,7 @@
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-3">
+            <div class="col-12 col-sm-6 col-xl-3 col-lg-4">
                 <div class="stat-card stat-card-warning">
                     <div class="stat-card-inner">
                         <div class="stat-icon-box">
@@ -104,6 +104,22 @@
                             <p class="stat-label">Mahasiswa</p>
                             <h3 class="stat-number">{{ $users->where('role', 'mahasiswa')->count() }}</h3>
                             <span class="stat-change"><i class="bi bi-arrow-up"></i> 8% dari bulan lalu</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-bg"></div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3 col-lg-4">
+                <div class="stat-card stat-card-purple">
+                    <div class="stat-card-inner">
+                        <div class="stat-icon-box">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Pengguna Luar</p>
+                            <h3 class="stat-number">{{ $users->where('role', 'pengguna_luar')->count() }}</h3>
+                            <span class="stat-change"><i class="bi bi-arrow-up"></i> 4% dari bulan lalu</span>
                         </div>
                     </div>
                     <div class="stat-card-bg"></div>
@@ -223,7 +239,7 @@
                     <h5 class="quick-stats-title">Ringkasan Sistem</h5>
                     
                     <div class="row g-3">
-                        <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="col-12 col-sm-6 col-lg-3 col-xl">
                             <div class="quick-stat-item">
                                 <div class="quick-stat-label">Total Pengguna</div>
                                 <div class="quick-stat-bar">
@@ -233,7 +249,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="col-12 col-sm-6 col-lg-3 col-xl">
                             <div class="quick-stat-item">
                                 <div class="quick-stat-label">Admin</div>
                                 <div class="quick-stat-bar">
@@ -243,7 +259,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="col-12 col-sm-6 col-lg-3 col-xl">
                             <div class="quick-stat-item">
                                 <div class="quick-stat-label">Petugas</div>
                                 <div class="quick-stat-bar">
@@ -253,13 +269,23 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="col-12 col-sm-6 col-lg-3 col-xl">
                             <div class="quick-stat-item">
                                 <div class="quick-stat-label">Mahasiswa</div>
                                 <div class="quick-stat-bar">
                                     <div class="quick-stat-fill" style="width: 90%; background: linear-gradient(90deg, #f6ad55, #ed8936)"></div>
                                 </div>
                                 <div class="quick-stat-value">{{ $users->where('role', 'mahasiswa')->count() }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-lg-3 col-xl">
+                            <div class="quick-stat-item">
+                                <div class="quick-stat-label">Pengguna Luar</div>
+                                <div class="quick-stat-bar">
+                                    <div class="quick-stat-fill" style="width: 35%; background: linear-gradient(90deg, #8b5cf6, #7c3aed)"></div>
+                                </div>
+                                <div class="quick-stat-value">{{ $users->where('role', 'pengguna_luar')->count() }}</div>
                             </div>
                         </div>
                     </div>
@@ -285,6 +311,8 @@
     --info-dark: #3182ce;
     --warning: #f6ad55;
     --warning-dark: #ed8936;
+    --purple: #8b5cf6;
+    --purple-dark: #7c3aed;
     --danger: #f56565;
     --light: #f7fafc;
     --light-2: #edf2f7;
@@ -446,6 +474,11 @@
 
 .stat-card-warning {
     background: linear-gradient(135deg, var(--warning), var(--warning-dark));
+    color: white;
+}
+
+.stat-card-purple {
+    background: linear-gradient(135deg, var(--purple), var(--purple-dark));
     color: white;
 }
 
@@ -631,151 +664,6 @@
     margin: 0;
 }
 
-.activity-card {
-    background: white;
-    border: none;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.activity-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--border);
-}
-
-.activity-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--dark);
-    margin: 0;
-}
-
-.link-primary {
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.activity-table {
-    overflow-x: auto;
-}
-
-.table {
-    margin: 0;
-    font-size: 0.95rem;
-}
-
-.table thead th {
-    background: var(--light-2);
-    border: none;
-    font-weight: 600;
-    color: var(--dark);
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-    padding: 1rem 1.5rem;
-}
-
-.table tbody tr {
-    border: none;
-    border-bottom: 1px solid var(--border);
-    transition: all 0.3s ease;
-}
-
-.table tbody tr:hover {
-    background: var(--light);
-}
-
-.table tbody td {
-    padding: 1.25rem 1.5rem;
-    vertical-align: middle;
-}
-
-.user-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.user-avatar {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.badge {
-    padding: 0.35rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.badge-success {
-    background: rgba(72, 187, 120, 0.2);
-    color: var(--success-dark);
-}
-
-.badge-info {
-    background: rgba(66, 153, 225, 0.2);
-    color: var(--info-dark);
-}
-
-.badge-warning {
-    background: rgba(246, 173, 85, 0.2);
-    color: var(--warning-dark);
-}
-
-.status-online-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.75rem;
-    background: rgba(72, 187, 120, 0.1);
-    color: var(--success-dark);
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.status-online-badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: var(--success);
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.btn-action {
-    display: inline-flex;
-    width: 32px;
-    height: 32px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    background: var(--light-2);
-    color: var(--gray);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    margin-right: 0.5rem;
-}
-
-.btn-action:hover {
-    background: var(--border);
-    color: var(--dark);
-}
-
 /* Quick Stats */
 .quick-stats {
     background: white;
@@ -861,14 +749,16 @@ const users = @json($users);
 const roleData = {
     admin: users.filter(u => u.role === 'admin').length,
     petugas: users.filter(u => u.role === 'petugas').length,
-    mahasiswa: users.filter(u => u.role === 'mahasiswa').length
+    mahasiswa: users.filter(u => u.role === 'mahasiswa').length,
+    pengguna_luar: users.filter(u => u.role === 'pengguna_luar').length
 };
 
 // Chart Colors
 const chartColors = {
     admin: 'rgba(72, 187, 120, 0.8)',
     petugas: 'rgba(66, 153, 225, 0.8)',
-    mahasiswa: 'rgba(246, 173, 85, 0.8)'
+    mahasiswa: 'rgba(246, 173, 85, 0.8)',
+    pengguna_luar: 'rgba(139, 92, 246, 0.8)'
 };
 
 // Doughnut Chart
@@ -876,18 +766,20 @@ const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
 new Chart(doughnutCtx, {
     type: 'doughnut',
     data: {
-        labels: ['Admin', 'Petugas', 'Mahasiswa'],
+        labels: ['Admin', 'Petugas', 'Mahasiswa', 'Pengguna Luar'],
         datasets: [{
-            data: [roleData.admin, roleData.petugas, roleData.mahasiswa],
+            data: [roleData.admin, roleData.petugas, roleData.mahasiswa, roleData.pengguna_luar],
             backgroundColor: [
                 'rgba(72, 187, 120, 0.8)',
                 'rgba(66, 153, 225, 0.8)',
-                'rgba(246, 173, 85, 0.8)'
+                'rgba(246, 173, 85, 0.8)',
+                'rgba(139, 92, 246, 0.8)'
             ],
             borderColor: [
                 '#48bb78',
                 '#4299e1',
-                '#f6ad55'
+                '#f6ad55',
+                '#8b5cf6'
             ],
             borderWidth: 2,
             borderRadius: 8
@@ -915,19 +807,21 @@ const barCtx = document.getElementById('barChart').getContext('2d');
 new Chart(barCtx, {
     type: 'bar',
     data: {
-        labels: ['Admin', 'Petugas', 'Mahasiswa'],
+        labels: ['Admin', 'Petugas', 'Mahasiswa', 'Pengguna Luar'],
         datasets: [{
             label: 'Jumlah Pengguna',
-            data: [roleData.admin, roleData.petugas, roleData.mahasiswa],
+            data: [roleData.admin, roleData.petugas, roleData.mahasiswa, roleData.pengguna_luar],
             backgroundColor: [
                 'rgba(72, 187, 120, 0.8)',
                 'rgba(66, 153, 225, 0.8)',
-                'rgba(246, 173, 85, 0.8)'
+                'rgba(246, 173, 85, 0.8)',
+                'rgba(139, 92, 246, 0.8)'
             ],
             borderColor: [
                 '#48bb78',
                 '#4299e1',
-                '#f6ad55'
+                '#f6ad55',
+                '#8b5cf6'
             ],
             borderWidth: 2,
             borderRadius: 8
@@ -1004,6 +898,19 @@ new Chart(lineCtx, {
                 tension: 0.4,
                 pointRadius: 4,
                 pointBackgroundColor: '#f6ad55',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            },
+            {
+                label: 'Pengguna Luar',
+                data: [8, 10, 9, 12, 11, 10, 9],
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#8b5cf6',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2
             }

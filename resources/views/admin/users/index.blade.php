@@ -44,7 +44,7 @@
 
             <!-- Stats Cards -->
             <div class="row mb-4 g-4">
-                <div class="col-md-3 col-sm-6">
+                <div class="col-xl col-lg-4 col-md-6 col-sm-6">
                     <div class="stat-card stat-card-blue">
                         <div class="stat-card-icon">
                             <i class="bi bi-people"></i>
@@ -60,7 +60,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6">
+                <div class="col-xl col-lg-4 col-md-6 col-sm-6">
                     <div class="stat-card stat-card-green">
                         <div class="stat-card-icon">
                             <i class="bi bi-shield-check"></i>
@@ -76,7 +76,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6">
+                <div class="col-xl col-lg-4 col-md-6 col-sm-6">
                     <div class="stat-card stat-card-purple">
                         <div class="stat-card-icon">
                             <i class="bi bi-person-badge"></i>
@@ -92,7 +92,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6">
+                <div class="col-xl col-lg-4 col-md-6 col-sm-6">
                     <div class="stat-card stat-card-orange">
                         <div class="stat-card-icon">
                             <i class="bi bi-mortarboard"></i>
@@ -100,6 +100,22 @@
                         <div class="stat-card-content">
                             <p class="stat-label">Mahasiswa</p>
                             <h3 class="stat-value">{{ $totalMahasiswa }}</h3>
+                        </div>
+                        <div class="stat-card-wave">
+                            <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;">
+                                <path d="M0.00,49.98 C150.00,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: rgba(255,255,255,0.1);"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl col-lg-4 col-md-6 col-sm-6">
+                    <div class="stat-card stat-card-cyan">
+                        <div class="stat-card-icon">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <div class="stat-card-content">
+                            <p class="stat-label">Pengguna Luar</p>
+                            <h3 class="stat-value">{{ $totalPenggunaLuar ?? 0 }}</h3>
                         </div>
                         <div class="stat-card-wave">
                             <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;">
@@ -439,6 +455,10 @@ h2 {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
+.stat-card-cyan {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
 .stat-card-icon {
     position: absolute;
     top: 20px;
@@ -649,7 +669,7 @@ h2 {
 }
 
 .badge-pengguna-luar {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
     color: white;
 }
 
@@ -822,6 +842,12 @@ h2 {
 }
 
 /* ========== RESPONSIVE ========== */
+@media (max-width: 1199px) {
+    .stat-card {
+        margin-bottom: 16px;
+    }
+}
+
 @media (max-width: 992px) {
     .container-fluid {
         padding: 20px;
