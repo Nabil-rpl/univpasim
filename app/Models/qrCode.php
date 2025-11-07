@@ -9,7 +9,7 @@ class QRCode extends Model
 {
     use HasFactory;
 
-    protected $table = 'qr_codes'; // ✅ Ubah dari 'qrcodes' ke 'qr_codes'
+    protected $table = 'qr_codes';
 
     protected $fillable = [
         'kode_unik',
@@ -19,7 +19,7 @@ class QRCode extends Model
     ];
 
     /**
-     * Relasi ke Buku
+     * Relasi dengan Buku
      */
     public function buku()
     {
@@ -27,9 +27,17 @@ class QRCode extends Model
     }
 
     /**
-     * Relasi ke User (pembuat QR Code)
+     * Relasi dengan User (Petugas yang membuat QR Code)
      */
-    public function pembuat()
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'dibuat_oleh');
+    }
+
+    /**
+     * Relasi dengan User sebagai Petugas (alias untuk user)
+     */
+    public function petugas()
     {
         return $this->belongsTo(User::class, 'dibuat_oleh');
     }

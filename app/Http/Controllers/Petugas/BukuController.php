@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\Buku;
-use App\Models\QRCode;
+use App\Models\QRCode as QRCodeModel; // ✅ Ubah alias untuk Model
+use SimpleSoftwareIO\QrCode\Facades\QrCode; // ✅ Import package QR Code
 
 class BukuController extends Controller
 {
@@ -28,7 +29,7 @@ class BukuController extends Controller
 
     public function create()
     {
-        // Daftar semua kategori jurusan kuliah (diambil dari daftar umum jurusan di Indonesia)
+        // Daftar semua kategori jurusan kuliah
         $categories = [
             'Aktuaria',
             'Astronomi',
@@ -306,24 +307,29 @@ class BukuController extends Controller
 
     public function edit(Buku $buku)
     {
-        return view('petugas.buku.edit', compact('buku'));
+        // Ambil kategori yang sama dengan create
+        $categories = [
+            'Aktuaria', 'Astronomi', 'Biologi', 'Bioteknologi', 'Fisika',
+            // ... (copy semua kategori dari method create)
+        ];
+        
+        return view('petugas.buku.edit', compact('buku', 'categories'));
     }
 
     public function update(Request $request, Buku $buku)
     {
-        // ⚠️ PERBAIKAN: Tambahkan 'kategori' ke dalam validasi
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'penulis' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
             'tahun_terbit' => 'required|integer',
-            'kategori' => 'required|string|max:255', // ✅ Ditambahkan
-            'stok' => 'required|integer|min:0', // ✅ Ubah min:1 jadi min:0 agar bisa 0 stok
+            'kategori' => 'required|string|max:255',
+            'stok' => 'required|integer|min:0',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         if ($request->hasFile('foto')) {
-            // hapus foto lama jika ada
+            // Hapus foto lama jika ada
             if ($buku->foto && Storage::exists('public/' . $buku->foto)) {
                 Storage::delete('public/' . $buku->foto);
             }
@@ -338,6 +344,9 @@ class BukuController extends Controller
 
     public function show(Buku $buku)
     {
+        // Load relasi qrCode dan petugas
+        $buku->load(['qrCode.petugas']);
+        
         return view('petugas.buku.show', compact('buku'));
     }
 
@@ -365,19 +374,18 @@ class BukuController extends Controller
         // Generate kode unik
         $kodeUnik = 'BOOK-' . $buku->id . '-' . Str::random(8);
 
-        // ✅ Generate QR Code sebagai SVG (tidak perlu imagick)
+        // ✅ Generate QR Code sebagai SVG menggunakan package QrCode
         $qrCodeImage = QrCode::format('svg')
-    ->size(300)
-    ->errorCorrection('H')
-    ->generate($kodeUnik);
-
+            ->size(300)
+            ->errorCorrection('H')
+            ->generate($kodeUnik);
 
         // Simpan QR Code ke storage
         $fileName = 'qr_codes/qr-' . $buku->id . '-' . time() . '.svg';
         Storage::disk('public')->put($fileName, $qrCodeImage);
 
-        // Simpan ke database
-        QRCode::create([
+        // ✅ Simpan ke database menggunakan Model QRCodeModel
+        QRCodeModel::create([
             'kode_unik' => $kodeUnik,
             'gambar_qr' => $fileName,
             'dibuat_oleh' => Auth::id(),
