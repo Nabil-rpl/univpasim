@@ -59,11 +59,13 @@
         border-radius: 20px;
         font-size: 0.85rem;
         font-weight: 600;
+        white-space: nowrap;
     }
 
     .deadline-info {
         font-size: 0.75rem;
         margin-top: 2px;
+        display: block;
     }
 
     .page-header {
@@ -83,6 +85,7 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        font-size: 1rem;
     }
 
     .table-hover tbody tr:hover {
@@ -96,10 +99,11 @@
     }
 
     .user-type-badge {
-        font-size: 0.7rem;
-        padding: 2px 8px;
-        border-radius: 10px;
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 8px;
         margin-left: 5px;
+        white-space: nowrap;
     }
 
     .btn-detail {
@@ -110,6 +114,7 @@
         border: 1px solid #667eea;
         color: #667eea;
         background: white;
+        white-space: nowrap;
     }
 
     .btn-detail:hover {
@@ -117,6 +122,151 @@
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         background: #667eea;
         color: white;
+    }
+
+    /* Table styling improvements */
+    .table > :not(caption) > * > * {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+    }
+
+    .table thead th {
+        font-weight: 600;
+        color: #475569;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    .info-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 0.9rem;
+        color: #1e293b;
+        font-weight: 600;
+    }
+
+    .user-info-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .user-meta {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .book-info-container {
+        display: flex;
+        align-items: start;
+        gap: 10px;
+    }
+
+    .book-details {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .book-title {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+
+    .book-author {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .date-display {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .date-main {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+
+    .date-time {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .duration-badge {
+        display: inline-block;
+        margin-bottom: 4px;
+    }
+
+    .status-container {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        align-items: flex-start;
+    }
+
+    .denda-info {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .petugas-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .petugas-details {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .petugas-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+
+    .petugas-role {
+        font-size: 0.75rem;
+        color: #64748b;
     }
 </style>
 
@@ -264,140 +414,170 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th width="4%">No</th>
-                        <th width="13%">Peminjam</th>
+                        <th width="3%" class="text-center">No</th>
+                        <th width="15%">Peminjam</th>
                         <th width="17%">Buku</th>
-                        <th width="11%">Tanggal Pinjam</th>
-                        <th width="11%">Durasi & Deadline</th>
-                        <th width="11%">Tanggal Kembali</th>
-                        <th width="11%">Status</th>
-                        <th width="11%">Petugas</th>
-                        <th width="11%" class="text-center">Aksi</th>
+                        <th width="11%">Tgl Pinjam</th>
+                        <th width="11%">Durasi</th>
+                        <th width="11%">Tgl Kembali</th>
+                        <th width="13%">Status</th>
+                        <th width="12%">Petugas</th>
+                        <th width="7%" class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($peminjamans as $index => $item)
                     <tr>
-                        <td class="text-center fw-bold">{{ $index + 1 }}</td>
+                        <td class="text-center">
+                            <span class="fw-bold text-muted">{{ $index + 1 }}</span>
+                        </td>
+                        
+                        <!-- Peminjam -->
                         <td>
-                            <div class="d-flex align-items-center">
+                            <div class="user-info-container">
                                 @if($item->mahasiswa->role === 'mahasiswa')
-                                    <div class="avatar-circle bg-primary bg-opacity-10 text-primary me-2">
+                                    <div class="avatar-circle bg-primary bg-opacity-10 text-primary">
                                         <i class="bi bi-mortarboard-fill"></i>
                                     </div>
                                 @else
-                                    <div class="avatar-circle bg-info bg-opacity-10 text-info me-2">
+                                    <div class="avatar-circle bg-info bg-opacity-10 text-info">
                                         <i class="bi bi-person-fill"></i>
                                     </div>
                                 @endif
-                                <div>
-                                    <strong>{{ $item->mahasiswa->name }}</strong>
-                                    @if($item->mahasiswa->role === 'mahasiswa')
-                                        <span class="user-type-badge bg-primary bg-opacity-10 text-primary">
-                                            <i class="bi bi-mortarboard"></i> Mahasiswa
-                                        </span>
-                                    @else
-                                        <span class="user-type-badge bg-info bg-opacity-10 text-info">
-                                            <i class="bi bi-person-circle"></i> Pengguna Luar
-                                        </span>
-                                    @endif
-                                    <br>
+                                <div class="user-details">
+                                    <div class="user-name">
+                                        <span>{{ $item->mahasiswa->name }}</span>
+                                        @if($item->mahasiswa->role === 'mahasiswa')
+                                            <span class="user-type-badge bg-primary bg-opacity-10 text-primary">
+                                                <i class="bi bi-mortarboard"></i> MHS
+                                            </span>
+                                        @else
+                                            <span class="user-type-badge bg-info bg-opacity-10 text-info">
+                                                <i class="bi bi-person-circle"></i> Luar
+                                            </span>
+                                        @endif
+                                    </div>
                                     @if($item->mahasiswa->role === 'mahasiswa')
                                         @if($item->mahasiswa->mahasiswa)
-                                            <small class="text-muted">NIM: {{ $item->mahasiswa->mahasiswa->nim }}</small>
+                                            <div class="user-meta">{{ $item->mahasiswa->mahasiswa->nim }}</div>
                                         @elseif($item->mahasiswa->nim)
-                                            <small class="text-muted">NIM: {{ $item->mahasiswa->nim }}</small>
+                                            <div class="user-meta">{{ $item->mahasiswa->nim }}</div>
                                         @else
-                                            <small class="text-muted">NIM: -</small>
+                                            <div class="user-meta text-muted fst-italic">-</div>
                                         @endif
                                     @else
-                                        <small class="text-muted">
+                                        <div class="user-meta">
                                             <i class="bi bi-telephone-fill me-1"></i>
-                                            {{ $item->mahasiswa->no_hp ?? 'No HP tidak tersedia' }}
-                                        </small>
+                                            {{ $item->mahasiswa->no_hp ?? '-' }}
+                                        </div>
                                     @endif
                                 </div>
                             </div>
                         </td>
+
+                        <!-- Buku -->
                         <td>
-                            <div class="d-flex align-items-start">
-                                <div class="avatar-circle bg-warning bg-opacity-10 text-warning me-2">
-                                    <i class="bi bi-book"></i>
+                            <div class="book-info-container">
+                                <div class="avatar-circle bg-warning bg-opacity-10 text-warning">
+                                    <i class="bi bi-book-fill"></i>
                                 </div>
-                                <div>
-                                    <strong>{{ $item->buku->judul }}</strong><br>
-                                    <small class="text-muted">{{ $item->buku->penulis }}</small>
+                                <div class="book-details">
+                                    <div class="book-title">{{ $item->buku->judul }}</div>
+                                    <div class="book-author">{{ $item->buku->penulis }}</div>
                                 </div>
                             </div>
                         </td>
+
+                        <!-- Tanggal Pinjam -->
                         <td>
-                            <i class="bi bi-calendar-event text-primary me-1"></i>
-                            <strong>{{ $item->tanggal_pinjam->format('d M Y') }}</strong><br>
-                            <small class="text-muted">{{ $item->tanggal_pinjam->format('H:i') }} WIB</small>
+                            <div class="date-display">
+                                <div class="date-main">
+                                    <i class="bi bi-calendar-event text-primary me-1"></i>
+                                    {{ $item->tanggal_pinjam->format('d M Y') }}
+                                </div>
+                                <div class="date-time">{{ $item->tanggal_pinjam->format('H:i') }} WIB</div>
+                            </div>
                         </td>
+
+                        <!-- Durasi & Deadline -->
                         <td>
-                            @if($item->durasi_hari)
-                                <span class="badge bg-info">{{ $item->durasi_hari }} Hari</span><br>
-                            @endif
-                            @if($item->tanggal_deadline)
-                                <small class="deadline-info {{ $item->isTerlambat() ? 'text-danger fw-bold' : 'text-muted' }}">
-                                    <i class="bi bi-calendar-x me-1"></i>
-                                    {{ $item->tanggal_deadline->format('d M Y') }}
-                                </small>
-                            @else
-                                <small class="text-muted">-</small>
-                            @endif
-                        </td>
-                        <td>
-                            @if($item->tanggal_kembali)
-                                <i class="bi bi-calendar-check text-success me-1"></i>
-                                <strong>{{ $item->tanggal_kembali->format('d M Y') }}</strong><br>
-                                <small class="text-muted">{{ $item->tanggal_kembali->format('H:i') }} WIB</small>
-                            @else
-                                <span class="text-muted fst-italic">
-                                    <i class="bi bi-dash-circle me-1"></i>Belum dikembalikan
-                                </span>
-                            @endif
-                        </td>
-                        <td>
-                            @if($item->status == 'dipinjam')
-                                @if($item->isTerlambat())
-                                    @php
-                                        $hariTerlambat = $item->getHariTerlambat();
-                                        $denda = $item->hitungDenda();
-                                    @endphp
-                                    <span class="badge badge-status bg-danger">
-                                        <i class="bi bi-exclamation-triangle me-1"></i>
-                                        Terlambat {{ $hariTerlambat }} hari
-                                    </span>
-                                    <br>
-                                    <small class="text-danger fw-bold mt-1 d-block">
-                                        <i class="bi bi-cash-coin me-1"></i>
-                                        Denda: Rp {{ number_format($denda, 0, ',', '.') }}
-                                    </small>
-                                @else
-                                    <span class="badge badge-status bg-warning">
-                                        <i class="bi bi-hourglass-split me-1"></i>Sedang Dipinjam
+                            <div>
+                                @if($item->durasi_hari)
+                                    <span class="badge bg-info duration-badge">
+                                        <i class="bi bi-clock me-1"></i>{{ $item->durasi_hari }} Hari
                                     </span>
                                 @endif
+                                @if($item->tanggal_deadline)
+                                    <div class="deadline-info {{ $item->isTerlambat() ? 'text-danger fw-bold' : 'text-muted' }}">
+                                        <i class="bi bi-calendar-x me-1"></i>
+                                        {{ $item->tanggal_deadline->format('d M Y') }}
+                                    </div>
+                                @else
+                                    <div class="text-muted small">-</div>
+                                @endif
+                            </div>
+                        </td>
+
+                        <!-- Tanggal Kembali -->
+                        <td>
+                            @if($item->tanggal_kembali)
+                                <div class="date-display">
+                                    <div class="date-main">
+                                        <i class="bi bi-calendar-check text-success me-1"></i>
+                                        {{ $item->tanggal_kembali->format('d M Y') }}
+                                    </div>
+                                    <div class="date-time">{{ $item->tanggal_kembali->format('H:i') }} WIB</div>
+                                </div>
                             @else
-                                <span class="badge badge-status bg-success">
-                                    <i class="bi bi-check-circle me-1"></i>Dikembalikan
+                                <span class="text-muted fst-italic small">
+                                    <i class="bi bi-dash-circle me-1"></i>Belum kembali
                                 </span>
                             @endif
                         </td>
+
+                        <!-- Status -->
+                        <td>
+                            <div class="status-container">
+                                @if($item->status == 'dipinjam')
+                                    @if($item->isTerlambat())
+                                        @php
+                                            $hariTerlambat = $item->getHariTerlambat();
+                                            $denda = $item->hitungDenda();
+                                        @endphp
+                                        <span class="badge badge-status bg-danger">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                            Terlambat {{ $hariTerlambat }}h
+                                        </span>
+                                        <span class="denda-info">
+                                            <i class="bi bi-cash-coin"></i>
+                                            Rp {{ number_format($denda, 0, ',', '.') }}
+                                        </span>
+                                    @else
+                                        <span class="badge badge-status bg-warning text-dark">
+                                            <i class="bi bi-hourglass-split me-1"></i>Dipinjam
+                                        </span>
+                                    @endif
+                                @else
+                                    <span class="badge badge-status bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Dikembalikan
+                                    </span>
+                                @endif
+                            </div>
+                        </td>
+
+                        <!-- Petugas -->
                         <td>
                             @if($item->petugas)
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-circle bg-success bg-opacity-10 text-success me-2">
-                                        <i class="bi bi-person-badge"></i>
+                                <div class="petugas-container">
+                                    <div class="avatar-circle bg-success bg-opacity-10 text-success">
+                                        <i class="bi bi-person-badge-fill"></i>
                                     </div>
-                                    <div>
-                                        <strong>{{ $item->petugas->name }}</strong><br>
-                                        <small class="text-muted">{{ ucfirst($item->petugas->role) }}</small>
+                                    <div class="petugas-details">
+                                        <div class="petugas-name">{{ $item->petugas->name }}</div>
+                                        <div class="petugas-role">{{ ucfirst($item->petugas->role) }}</div>
                                     </div>
                                 </div>
                             @else
@@ -406,6 +586,8 @@
                                 </span>
                             @endif
                         </td>
+
+                        <!-- Aksi -->
                         <td class="text-center">
                             <a href="{{ route('admin.peminjaman.show', $item->id) }}" 
                                class="btn btn-detail btn-sm"

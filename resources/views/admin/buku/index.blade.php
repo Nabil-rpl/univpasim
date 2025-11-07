@@ -10,7 +10,7 @@
                     <div class="icon-wrapper">
                         <i class="bi bi-book-fill"></i>
                     </div>
-                    <span>Daftar Books</span>
+                    <span>Daftar Buku</span>
                 </h2>
                 <p class="page-subtitle mb-0">Kelola koleksi buku perpustakaan Anda</p>
             </div>
@@ -146,14 +146,14 @@
                                 <td class="text-center">
                                     <div class="action-buttons">
                                         <a href="{{ route('admin.buku.show', $item->id) }}" 
-                                           class="btn-action btn-info-custom"
+                                           class="btn-action btn-view"
                                            data-bs-toggle="tooltip"
                                            title="Lihat Detail">
                                             <i class="bi bi-eye"></i>
                                         </a>
 
                                         <button type="button" 
-                                                class="btn-action btn-danger-custom"
+                                                class="btn-action btn-delete"
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#deleteModal{{ $item->id }}"
                                                 title="Hapus Buku">
@@ -239,6 +239,12 @@
     --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     --card-hover-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Minimalist Button Colors */
+    --btn-gray: #64748b;
+    --btn-gray-hover: #475569;
+    --btn-light: #f1f5f9;
+    --btn-light-hover: #e2e8f0;
 }
 
 /* =========================
@@ -529,7 +535,7 @@
    Badges
    ========================= */
 .year-badge {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: #4facfe;
     color: white;
     padding: 0.4rem 0.9rem;
     border-radius: 10px;
@@ -540,7 +546,7 @@
 }
 
 .category-badge {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #4facfe;
     color: white;
     padding: 0.4rem 0.9rem;
     border-radius: 10px;
@@ -561,7 +567,7 @@
 }
 
 .stock-available {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: #4facfe;
     color: white;
     box-shadow: 0 4px 10px rgba(17, 153, 142, 0.3);
 }
@@ -573,7 +579,7 @@
 }
 
 /* =========================
-   Action Buttons
+   Action Buttons - Minimalist Design
    ========================= */
 .action-buttons {
     display: inline-flex;
@@ -584,28 +590,41 @@
     width: 38px;
     height: 38px;
     border-radius: 10px;
-    border: none;
+    border: 2px solid #e2e8f0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: white;
     cursor: pointer;
     transition: var(--transition);
     font-size: 0.9rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    background: white;
+    color: var(--btn-gray);
 }
 
-.btn-info-custom {
-    background: var(--info-gradient);
+.btn-view {
+    color: #64748b;
+    border-color: #cbd5e0;
 }
 
-.btn-danger-custom {
-    background: var(--danger-gradient);
+.btn-view:hover {
+    background: var(--btn-light);
+    border-color: var(--btn-gray);
+    color: var(--btn-gray-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.15);
 }
 
-.btn-action:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+.btn-delete {
+    color: #94a3b8;
+    border-color: #cbd5e0;
+}
+
+.btn-delete:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
 /* =========================
@@ -692,6 +711,12 @@
     .book-cover {
         width: 50px;
         height: 50px;
+    }
+    
+    .btn-action {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
     }
 }
 
