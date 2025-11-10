@@ -941,17 +941,17 @@
     }
 
     .qr-btn.download {
-        background: linear-gradient(135deg, #00c6ff, #0072ff);
+        background: #1768ff; 0%, #f5576c 100%);
         color: white;
     }
 
     .qr-btn.regenerate {
-        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        background: #12e6f9; 0%, #f5576c 100%);
         color: white;
     }
 
     .qr-btn.delete {
-        background: linear-gradient(135deg, #f093fb, #f5576c);
+        background: #ec2416; 0%, #f5576c 100%);
         color: white;
     }
 

@@ -599,7 +599,7 @@
 <div class="filter-card">
     <form method="GET" action="{{ route('petugas.peminjaman.index') }}">
         <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-xl-4 col-lg-6 col-md-6">
                 <label class="form-label">
                     <i class="bi bi-search me-2"></i>Pencarian
                 </label>
@@ -607,7 +607,7 @@
                        placeholder="Nama peminjam atau judul buku..."
                        value="{{ request('search') }}">
             </div>
-            <div class="col-md-2">
+            <div class="col-xl-2 col-lg-3 col-md-6">
                 <label class="form-label">
                     <i class="bi bi-funnel me-2"></i>Status
                 </label>
@@ -617,7 +617,7 @@
                     <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-xl-2 col-lg-3 col-md-6">
                 <label class="form-label">
                     <i class="bi bi-person me-2"></i>Tipe Peminjam
                 </label>
@@ -627,22 +627,26 @@
                     <option value="pengguna_luar" {{ request('role') == 'pengguna_luar' ? 'selected' : '' }}>Pengguna Luar</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-xl-2 col-lg-6 col-md-6">
                 <label class="form-label">
                     <i class="bi bi-calendar me-2"></i>Dari Tanggal
                 </label>
                 <input type="date" name="tanggal_dari" class="form-control" value="{{ request('tanggal_dari') }}">
             </div>
-            <div class="col-md-3 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search me-2"></i>Filter
-                </button>
-                <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </a>
-                <a href="{{ route('petugas.peminjaman.create') }}" class="btn btn-success">
-                    <i class="bi bi-plus-circle me-2"></i>Tambah
-                </a>
+            <div class="col-12">
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-search me-2"></i>Filter
+                    </button>
+                    <a href="{{ route('petugas.peminjaman.index') }}" 
+                       class="btn btn-secondary px-3" 
+                       title="Reset Filter">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                    <a href="{{ route('petugas.peminjaman.create') }}" class="btn btn-success px-4">
+                        <i class="bi bi-plus-circle me-2"></i>Tambah Peminjaman
+                    </a>
+                </div>
             </div>
         </div>
     </form>
@@ -871,30 +875,6 @@
         </div>
     </div>
     @endif
-</div>
-
-<!-- Quick Actions Floating Button -->
-<div class="quick-actions" style="position: fixed; bottom: 30px; right: 30px; z-index: 1000;">
-    <a href="{{ route('petugas.peminjaman.create') }}" 
-       class="btn btn-lg shadow-lg"
-       style="
-           width: 60px; 
-           height: 60px; 
-           border-radius: 50%; 
-           background: linear-gradient(135deg, var(--primary), var(--secondary));
-           display: flex;
-           align-items: center;
-           justify-content: center;
-           color: white;
-           text-decoration: none;
-           transition: all 0.3s;
-           box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-       "
-       onmouseover="this.style.transform='scale(1.1) rotate(90deg)'"
-       onmouseout="this.style.transform='scale(1) rotate(0deg)'"
-       title="Tambah Peminjaman">
-        <i class="bi bi-plus-lg" style="font-size: 1.8rem;"></i>
-    </a>
 </div>
 
 <script>
