@@ -152,13 +152,7 @@
                                             <i class="bi bi-eye"></i>
                                         </a>
 
-                                        <button type="button" 
-                                                class="btn-action btn-delete"
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#deleteModal{{ $item->id }}"
-                                                title="Hapus Buku">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                       
                                     </div>
 
                                     {{-- Modal Konfirmasi Hapus --}}
@@ -172,9 +166,7 @@
                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <p class="mb-1">Yakin ingin menghapus buku ini?</p>
-                                                    <strong class="text-danger">"{{ $item->judul }}"</strong>
-                                                    <p class="text-muted mt-2 mb-0">
+                                                   
                                                         <small><i class="bi bi-info-circle"></i> Data yang dihapus tidak dapat dikembalikan.</small>
                                                     </p>
                                                 </div>
