@@ -1,118 +1,104 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
     {{-- Breadcrumb --}}
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb bg-light px-3 py-2 rounded">
-            <li class="breadcrumb-item"><a href="{{ route('admin.buku.index') }}" class="text-decoration-none">📚 Daftar Buku</a></li>
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-white px-4 py-3 rounded-3 shadow-sm border">
+            <li class="breadcrumb-item">
+                <a href="{{ route('admin.buku.index') }}" class="text-decoration-none text-primary">
+                    <i class="bi bi-book-fill"></i> Daftar Buku
+                </a>
+            </li>
             <li class="breadcrumb-item active" aria-current="page">Detail Buku</li>
         </ol>
     </nav>
 
-    <div class="card shadow-lg border-0 overflow-hidden">
-        {{-- Header dengan Gradient Premium --}}
-        <div class="card-header bg-gradient text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="card border-0 shadow-lg overflow-hidden">
+        {{-- Header --}}
+        <div class="card-header bg-gradient-primary text-white py-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h3 class="mb-1">
-                        <i class="bi bi-book-half"></i> Detail Informasi Buku
+                    <h3 class="mb-1 fw-bold">
+                        <i class="bi bi-book-half me-2"></i>Detail Buku
                     </h3>
-                    <p class="mb-0 opacity-75 small">Informasi lengkap tentang buku perpustakaan</p>
+                    <p class="mb-0 opacity-75">Informasi lengkap buku perpustakaan</p>
                 </div>
-                <div>
-                    <a href="{{ route('admin.buku.index') }}" class="btn btn-light btn-sm shadow-sm">
-                        <i class="bi bi-arrow-left-circle"></i> Kembali
-                    </a>
-                </div>
+                <a href="{{ route('admin.buku.index') }}" class="btn btn-light shadow-sm">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </a>
             </div>
         </div>
 
         <div class="row g-0">
-            {{-- Kolom Gambar & Stats --}}
+            {{-- Sidebar: Cover & Stats --}}
             <div class="col-lg-4 bg-light border-end">
-                <div class="p-4 h-100 d-flex flex-column">
+                <div class="p-4">
                     {{-- Cover Buku --}}
                     <div class="text-center mb-4">
                         @if ($buku->foto && file_exists(public_path('storage/' . $buku->foto)))
-                            <div class="position-relative d-inline-block">
+                            <div class="cover-wrapper">
                                 <img src="{{ asset('storage/' . $buku->foto) }}" 
                                      alt="{{ $buku->judul }}" 
-                                     class="img-fluid rounded-3 shadow-lg book-cover"
-                                     style="max-height: 400px; object-fit: cover; border: 5px solid white;">
+                                     class="img-fluid rounded-3 shadow-lg"
+                                     style="max-height: 420px; width: 100%; object-fit: cover;">
                                 
-                                {{-- Badge Overlay --}}
-                                <div class="position-absolute top-0 end-0 m-2">
-                                    <span class="badge {{ $buku->stok > 0 ? 'bg-success' : 'bg-danger' }} px-3 py-2 shadow">
-                                        <i class="bi bi-box-seam"></i> Stok: {{ $buku->stok }}
-                                    </span>
-                                </div>
-
-                                @if($buku->kategori)
-                                <div class="position-absolute bottom-0 start-0 end-0 m-2">
-                                    <span class="badge bg-primary bg-opacity-90 w-100 py-2 shadow">
-                                        <i class="bi bi-tag"></i> {{ $buku->kategori }}
-                                    </span>
-                                </div>
-                                @endif
+                                {{-- Badge Stok --}}
+                                <span class="badge-stok badge {{ $buku->stok > 0 ? 'bg-success' : 'bg-danger' }} shadow">
+                                    <i class="bi bi-box-seam"></i> {{ $buku->stok }} Unit
+                                </span>
                             </div>
                         @else
-                            <div class="bg-white rounded-3 shadow p-5 text-center">
-                                <i class="bi bi-image-fill text-muted" style="font-size: 6rem; opacity: 0.2;"></i>
-                                <p class="text-muted fst-italic mt-3 mb-0">Tidak ada cover buku</p>
+                            <div class="no-cover bg-white rounded-3 shadow d-flex align-items-center justify-content-center" style="height: 420px;">
+                                <div class="text-center">
+                                    <i class="bi bi-image text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
+                                    <p class="text-muted mt-3">Tidak ada cover</p>
+                                </div>
                             </div>
                         @endif
                     </div>
 
-                    {{-- Quick Stats Cards --}}
-                    <div class="mt-auto">
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <div class="card border-0 shadow-sm text-center stat-card">
-                                    <div class="card-body py-3">
-                                        <div class="stat-icon bg-primary bg-opacity-10 text-primary mb-2 mx-auto">
-                                            <i class="bi bi-calendar-event"></i>
-                                        </div>
-                                        <h4 class="mb-0 fw-bold">{{ $buku->tahun_terbit }}</h4>
-                                        <small class="text-muted">Tahun Terbit</small>
-                                    </div>
+                    {{-- Quick Stats --}}
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="stat-card text-center">
+                                <div class="stat-icon bg-primary-subtle">
+                                    <i class="bi bi-calendar-event text-primary"></i>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="card border-0 shadow-sm text-center stat-card">
-                                    <div class="card-body py-3">
-                                        <div class="stat-icon bg-success bg-opacity-10 text-success mb-2 mx-auto">
-                                            <i class="bi bi-stack"></i>
-                                        </div>
-                                        <h4 class="mb-0 fw-bold">{{ $buku->stok }}</h4>
-                                        <small class="text-muted">Stok Buku</small>
-                                    </div>
-                                </div>
+                                <h4 class="stat-value">{{ $buku->tahun_terbit }}</h4>
+                                <p class="stat-label">Tahun Terbit</p>
                             </div>
                         </div>
-
-                        {{-- QR Code Indicator --}}
-                        @if($buku->qrCode)
-                        <div class="card border-0 shadow-sm mt-2 bg-info bg-opacity-10">
-                            <div class="card-body py-2 text-center">
-                                <i class="bi bi-qr-code-scan text-info"></i>
-                                <small class="text-info fw-semibold ms-1">QR Code Tersedia</small>
+                        <div class="col-6">
+                            <div class="stat-card text-center">
+                                <div class="stat-icon bg-success-subtle">
+                                    <i class="bi bi-stack text-success"></i>
+                                </div>
+                                <h4 class="stat-value">{{ $buku->stok }}</h4>
+                                <p class="stat-label">Stok Buku</p>
                             </div>
                         </div>
-                        @endif
                     </div>
+
+                    {{-- QR Indicator --}}
+                    @if($buku->qrCode)
+                    <div class="alert alert-info d-flex align-items-center mt-3 mb-0">
+                        <i class="bi bi-qr-code-scan fs-4 me-2"></i>
+                        <span class="fw-semibold">QR Code Tersedia</span>
+                    </div>
+                    @endif
                 </div>
             </div>
 
-            {{-- Kolom Detail Informasi --}}
+            {{-- Content: Detail Information --}}
             <div class="col-lg-8">
                 <div class="p-4">
-                    {{-- Judul Buku --}}
+                    {{-- Judul & Badges --}}
                     <div class="mb-4">
-                        <h2 class="fw-bold text-primary mb-3">{{ $buku->judul }}</h2>
+                        <h2 class="fw-bold text-dark mb-3">{{ $buku->judul }}</h2>
                         <div class="d-flex gap-2 flex-wrap">
                             @if($buku->kategori)
-                                <span class="badge bg-primary bg-opacity-75 px-3 py-2">
+                                <span class="badge bg-primary px-3 py-2">
                                     <i class="bi bi-tag-fill"></i> {{ $buku->kategori }}
                                 </span>
                             @endif
@@ -125,172 +111,157 @@
                         </div>
                     </div>
 
-                    <hr class="my-4">
+                    {{-- Section: Informasi Detail --}}
+                    <section class="mb-4">
+                        <h5 class="section-title mb-3">
+                            <i class="bi bi-info-circle me-2"></i>Informasi Detail
+                        </h5>
 
-                    {{-- Detail Informasi Grid --}}
-                    <h5 class="fw-bold mb-3 text-secondary">
-                        <i class="bi bi-info-circle"></i> Informasi Detail
-                    </h5>
-
-                    <div class="row g-3 mb-4">
-                        {{-- Penulis --}}
-                        <div class="col-md-6">
-                            <div class="info-card p-3 rounded-3 h-100 border">
-                                <div class="d-flex align-items-start">
-                                    <div class="icon-box me-3 flex-shrink-0">
+                        <div class="row g-3">
+                            {{-- Penulis --}}
+                            <div class="col-md-6">
+                                <div class="info-box">
+                                    <div class="info-icon bg-primary-subtle">
                                         <i class="bi bi-person-fill text-primary"></i>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <small class="text-muted d-block mb-1">Penulis</small>
-                                        <h5 class="mb-0 fw-bold">{{ $buku->penulis }}</h5>
+                                    <div class="info-content">
+                                        <label>Penulis</label>
+                                        <p>{{ $buku->penulis }}</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {{-- Penerbit --}}
-                        <div class="col-md-6">
-                            <div class="info-card p-3 rounded-3 h-100 border">
-                                <div class="d-flex align-items-start">
-                                    <div class="icon-box me-3 flex-shrink-0">
+                            {{-- Penerbit --}}
+                            <div class="col-md-6">
+                                <div class="info-box">
+                                    <div class="info-icon bg-success-subtle">
                                         <i class="bi bi-building text-success"></i>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <small class="text-muted d-block mb-1">Penerbit</small>
-                                        <h5 class="mb-0 fw-bold">{{ $buku->penerbit }}</h5>
+                                    <div class="info-content">
+                                        <label>Penerbit</label>
+                                        <p>{{ $buku->penerbit }}</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {{-- Tahun Terbit --}}
-                        <div class="col-md-6">
-                            <div class="info-card p-3 rounded-3 h-100 border">
-                                <div class="d-flex align-items-start">
-                                    <div class="icon-box me-3 flex-shrink-0">
+                            {{-- Tahun Terbit --}}
+                            <div class="col-md-6">
+                                <div class="info-box">
+                                    <div class="info-icon bg-warning-subtle">
                                         <i class="bi bi-calendar-check text-warning"></i>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <small class="text-muted d-block mb-1">Tahun Terbit</small>
-                                        <h5 class="mb-0 fw-bold">{{ $buku->tahun_terbit }}</h5>
+                                    <div class="info-content">
+                                        <label>Tahun Terbit</label>
+                                        <p>{{ $buku->tahun_terbit }}</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {{-- Stok --}}
-                        <div class="col-md-6">
-                            <div class="info-card p-3 rounded-3 h-100 border">
-                                <div class="d-flex align-items-start">
-                                    <div class="icon-box me-3 flex-shrink-0">
+                            {{-- Stok --}}
+                            <div class="col-md-6">
+                                <div class="info-box">
+                                    <div class="info-icon bg-info-subtle">
                                         <i class="bi bi-box-seam text-info"></i>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <small class="text-muted d-block mb-1">Stok Tersedia</small>
-                                        <h5 class="mb-0">
-                                            <span class="badge {{ $buku->stok > 0 ? 'bg-success' : 'bg-danger' }} px-3 py-2">
+                                    <div class="info-content">
+                                        <label>Stok Tersedia</label>
+                                        <p>
+                                            <span class="badge {{ $buku->stok > 0 ? 'bg-success' : 'bg-danger' }} fs-6">
                                                 {{ $buku->stok }} Unit
                                             </span>
-                                        </h5>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <hr class="my-4">
+                    {{-- Section: Informasi Sistem --}}
+                    <section class="mb-4">
+                        <h5 class="section-title mb-3">
+                            <i class="bi bi-clock-history me-2"></i>Informasi Sistem
+                        </h5>
 
-                    {{-- Informasi Sistem --}}
-                    <h5 class="fw-bold mb-3 text-secondary">
-                        <i class="bi bi-clock-history"></i> Informasi Sistem
-                    </h5>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <div class="card bg-light border-0 h-100 shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-circle bg-primary text-white me-3">
-                                            <i class="bi bi-plus-circle"></i>
-                                        </div>
-                                        <div>
-                                            <small class="text-muted d-block">Ditambahkan</small>
-                                            <strong>{{ $buku->created_at->translatedFormat('d F Y') }}</strong>
-                                            <br>
-                                            <small class="text-muted">{{ $buku->created_at->diffForHumans() }}</small>
-                                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="system-info">
+                                    <div class="system-icon bg-primary">
+                                        <i class="bi bi-plus-circle"></i>
+                                    </div>
+                                    <div class="system-content">
+                                        <label>Ditambahkan</label>
+                                        <p class="mb-0">{{ $buku->created_at->translatedFormat('d F Y') }}</p>
+                                        <small class="text-muted">{{ $buku->created_at->diffForHumans() }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="system-info">
+                                    <div class="system-icon bg-success">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </div>
+                                    <div class="system-content">
+                                        <label>Terakhir Diupdate</label>
+                                        <p class="mb-0">{{ $buku->updated_at->translatedFormat('d F Y') }}</p>
+                                        <small class="text-muted">{{ $buku->updated_at->diffForHumans() }}</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card bg-light border-0 h-100 shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-circle bg-success text-white me-3">
-                                            <i class="bi bi-arrow-repeat"></i>
-                                        </div>
-                                        <div>
-                                            <small class="text-muted d-block">Terakhir Diupdate</small>
-                                            <strong>{{ $buku->updated_at->diffForHumans() }}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </section>
 
-                    {{-- QR Code Section --}}
+                    {{-- Section: QR Code --}}
                     @if($buku->qrCode)
-                    <hr class="my-4">
-                    <h5 class="fw-bold mb-3 text-secondary">
-                        <i class="bi bi-qr-code-scan"></i> QR Code Buku
-                    </h5>
-                    
-                    <div class="qr-section p-4 bg-light rounded-3 border-2 border-dashed">
-                        <div class="row align-items-center">
-                            <div class="col-md-4 text-center">
-                                <div class="qr-container p-3 bg-white rounded shadow-sm">
-                                    <img src="{{ asset('storage/' . $buku->qrCode->gambar_qr) }}" 
-                                         alt="QR Code" 
-                                         class="img-fluid"
-                                         style="max-width: 180px;">
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    <small class="text-muted d-block mb-2">
-                                        <i class="bi bi-key"></i> Kode Unik
-                                    </small>
-                                    <div class="input-group">
-                                        <input type="text" 
-                                               class="form-control bg-dark text-white font-monospace" 
-                                               value="{{ $buku->qrCode->kode_unik }}" 
-                                               id="kodeUnik"
-                                               readonly>
-                                        <button class="btn btn-outline-secondary" 
-                                                type="button"
-                                                onclick="copyCode()"
-                                                title="Copy kode">
-                                            <i class="bi bi-clipboard"></i>
-                                        </button>
+                    <section class="mb-4">
+                        <h5 class="section-title mb-3">
+                            <i class="bi bi-qr-code-scan me-2"></i>QR Code Buku
+                        </h5>
+
+                        <div class="qr-section">
+                            <div class="row align-items-center">
+                                <div class="col-md-4 text-center">
+                                    <div class="qr-container">
+                                        <img src="{{ asset('storage/' . $buku->qrCode->gambar_qr) }}" 
+                                             alt="QR Code" 
+                                             class="img-fluid rounded shadow">
                                     </div>
                                 </div>
-                                <div class="card bg-white border-0 shadow-sm">
-                                    <div class="card-body py-2">
-                                        <div class="d-flex align-items-center">
+                                <div class="col-md-8">
+                                    {{-- Kode Unik --}}
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <i class="bi bi-key-fill me-1"></i>Kode Unik
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="text" 
+                                                   class="form-control form-control-lg font-monospace bg-dark text-white border-0" 
+                                                   value="{{ $buku->qrCode->kode_unik }}" 
+                                                   id="kodeUnik"
+                                                   readonly>
+                                            <button class="btn btn-outline-secondary" 
+                                                    type="button"
+                                                    onclick="copyCode()"
+                                                    title="Copy kode">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- Info Pembuat --}}
+                                    <div class="qr-meta">
+                                        <div class="d-flex align-items-center mb-2">
                                             <i class="bi bi-person-badge text-primary me-2"></i>
-                                            <small class="text-muted">
+                                            <small>
                                                 Dibuat oleh: 
                                                 @if($buku->qrCode->petugas)
-                                                    <strong class="text-primary">{{ $buku->qrCode->petugas->name }}</strong>
-                                                    <span class="badge bg-info ms-1">Petugas</span>
+                                                    <strong>{{ $buku->qrCode->petugas->name }}</strong>
+                                                    <span class="badge bg-primary badge-sm ms-1">Petugas</span>
                                                 @else
-                                                    <strong class="text-secondary">System</strong>
+                                                    <strong>System</strong>
                                                 @endif
                                             </small>
                                         </div>
-                                        <div class="d-flex align-items-center mt-1">
+                                        <div class="d-flex align-items-center">
                                             <i class="bi bi-clock text-success me-2"></i>
                                             <small class="text-muted">
                                                 {{ $buku->qrCode->created_at->diffForHumans() }}
@@ -300,15 +271,13 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                     @endif
 
-                    <hr class="my-4">
-
                     {{-- Action Buttons --}}
-                    <div class="d-flex gap-2 flex-wrap justify-content-end">
+                    <div class="d-flex gap-2 flex-wrap justify-content-end mt-4 pt-3 border-top">
                         <a href="{{ route('admin.buku.index') }}" class="btn btn-outline-secondary btn-lg">
-                            <i class="bi bi-arrow-left-circle"></i> Kembali ke Daftar
+                            <i class="bi bi-arrow-left"></i> Kembali
                         </a>
                         
                         <button type="button" 
@@ -329,30 +298,24 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-danger text-white border-0">
-                <h5 class="modal-title">
-                    <i class="bi bi-exclamation-triangle-fill"></i> Konfirmasi Penghapusan
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Konfirmasi Penghapusan
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="text-center mb-3">
-                    <div class="warning-icon">
-                        <i class="bi bi-exclamation-triangle text-warning"></i>
-                    </div>
+                    <i class="bi bi-exclamation-triangle text-warning modal-warning-icon"></i>
                 </div>
-                <p class="text-center mb-2 fs-5">Yakin ingin menghapus buku ini?</p>
-                <div class="text-center mb-3">
-                    <div class="alert alert-light border">
-                        <strong class="text-primary">"{{ $buku->judul }}"</strong>
-                    </div>
+                <p class="text-center mb-3 fs-5 fw-semibold">Yakin ingin menghapus buku ini?</p>
+                <div class="alert alert-light border text-center mb-3">
+                    <strong class="text-primary">"{{ $buku->judul }}"</strong>
                 </div>
-                <div class="alert alert-warning mb-0">
-                    <div class="d-flex align-items-start">
-                        <i class="bi bi-info-circle-fill me-2 mt-1"></i>
-                        <small>
-                            <strong>Perhatian!</strong> Data yang sudah dihapus tidak dapat dikembalikan lagi.
-                        </small>
-                    </div>
+                <div class="alert alert-warning d-flex align-items-start mb-0">
+                    <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+                    <small>
+                        <strong>Perhatian!</strong> Data yang sudah dihapus tidak dapat dikembalikan lagi.
+                    </small>
                 </div>
             </div>
             <div class="modal-footer border-0 bg-light">
@@ -363,7 +326,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Ya, Hapus Sekarang!
+                        <i class="bi bi-trash"></i> Ya, Hapus!
                     </button>
                 </form>
             </div>
@@ -372,136 +335,272 @@
 </div>
 
 <style>
-/* Gradient Background */
-.bg-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* ===== VARIABLES ===== */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --transition: all 0.3s ease;
 }
 
-/* Book Cover Animation */
-.book-cover {
-    transition: transform 0.3s ease;
+/* ===== HEADER ===== */
+.bg-gradient-primary {
+    background: var(--primary-gradient);
 }
 
-.book-cover:hover {
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+    margin-bottom: 0;
+}
+
+/* ===== COVER IMAGE ===== */
+.cover-wrapper {
+    position: relative;
+}
+
+.cover-wrapper img {
+    transition: var(--transition);
+}
+
+.cover-wrapper:hover img {
     transform: scale(1.02);
 }
 
-/* Icon Boxes */
-.icon-box {
+.badge-stok {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* ===== STAT CARDS ===== */
+.stat-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
     width: 48px;
     height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(102, 126, 234, 0.1);
-    border-radius: 12px;
-    font-size: 1.4rem;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    margin: 0 auto 0.75rem;
 }
 
-/* Icon Circle */
-.icon-circle {
-    width: 45px;
-    height: 45px;
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0.5rem 0 0.25rem;
+    color: #2d3748;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #718096;
+    margin: 0;
+}
+
+/* ===== SECTION TITLE ===== */
+.section-title {
+    font-weight: 700;
+    color: #2d3748;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* ===== INFO BOX ===== */
+.info-box {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 1.2rem;
-    flex-shrink: 0;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius);
+    transition: var(--transition);
+    height: 100%;
 }
 
-/* Info Cards */
-.info-card {
-    background: #ffffff;
-    transition: all 0.3s ease;
-}
-
-.info-card:hover {
-    background: #f8f9fa;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+.info-box:hover {
+    background: #f7fafc;
+    box-shadow: var(--shadow-sm);
     transform: translateY(-2px);
 }
 
-/* Stat Cards */
-.stat-card {
-    transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-}
-
-.stat-icon {
-    width: 40px;
-    height: 40px;
+.info-icon {
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    flex-shrink: 0;
 }
 
-/* QR Section */
+.info-content {
+    flex: 1;
+}
+
+.info-content label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #718096;
+    margin-bottom: 0.25rem;
+    display: block;
+    letter-spacing: 0.5px;
+}
+
+.info-content p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+}
+
+/* ===== SYSTEM INFO ===== */
+.system-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+}
+
+.system-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.system-content label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #718096;
+    margin-bottom: 0.25rem;
+    display: block;
+    letter-spacing: 0.5px;
+}
+
+.system-content p {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+}
+
+/* ===== QR CODE SECTION ===== */
 .qr-section {
-    border: 2px dashed #dee2e6;
+    background: #f7fafc;
+    border: 2px dashed #cbd5e0;
+    border-radius: var(--radius);
+    padding: 1.5rem;
 }
 
 .qr-container {
-    transition: transform 0.3s ease;
+    background: white;
+    padding: 1rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
 }
 
 .qr-container:hover {
-    transform: scale(1.03);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
 }
 
-/* Breadcrumb */
-.breadcrumb {
-    border: 1px solid #e9ecef;
+.qr-meta {
+    background: white;
+    padding: 1rem;
+    border-radius: var(--radius);
+    border: 1px solid #e2e8f0;
 }
 
-/* Modal Warning Icon */
-.warning-icon i {
-    font-size: 5rem;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-/* Buttons */
+/* ===== BUTTONS ===== */
 .btn {
     border-radius: 8px;
-    transition: all 0.3s ease;
-    font-weight: 500;
+    font-weight: 600;
+    transition: var(--transition);
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-md);
 }
 
-/* Badge */
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+}
+
+/* ===== BADGES ===== */
 .badge {
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.3px;
 }
 
-/* Card */
-.card {
-    border-radius: 12px;
+.badge-sm {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
 }
 
-/* Border Dashed */
-.border-dashed {
-    border-style: dashed !important;
+/* ===== MODAL ===== */
+.modal-warning-icon {
+    font-size: 5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.95); }
+}
+
+/* ===== CARD ===== */
+.card {
+    border-radius: var(--radius);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 0.75rem;
+    }
+    
+    .info-box {
+        margin-bottom: 0.75rem;
+    }
+    
+    .qr-section .col-md-4 {
+        margin-bottom: 1.5rem;
+    }
 }
 </style>
 
 <script>
-// Copy kode unik ke clipboard
 function copyCode() {
     const codeInput = document.getElementById('kodeUnik');
     codeInput.select();
