@@ -281,9 +281,7 @@
         <h5 class="mb-0">
             <i class="bi bi-list-check me-2"></i>Daftar Buku yang Perlu Dikembalikan
         </h5>
-        <a href="{{ route('petugas.pengembalian.riwayat') }}" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-clock-history me-2"></i>Lihat Riwayat
-        </a>
+    
     </div>
 
     <div class="table-responsive">
