@@ -30,7 +30,7 @@ class PeminjamanController extends Controller
             return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan.');
         }
 
-        // ✅ GUNAKAN $user->id (konsisten dengan pinjam())
+        // ✅ HANYA load 'buku' dan 'petugas' (tidak ada pengembalian)
         $peminjamans = Peminjaman::where('mahasiswa_id', $user->id)
             ->with(['buku', 'petugas'])
             ->orderBy('created_at', 'desc')
@@ -51,7 +51,7 @@ class PeminjamanController extends Controller
             return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan.');
         }
 
-        // ✅ SUDAH BENAR - menggunakan $user->id
+        // ✅ HANYA load 'buku' dan 'petugas'
         $query = Peminjaman::where('mahasiswa_id', $user->id)
             ->with(['buku', 'petugas']);
 
@@ -77,28 +77,51 @@ class PeminjamanController extends Controller
 
     /**
      * Detail peminjaman
-     * ✅ DIPERBAIKI - sekarang konsisten menggunakan $user->id
+     * ✅ FIXED - Tanpa relasi pengembalian
      */
     public function show($id)
     {
-        $user = Auth::user();
-        $mahasiswa = MahasiswaModel::where('email', $user->email)->first();
+        try {
+            $user = Auth::user();
+            $mahasiswa = MahasiswaModel::where('email', $user->email)->first();
 
-        if (!$mahasiswa) {
-            return redirect()->back()->with('error', 'Data mahasiswa tidak ditemukan.');
+            if (!$mahasiswa) {
+                return redirect()->route('mahasiswa.peminjaman.riwayat')
+                    ->with('error', 'Data mahasiswa tidak ditemukan.');
+            }
+
+            // ✅ HANYA load 'buku' dan 'petugas'
+            $peminjaman = Peminjaman::where('mahasiswa_id', $user->id)
+                ->where('id', $id)
+                ->with(['buku', 'petugas'])
+                ->first();
+
+            // Cek apakah peminjaman ditemukan
+            if (!$peminjaman) {
+                return redirect()->route('mahasiswa.peminjaman.riwayat')
+                    ->with('error', 'Data peminjaman tidak ditemukan.');
+            }
+
+            // Cek apakah peminjaman milik user yang login
+            if ($peminjaman->mahasiswa_id != $user->id) {
+                return redirect()->route('mahasiswa.peminjaman.riwayat')
+                    ->with('error', 'Anda tidak memiliki akses ke peminjaman ini.');
+            }
+
+            return view('mahasiswa.peminjaman.show', compact('peminjaman', 'mahasiswa'));
+
+        } catch (\Exception $e) {
+            Log::error('Error menampilkan detail peminjaman', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('mahasiswa.peminjaman.riwayat')
+                ->with('error', 'Terjadi kesalahan saat mengambil data peminjaman.');
         }
-
-        // ✅ SPESIFIKKAN TABEL untuk menghindari ambiguitas
-        $peminjaman = Peminjaman::where('peminjaman.mahasiswa_id', $user->id)
-            ->where('peminjaman.id', $id)
-            ->with(['buku', 'petugas'])
-            ->firstOrFail();
-
-        return view('mahasiswa.peminjaman.show', compact('peminjaman', 'mahasiswa'));
     }
 
     /**
-     * Proses pinjam buku (dipanggil dari route mahasiswa.buku.pinjam)
+     * Proses pinjam buku
      */
     public function pinjam($id)
     {
@@ -126,7 +149,7 @@ class PeminjamanController extends Controller
                 return redirect()->back()->with('error', 'Stok buku tidak tersedia.');
             }
 
-            // ✅ Cek peminjaman menggunakan $user->id (konsisten!)
+            // Cek apakah mahasiswa sudah meminjam buku ini
             $sudahPinjam = Peminjaman::where('mahasiswa_id', $user->id)
                 ->where('buku_id', $buku->id)
                 ->where('status', 'dipinjam')
@@ -137,7 +160,7 @@ class PeminjamanController extends Controller
                 return redirect()->back()->with('error', 'Anda sudah meminjam buku ini dan belum mengembalikannya.');
             }
 
-            // ✅ Cek batas maksimal menggunakan $user->id
+            // Cek batas maksimal peminjaman
             $jumlahPinjaman = Peminjaman::where('mahasiswa_id', $user->id)
                 ->where('status', 'dipinjam')
                 ->count();
@@ -147,12 +170,17 @@ class PeminjamanController extends Controller
                 return redirect()->back()->with('error', 'Anda sudah mencapai batas maksimal peminjaman (3 buku).');
             }
 
-            // ✅ Buat peminjaman dengan Auth::id() / $user->id
+            // Hitung tanggal deadline (3 hari dari sekarang)
+            $tanggalDeadline = now()->addDays(3);
+
+            // Buat peminjaman baru
             $peminjaman = Peminjaman::create([
-                'mahasiswa_id' => $user->id, // atau Auth::id()
+                'mahasiswa_id' => $user->id,
                 'buku_id' => $buku->id,
-                'petugas_id' => null,
+                'petugas_id' => null, // Akan diisi oleh command atau petugas
                 'tanggal_pinjam' => now(),
+                'durasi_hari' => 3,
+                'tanggal_deadline' => $tanggalDeadline,
                 'tanggal_kembali' => null,
                 'status' => 'dipinjam',
             ]);
@@ -166,7 +194,8 @@ class PeminjamanController extends Controller
             DB::commit();
 
             return redirect()->route('mahasiswa.peminjaman.index')
-                ->with('success', "Berhasil meminjam buku '{$buku->judul}'.");
+                ->with('success', "Berhasil meminjam buku '{$buku->judul}'. Harap kembalikan sebelum " . $tanggalDeadline->format('d M Y'));
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error saat meminjam buku', [

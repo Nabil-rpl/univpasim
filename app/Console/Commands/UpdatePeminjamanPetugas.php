@@ -9,16 +9,16 @@ use App\Models\User;
 class UpdatePeminjamanPetugas extends Command
 {
     protected $signature = 'peminjaman:update-petugas';
-    protected $description = 'Update petugas_id yang NULL di tabel peminjaman dengan petugas pertama';
+    protected $description = 'Update petugas_id yang NULL di tabel peminjaman dengan distribusi merata ke semua petugas';
 
     public function handle()
     {
         $this->info('🔄 Memulai update petugas_id...');
 
-        // Cari petugas pertama
-        $petugas = User::where('role', 'petugas')->first();
+        // Ambil SEMUA petugas
+        $petugasList = User::where('role', 'petugas')->get();
 
-        if (!$petugas) {
+        if ($petugasList->isEmpty()) {
             $this->error('❌ Tidak ada user dengan role petugas!');
             $this->info('💡 Silakan buat user petugas terlebih dahulu');
             return 1;
@@ -33,20 +33,35 @@ class UpdatePeminjamanPetugas extends Command
         }
 
         $this->info("📊 Ditemukan {$jumlah} data peminjaman tanpa petugas");
+        $this->info("👥 Akan didistribusikan ke {$petugasList->count()} petugas");
         $this->newLine();
+        
+        // Tampilkan tabel semua petugas
+        $tableData = $petugasList->map(function($petugas) {
+            return [$petugas->id, $petugas->name, $petugas->role];
+        })->toArray();
         
         $this->table(
             ['ID', 'Nama', 'Role'],
-            [[$petugas->id, $petugas->name, $petugas->role]]
+            $tableData
         );
         
-        if ($this->confirm("Update semua data dengan petugas di atas?", true)) {
-            Peminjaman::whereNull('petugas_id')
-                ->update(['petugas_id' => $petugas->id]);
+        if ($this->confirm("Update dan distribusikan data ke semua petugas di atas?", true)) {
+            $peminjaman = Peminjaman::whereNull('petugas_id')->get();
+            $bar = $this->output->createProgressBar($peminjaman->count());
+            $bar->start();
             
-            $this->newLine();
+            // Distribusi merata menggunakan round-robin
+            foreach ($peminjaman as $index => $item) {
+                $petugas = $petugasList[$index % $petugasList->count()];
+                $item->update(['petugas_id' => $petugas->id]);
+                $bar->advance();
+            }
+            
+            $bar->finish();
+            $this->newLine(2);
             $this->info("✅ Berhasil update {$jumlah} data peminjaman");
-            $this->info("👤 Petugas: {$petugas->name} (ID: {$petugas->id})");
+            $this->info("📌 Data didistribusikan secara merata ke {$petugasList->count()} petugas");
         } else {
             $this->warn('⚠️  Update dibatalkan');
         }

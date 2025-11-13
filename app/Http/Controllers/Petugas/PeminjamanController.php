@@ -62,7 +62,11 @@ class PeminjamanController extends Controller
             });
         }
 
-        $peminjamans = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+        $peminjamans = $query
+    ->orderByDesc('created_at')
+    ->simplePaginate(15)
+    ->appends(request()->query());
+
 
         // Statistik
         $stats = [
