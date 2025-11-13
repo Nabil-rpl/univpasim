@@ -12,6 +12,11 @@ use Carbon\Carbon;
 
 class PengembalianController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth', 'role:petugas']);
+    }
+
     /**
      * Tampilkan daftar peminjaman yang belum dikembalikan
      */
@@ -64,8 +69,6 @@ class PengembalianController extends Controller
 
         $peminjaman = $query->paginate(15)->appends(request()->query());
 
-
-
         // Hitung statistik
         $stats = [
             'aktif' => Peminjaman::where('status', 'dipinjam')->count(),
@@ -90,10 +93,10 @@ class PengembalianController extends Controller
     /**
      * Tampilkan detail peminjaman sebelum proses pengembalian
      */
-    public function show($peminjaman_id)
+    public function show($id)
     {
-        $peminjaman = Peminjaman::with(['mahasiswa', 'buku'])
-            ->findOrFail($peminjaman_id);
+        $peminjaman = Peminjaman::with(['mahasiswa', 'buku', 'petugas'])
+            ->findOrFail($id);
 
         // Cek apakah sudah dikembalikan
         if ($peminjaman->status === 'dikembalikan') {
@@ -111,9 +114,9 @@ class PengembalianController extends Controller
     /**
      * Proses pengembalian buku
      */
-    public function store(Request $request, $peminjaman_id)
+    public function store(Request $request, $id)
     {
-        $peminjaman = Peminjaman::findOrFail($peminjaman_id);
+        $peminjaman = Peminjaman::findOrFail($id);
         
         // Cek apakah sudah dikembalikan
         if ($peminjaman->status === 'dikembalikan') {
@@ -124,6 +127,7 @@ class PengembalianController extends Controller
         
         try {
             $tanggalPengembalian = Carbon::now();
+            $petugasId = Auth::id(); // ID petugas yang sedang login
             
             // Hitung denda jika terlambat
             $denda = $peminjaman->hitungDenda();
@@ -131,15 +135,16 @@ class PengembalianController extends Controller
             // Buat record pengembalian
             Pengembalian::create([
                 'peminjaman_id' => $peminjaman->id,
-                'petugas_id' => Auth::id(),
+                'petugas_id' => $petugasId,
                 'tanggal_pengembalian' => $tanggalPengembalian,
                 'denda' => $denda,
             ]);
 
-            // Update status peminjaman
+            // Update status peminjaman DAN petugas_id
             $peminjaman->update([
                 'status' => 'dikembalikan',
                 'tanggal_kembali' => $tanggalPengembalian,
+                'petugas_id' => $petugasId, // UPDATE PETUGAS ID DISINI!
             ]);
 
             // Tambah stok buku

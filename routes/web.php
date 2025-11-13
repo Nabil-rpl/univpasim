@@ -149,14 +149,14 @@ Route::middleware(['auth', 'role:petugas'])
             Route::delete('/{id}', [PetugasPeminjamanController::class, 'destroy'])->name('destroy');
         });
 
-        // Pengembalian Routes
-        Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
-            Route::get('/', [PengembalianController::class, 'index'])->name('index');
-            Route::get('/search', [PengembalianController::class, 'search'])->name('search');
-            Route::get('/riwayat', [PengembalianController::class, 'riwayat'])->name('riwayat');
-            Route::get('/{peminjaman_id}', [PengembalianController::class, 'show'])->name('show');
-            Route::post('/{peminjaman_id}', [PengembalianController::class, 'store'])->name('store');
-        });
+       // Pengembalian Routes
+Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
+    Route::get('/', [PengembalianController::class, 'index'])->name('index');
+    Route::get('/search', [PengembalianController::class, 'search'])->name('search');
+    Route::get('/riwayat', [PengembalianController::class, 'riwayat'])->name('riwayat');
+    Route::get('/{peminjaman_id}', [PengembalianController::class, 'show'])->name('show');
+    Route::post('/{peminjaman_id}', [PengembalianController::class, 'store'])->name('store');
+});
 
         // Profile Petugas
         Route::prefix('profile')->as('profile.')->group(function () {
