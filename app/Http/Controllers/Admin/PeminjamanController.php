@@ -19,11 +19,14 @@ class PeminjamanController extends Controller
      */
     public function index(Request $request)
     {
-        // Query dasar dengan eager loading
+        // Query dasar dengan eager loading + perpanjangan
         $query = Peminjaman::with([
-            'mahasiswa.mahasiswa', // Relasi ke tabel mahasiswa jika ada
+            'mahasiswa.mahasiswa',
             'buku',
-            'petugas'
+            'petugas',
+            'perpanjangan' => function($q) {
+                $q->orderBy('created_at', 'desc');
+            }
         ]);
 
         // Filter berdasarkan status
@@ -36,6 +39,15 @@ class PeminjamanController extends Controller
             $query->whereHas('mahasiswa', function($q) use ($request) {
                 $q->where('role', $request->tipe_peminjam);
             });
+        }
+
+        // Filter peminjaman yang diperpanjang
+        if ($request->filled('diperpanjang')) {
+            if ($request->diperpanjang == 'ya') {
+                $query->has('perpanjangan');
+            } elseif ($request->diperpanjang == 'tidak') {
+                $query->doesntHave('perpanjangan');
+            }
         }
 
         // Filter berdasarkan bulan/tahun
@@ -61,17 +73,19 @@ class PeminjamanController extends Controller
         }
 
         // Urutkan berdasarkan yang terbaru
-        $peminjamans = $query->orderBy('created_at', 'desc')->get();
+        $peminjamans = $query->orderBy('created_at', 'desc')->paginate(15)->appends(request()->query());
 
         // Hitung statistik
+        $allPeminjamans = Peminjaman::with('perpanjangan')->get();
         $statistics = [
-            'total_peminjaman' => $peminjamans->count(),
-            'total_mahasiswa' => $peminjamans->filter(fn($p) => $p->mahasiswa->role === 'mahasiswa')->count(),
-            'total_pengguna_luar' => $peminjamans->filter(fn($p) => $p->mahasiswa->role === 'pengguna_luar')->count(),
-            'sedang_dipinjam' => $peminjamans->where('status', 'dipinjam')->count(),
-            'sudah_dikembalikan' => $peminjamans->where('status', 'dikembalikan')->count(),
-            'terlambat' => $peminjamans->filter(fn($p) => $p->status === 'dipinjam' && $p->isTerlambat())->count(),
-            'total_denda' => $peminjamans->filter(fn($p) => $p->status === 'dipinjam' && $p->isTerlambat())
+            'total_peminjaman' => $allPeminjamans->count(),
+            'total_mahasiswa' => $allPeminjamans->filter(fn($p) => $p->mahasiswa->role === 'mahasiswa')->count(),
+            'total_pengguna_luar' => $allPeminjamans->filter(fn($p) => $p->mahasiswa->role === 'pengguna_luar')->count(),
+            'sedang_dipinjam' => $allPeminjamans->where('status', 'dipinjam')->count(),
+            'sudah_dikembalikan' => $allPeminjamans->where('status', 'dikembalikan')->count(),
+            'terlambat' => $allPeminjamans->filter(fn($p) => $p->status === 'dipinjam' && $p->isTerlambat())->count(),
+            'diperpanjang' => $allPeminjamans->filter(fn($p) => $p->perpanjangan->isNotEmpty())->count(),
+            'total_denda' => $allPeminjamans->filter(fn($p) => $p->status === 'dipinjam' && $p->isTerlambat())
                                         ->sum(fn($p) => $p->hitungDenda())
         ];
 
@@ -86,7 +100,10 @@ class PeminjamanController extends Controller
         $peminjaman = Peminjaman::with([
             'mahasiswa.mahasiswa',
             'buku',
-            'petugas'
+            'petugas',
+            'perpanjangan' => function($q) {
+                $q->orderBy('created_at', 'desc');
+            }
         ])->findOrFail($id);
 
         return view('admin.peminjaman.show', compact('peminjaman'));
@@ -100,7 +117,8 @@ class PeminjamanController extends Controller
         $query = Peminjaman::with([
             'mahasiswa.mahasiswa',
             'buku',
-            'petugas'
+            'petugas',
+            'perpanjangan'
         ]);
 
         // Terapkan filter yang sama dengan index
@@ -146,13 +164,14 @@ class PeminjamanController extends Controller
                 'Status',
                 'Terlambat (Hari)',
                 'Denda (Rp)',
+                'Diperpanjang',
+                'Jumlah Perpanjangan',
                 'Petugas',
                 'Tanggal Transaksi'
             ]);
             
             // Data
             foreach ($peminjamans as $index => $item) {
-                // Tentukan tipe peminjam dan identitas
                 $tipePeminjam = $item->mahasiswa->role === 'mahasiswa' ? 'Mahasiswa' : 'Pengguna Luar';
                 
                 if ($item->mahasiswa->role === 'mahasiswa') {
@@ -161,13 +180,15 @@ class PeminjamanController extends Controller
                     $identitas = $item->mahasiswa->no_hp ?? '-';
                 }
 
-                // Hitung keterlambatan dan denda
                 $hariTerlambat = 0;
                 $denda = 0;
                 if ($item->status === 'dipinjam' && $item->isTerlambat()) {
                     $hariTerlambat = $item->getHariTerlambat();
                     $denda = $item->hitungDenda();
                 }
+
+                $jumlahPerpanjangan = $item->perpanjangan->count();
+                $diperpanjang = $jumlahPerpanjangan > 0 ? 'Ya' : 'Tidak';
 
                 fputcsv($file, [
                     $index + 1,
@@ -183,6 +204,8 @@ class PeminjamanController extends Controller
                     ucfirst($item->status),
                     $hariTerlambat,
                     $denda,
+                    $diperpanjang,
+                    $jumlahPerpanjangan,
                     $item->petugas ? $item->petugas->name : 'Sistem',
                     $item->created_at->format('d/m/Y H:i')
                 ]);
@@ -199,7 +222,7 @@ class PeminjamanController extends Controller
      */
     public function statistics()
     {
-        $peminjamans = Peminjaman::with(['mahasiswa', 'buku'])->get();
+        $peminjamans = Peminjaman::with(['mahasiswa', 'buku', 'perpanjangan'])->get();
 
         $stats = [
             'overview' => [
@@ -207,6 +230,7 @@ class PeminjamanController extends Controller
                 'sedang_dipinjam' => $peminjamans->where('status', 'dipinjam')->count(),
                 'sudah_dikembalikan' => $peminjamans->where('status', 'dikembalikan')->count(),
                 'terlambat' => $peminjamans->filter(fn($p) => $p->status === 'dipinjam' && $p->isTerlambat())->count(),
+                'diperpanjang' => $peminjamans->filter(fn($p) => $p->perpanjangan->isNotEmpty())->count(),
             ],
             'by_user_type' => [
                 'mahasiswa' => $peminjamans->filter(fn($p) => $p->mahasiswa->role === 'mahasiswa')->count(),

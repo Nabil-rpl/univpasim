@@ -292,8 +292,83 @@
         border-top: 5px solid #8b5cf6;
     }
 
+    .perpanjangan-card {
+        border-top: 5px solid #a855f7;
+    }
+
     .timeline-card {
         border-top: 5px solid #10b981;
+    }
+
+    /* Perpanjangan Styling */
+    .perpanjangan-item {
+        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+        border-left: 4px solid #a855f7;
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .perpanjangan-item:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
+    }
+
+    .perpanjangan-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .perpanjangan-badge {
+        background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+    }
+
+    .perpanjangan-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .perpanjangan-detail {
+        background: white;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+
+    .perpanjangan-detail-label {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-bottom: 4px;
+    }
+
+    .perpanjangan-detail-value {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+
+    .empty-perpanjangan {
+        text-align: center;
+        padding: 40px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-perpanjangan i {
+        font-size: 3rem;
+        margin-bottom: 12px;
+        opacity: 0.5;
     }
 
     /* Responsive adjustments */
@@ -311,6 +386,10 @@
         .avatar-circle {
             margin: 0 auto;
         }
+
+        .perpanjangan-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
@@ -326,7 +405,7 @@
             </div>
             <div>
                 <a href="{{ route('admin.peminjaman.index') }}" class="btn btn-back">
-                    <i class="bi bi-arrow-left me-2"></i>Kembali ke Data Buku
+                    <i class="bi bi-arrow-left me-2"></i>Kembali ke Data Peminjaman
                 </a>
             </div>
         </div>
@@ -510,7 +589,7 @@
             <div class="info-row">
                 <div class="info-label">
                     <i class="bi bi-upc-scan"></i>
-                    <span>ISBN (International Standard Book Number)</span>
+                    <span>ISBN</span>
                 </div>
                 <div class="info-value">
                     <code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">
@@ -647,7 +726,7 @@
                 <div class="info-row">
                     <div class="info-label">
                         <i class="bi bi-cash-coin"></i>
-                        <span>Total Denda yang Harus Dibayar</span>
+                        <span>Total Denda</span>
                     </div>
                     <div class="info-value">
                         <div class="denda-display">
@@ -675,6 +754,82 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Riwayat Perpanjangan -->
+    <div class="detail-card perpanjangan-card">
+        <h6 class="card-title">
+            <i class="bi bi-arrow-repeat"></i>
+            Riwayat Perpanjangan
+            @if($peminjaman->perpanjangan->isNotEmpty())
+                <span class="badge badge-custom bg-purple" style="background: #a855f7 !important; margin-left: auto;">
+                    {{ $peminjaman->perpanjangan->count() }}x Perpanjangan
+                </span>
+            @endif
+        </h6>
+
+        @if($peminjaman->perpanjangan->isNotEmpty())
+            @foreach($peminjaman->perpanjangan->sortBy('tanggal_perpanjangan') as $index => $perpanjangan)
+                <div class="perpanjangan-item">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="perpanjangan-badge">{{ $index + 1 }}</div>
+                        <div>
+                            <h6 class="mb-0" style="color: #7c3aed; font-weight: 700;">
+                                🔄 Perpanjangan {{ $index + 1 }}
+                            </h6>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                {{ \Carbon\Carbon::parse($perpanjangan->tanggal_perpanjangan)->format('d M Y, H:i') }} WIB
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="perpanjangan-grid">
+                        <div class="perpanjangan-detail">
+                            <div class="perpanjangan-detail-label">Deadline Lama</div>
+                            <div class="perpanjangan-detail-value text-danger">
+                                <i class="bi bi-calendar-x me-1"></i>
+                                {{ \Carbon\Carbon::parse($perpanjangan->tanggal_deadline_lama)->format('d M Y') }}
+                            </div>
+                        </div>
+
+                        <div class="perpanjangan-detail">
+                            <div class="perpanjangan-detail-label">Deadline Baru</div>
+                            <div class="perpanjangan-detail-value text-success">
+                                <i class="bi bi-calendar-check me-1"></i>
+                                {{ \Carbon\Carbon::parse($perpanjangan->tanggal_deadline_baru)->format('d M Y') }}
+                            </div>
+                        </div>
+
+                        @if($perpanjangan->durasi_perpanjangan)
+                        <div class="perpanjangan-detail">
+                            <div class="perpanjangan-detail-label">Durasi Tambahan</div>
+                            <div class="perpanjangan-detail-value" style="color: #a855f7;">
+                                <i class="bi bi-clock-history me-1"></i>
+                                +{{ $perpanjangan->durasi_perpanjangan }} Hari
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($perpanjangan->petugas)
+                        <div class="perpanjangan-detail">
+                            <div class="perpanjangan-detail-label">Diproses Oleh</div>
+                            <div class="perpanjangan-detail-value">
+                                <i class="bi bi-person-badge me-1"></i>
+                                {{ $perpanjangan->petugas->name }}
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+        @else
+            <div class="empty-perpanjangan">
+                <i class="bi bi-inbox"></i>
+                <h6 style="color: #64748b; font-weight: 600;">Belum Ada Perpanjangan</h6>
+                <p class="mb-0">Peminjaman ini belum pernah diperpanjang</p>
+            </div>
+        @endif
     </div>
 
     <!-- Timeline -->
@@ -714,6 +869,37 @@
                     </small>
                 </div>
             </div>
+
+            <!-- Perpanjangan (jika ada) -->
+            @foreach($peminjaman->perpanjangan->sortBy('tanggal_perpanjangan') as $index => $perpanjangan)
+            <div class="timeline-item">
+                <div class="timeline-icon" style="background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6 style="color: #7c3aed;">🔄 Perpanjangan {{ $index + 1 }}</h6>
+                    <p>{{ \Carbon\Carbon::parse($perpanjangan->tanggal_perpanjangan)->format('d M Y, H:i') }} WIB</p>
+                    <small>
+                        Batas pengembalian diperpanjang dari 
+                        <strong class="text-danger">{{ \Carbon\Carbon::parse($perpanjangan->tanggal_deadline_lama)->format('d M Y') }}</strong> 
+                        menjadi 
+                        <strong class="text-success">{{ \Carbon\Carbon::parse($perpanjangan->tanggal_deadline_baru)->format('d M Y') }}</strong>
+                        @if($perpanjangan->durasi_perpanjangan)
+                            <span class="badge badge-custom" style="background: #a855f7 !important; color: white;">
+                                +{{ $perpanjangan->durasi_perpanjangan }} hari
+                            </span>
+                        @endif
+                    </small>
+                    @if($perpanjangan->petugas)
+                    <br>
+                    <small class="d-block mt-1">
+                        <i class="bi bi-person-badge me-1"></i>
+                        Diproses oleh: <strong>{{ $perpanjangan->petugas->name }}</strong>
+                    </small>
+                    @endif
+                </div>
+            </div>
+            @endforeach
 
             <!-- Deadline -->
             @if($peminjaman->tanggal_deadline)

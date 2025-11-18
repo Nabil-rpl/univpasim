@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+
     <title>{{ config('app.name', 'Admin Dashboard') }} - @yield('title', 'Dashboard')</title>
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+
     <!-- Custom CSS -->
     <style>
         :root {
@@ -54,7 +55,7 @@
         .sidebar-brand {
             padding: 0 25px 25px;
             text-align: center;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 10px;
         }
 
@@ -76,8 +77,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
         }
 
         .sidebar-menu {
@@ -93,7 +101,7 @@
             display: flex;
             align-items: center;
             padding: 14px 18px;
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
             transition: all 0.3s ease;
             border-radius: 12px;
@@ -177,7 +185,7 @@
         /* Menu Section Header */
         .menu-section {
             padding: 25px 20px 12px;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255, 255, 255, 0.4);
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -210,7 +218,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             position: sticky;
             top: 0;
             z-index: 999;
@@ -322,7 +330,7 @@
         /* Dropdown Menu */
         .dropdown-menu {
             border: none;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             border-radius: 12px;
             padding: 10px;
             margin-top: 10px;
@@ -397,7 +405,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 999;
             backdrop-filter: blur(4px);
         }
@@ -412,7 +420,7 @@
         }
 
         .sidebar::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .sidebar::-webkit-scrollbar-thumb {
@@ -424,9 +432,10 @@
             background: linear-gradient(180deg, rgba(94, 114, 228, 0.8), rgba(94, 114, 228, 0.5));
         }
     </style>
-    
+
     @stack('styles')
 </head>
+
 <body>
     <!-- Sidebar Overlay (Mobile) -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -436,11 +445,12 @@
         <div class="sidebar-brand">
             <h4><i class="bi bi-mortarboard-fill"></i> AdminPASIM</h4>
         </div>
-        
+
         <ul class="sidebar-menu">
             <!-- Dashboard -->
             <li>
-                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('admin.dashboard') }}"
+                    class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
@@ -448,22 +458,25 @@
 
             <!-- Management Section -->
             <div class="menu-section">Management</div>
-            
+
             <li>
-                <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.users.index') }}"
+                    class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                     <i class="bi bi-people-fill"></i>
                     <span>Kelola User</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.mahasiswa.index') }}" class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.mahasiswa.index') }}"
+                    class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}">
                     <i class="bi bi-person-badge-fill"></i>
                     <span>Data Mahasiswa</span>
                     <span class="menu-badge">New</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.buku.index') }}" class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.buku.index') }}"
+                    class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
                     <i class="bi bi-book-fill"></i>
                     <span>Kelola Buku</span>
                 </a>
@@ -471,19 +484,29 @@
 
             <!-- Transactions Section -->
             <div class="menu-section">Transaksi</div>
-            
+
             <li>
-                <a href="{{ route('admin.peminjaman.index') }}" class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.peminjaman.index') }}"
+                    class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}">
                     <i class="bi bi-journal-text"></i>
                     <span>Peminjaman</span>
                 </a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/perpanjangan*') ? 'active' : '' }}"
+                    href="{{ route('admin.perpanjangan.index') }}">
+                    <i class="bi bi-calendar-check"></i>
+                    <span class="nav-link-text ms-1">Perpanjangan</span>
+                </a>
+            </li>
+
             <!-- Reports Section -->
             <div class="menu-section">Laporan</div>
-            
+
             <li>
-                <a href="{{ route('admin.laporan.index') }}" class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.laporan.index') }}"
+                    class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text-fill"></i>
                     <span>Laporan Petugas</span>
                 </a>
@@ -501,7 +524,7 @@
                 </button>
                 <h5>@yield('page-title', 'Dashboard')</h5>
             </div>
-            
+
             <div class="navbar-right">
                 <!-- Notifications -->
                 <div class="dropdown">
@@ -512,10 +535,17 @@
                         </span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header">Notifikasi</h6></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle-fill text-info"></i> User baru terdaftar</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-exclamation-triangle-fill text-warning"></i> Update sistem tersedia</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <h6 class="dropdown-header">Notifikasi</h6>
+                        </li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle-fill text-info"></i>
+                                User baru terdaftar</a></li>
+                        <li><a class="dropdown-item" href="#"><i
+                                    class="bi bi-exclamation-triangle-fill text-warning"></i> Update sistem tersedia</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li><a class="dropdown-item text-center" href="#">Lihat semua</a></li>
                     </ul>
                 </div>
@@ -538,7 +568,9 @@
                                 <i class="bi bi-person-fill"></i> Profil Saya
                             </a>
                         </li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li>
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
@@ -560,7 +592,7 @@
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Custom JS -->
     <script>
         // Mobile Menu Toggle
@@ -588,7 +620,8 @@
             });
         }
     </script>
-    
+
     @stack('scripts')
 </body>
+
 </html>
