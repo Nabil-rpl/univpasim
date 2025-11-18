@@ -121,6 +121,15 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/laporan', 'index')->name('laporan.index');
             Route::get('/laporan/{laporan}', 'show')->name('laporan.show');
         });
+
+        // Di dalam Route::middleware(['auth', 'role:admin']) group
+
+// Perpanjangan (Admin Read-Only)
+Route::prefix('perpanjangan')->as('perpanjangan.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'index'])->name('index');
+    Route::get('/{id}', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'show'])->name('show');
+    Route::get('/export/csv', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'export'])->name('export');
+});
     });
 
 // ============================================

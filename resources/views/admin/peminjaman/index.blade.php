@@ -22,6 +22,7 @@
     .stats-card.success { border-left-color: #10b981; }
     .stats-card.warning { border-left-color: #f59e0b; }
     .stats-card.danger { border-left-color: #ef4444; }
+    .stats-card.purple { border-left-color: #8b5cf6; }
 
     .stats-icon {
         width: 60px;
@@ -38,6 +39,7 @@
     .bg-success-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
     .bg-warning-gradient { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
     .bg-danger-gradient { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+    .bg-purple-gradient { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
 
     .filter-card {
         background: white;
@@ -60,6 +62,36 @@
         font-size: 0.85rem;
         font-weight: 600;
         white-space: nowrap;
+    }
+
+    .extension-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% {
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        }
+        50% {
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.5);
+        }
+    }
+
+    .extension-count {
+        background: rgba(255, 255, 255, 0.3);
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-weight: 700;
     }
 
     .deadline-info {
@@ -141,18 +173,6 @@
         display: flex;
         flex-direction: column;
         gap: 4px;
-    }
-
-    .info-label {
-        font-size: 0.75rem;
-        color: #64748b;
-        font-weight: 500;
-    }
-
-    .info-value {
-        font-size: 0.9rem;
-        color: #1e293b;
-        font-weight: 600;
     }
 
     .user-info-container {
@@ -273,7 +293,7 @@
 <div class="container-fluid mt-4">
     <!-- Page Header -->
     <div class="page-header">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <h3 class="mb-1">
                     <i class="bi bi-journal-bookmark-fill me-2"></i>Data Peminjaman Buku
@@ -289,24 +309,13 @@
     </div>
 
     <!-- Statistik Cards -->
-    @php
-        $stats = [
-            'total' => $peminjamans->count(),
-            'dipinjam' => $peminjamans->where('status', 'dipinjam')->count(),
-            'dikembalikan' => $peminjamans->where('status', 'dikembalikan')->count(),
-            'terlambat' => $peminjamans->where('status', 'dipinjam')->filter(function($item) {
-                return $item->isTerlambat();
-            })->count()
-        ];
-    @endphp
-
     <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
+        <div class="col-lg col-md-6 mb-3">
             <div class="stats-card primary">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Total Peminjaman</h6>
-                        <h2 class="mb-0 fw-bold">{{ $stats['total'] }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ $statistics['total_peminjaman'] }}</h2>
                         <small class="text-muted">Seluruh data</small>
                     </div>
                     <div class="stats-icon bg-primary-gradient">
@@ -316,12 +325,12 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 mb-3">
+        <div class="col-lg col-md-6 mb-3">
             <div class="stats-card warning">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Sedang Dipinjam</h6>
-                        <h2 class="mb-0 fw-bold">{{ $stats['dipinjam'] }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ $statistics['sedang_dipinjam'] }}</h2>
                         <small class="text-muted">Aktif saat ini</small>
                     </div>
                     <div class="stats-icon bg-warning-gradient">
@@ -331,12 +340,12 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 mb-3">
+        <div class="col-lg col-md-6 mb-3">
             <div class="stats-card success">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Sudah Dikembalikan</h6>
-                        <h2 class="mb-0 fw-bold">{{ $stats['dikembalikan'] }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ $statistics['sudah_dikembalikan'] }}</h2>
                         <small class="text-muted">Transaksi selesai</small>
                     </div>
                     <div class="stats-icon bg-success-gradient">
@@ -346,12 +355,27 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 mb-3">
+        <div class="col-lg col-md-6 mb-3">
+            <div class="stats-card purple">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Diperpanjang</h6>
+                        <h2 class="mb-0 fw-bold">{{ $statistics['diperpanjang'] }}</h2>
+                        <small class="text-muted">Ada perpanjangan</small>
+                    </div>
+                    <div class="stats-icon bg-purple-gradient">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg col-md-6 mb-3">
             <div class="stats-card danger">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Terlambat</h6>
-                        <h2 class="mb-0 fw-bold">{{ $stats['terlambat'] }}</h2>
+                        <h2 class="mb-0 fw-bold">{{ $statistics['terlambat'] }}</h2>
                         <small class="text-muted">Perlu perhatian</small>
                     </div>
                     <div class="stats-icon bg-danger-gradient">
@@ -379,27 +403,60 @@
     </div>
     @endif
 
-    <!-- Filter & Info -->
+    <!-- Filter & Search -->
     <div class="filter-card">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <div class="d-flex align-items-center">
-                    <div class="me-4">
-                        <i class="bi bi-funnel text-primary" style="font-size: 1.5rem;"></i>
-                    </div>
-                    <div>
-                        <h5 class="mb-1">Filter Data</h5>
-                        <p class="text-muted mb-0 small">Menampilkan semua data peminjaman yang tercatat</p>
+        <form method="GET" action="{{ route('admin.peminjaman.index') }}">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-semibold mb-2">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Semua Status</option>
+                        <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
+                        <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-semibold mb-2">Tipe Peminjam</label>
+                    <select name="tipe_peminjam" class="form-select">
+                        <option value="">Semua Tipe</option>
+                        <option value="mahasiswa" {{ request('tipe_peminjam') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
+                        <option value="pengguna_luar" {{ request('tipe_peminjam') == 'pengguna_luar' ? 'selected' : '' }}>Pengguna Luar</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-semibold mb-2">Perpanjangan</label>
+                    <select name="diperpanjang" class="form-select">
+                        <option value="">Semua</option>
+                        <option value="ya" {{ request('diperpanjang') == 'ya' ? 'selected' : '' }}>✅ Ada Perpanjangan</option>
+                        <option value="tidak" {{ request('diperpanjang') == 'tidak' ? 'selected' : '' }}>❌ Tidak Ada</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label small fw-semibold mb-2">Pencarian</label>
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Cari nama, NIM, atau judul buku..." 
+                           value="{{ request('search') }}">
+                </div>
+
+                <div class="col-lg-2 col-md-12">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">
+                            <i class="bi bi-search me-2"></i>Filter
+                        </button>
+                        @if(request()->anyFilled(['status', 'tipe_peminjam', 'diperpanjang', 'search']))
+                            <a href="{{ route('admin.peminjaman.index') }}" 
+                               class="btn btn-outline-secondary" 
+                               title="Reset Filter">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 text-end">
-                <div class="badge bg-info px-3 py-2">
-                    <i class="bi bi-clock-history me-1"></i>
-                    Update: {{ now()->format('d M Y, H:i') }}
-                </div>
-            </div>
-        </div>
+        </form>
     </div>
 
     <!-- Table -->
@@ -409,7 +466,7 @@
                 <i class="bi bi-table me-2"></i>Daftar Peminjaman
             </h5>
             <span class="text-muted small">
-                Total: <strong>{{ $stats['total'] }}</strong> data
+                Total: <strong>{{ $peminjamans->total() }}</strong> data
             </span>
         </div>
 
@@ -432,7 +489,7 @@
                     @forelse($peminjamans as $index => $item)
                     <tr>
                         <td class="text-center">
-                            <span class="fw-bold text-muted">{{ $index + 1 }}</span>
+                            <span class="fw-bold text-muted">{{ $peminjamans->firstItem() + $index }}</span>
                         </td>
                         
                         <!-- Peminjam -->
@@ -485,8 +542,19 @@
                                     <i class="bi bi-book-fill"></i>
                                 </div>
                                 <div class="book-details">
-                                    <div class="book-title">{{ $item->buku->judul }}</div>
+                                    <div class="book-title">{{ Str::limit($item->buku->judul, 40) }}</div>
                                     <div class="book-author">{{ $item->buku->penulis }}</div>
+                                    
+                                    <!-- Extension Badge -->
+                                    @if($item->perpanjangan->isNotEmpty())
+                                        <div class="mt-2">
+                                            <span class="extension-badge">
+                                                <i class="bi bi-arrow-repeat"></i>
+                                                Diperpanjang
+                                                <span class="extension-count">{{ $item->perpanjangan->count() }}x</span>
+                                            </span>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </td>
@@ -609,24 +677,22 @@
             </table>
         </div>
 
-        <!-- Footer Info -->
-        @if($peminjamans->count() > 0)
+        <!-- Pagination -->
+        @if($peminjamans->hasPages())
         <div class="mt-4 pt-3 border-top">
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <div class="d-flex align-items-center text-muted">
                         <i class="bi bi-info-circle me-2"></i>
                         <span>
-                            Menampilkan <strong>{{ $peminjamans->count() }}</strong> dari 
-                            <strong>{{ $stats['total'] }}</strong> total peminjaman
+                            Menampilkan <strong>{{ $peminjamans->firstItem() }}</strong> hingga 
+                            <strong>{{ $peminjamans->lastItem() }}</strong> dari 
+                            <strong>{{ $peminjamans->total() }}</strong> total peminjaman
                         </span>
                     </div>
                 </div>
-                <div class="col-md-6 text-end">
-                    <small class="text-muted">
-                        <i class="bi bi-shield-check me-1"></i>
-                        Data di-monitoring oleh Admin
-                    </small>
+                <div class="col-md-6">
+                    {{ $peminjamans->links() }}
                 </div>
             </div>
         </div>
