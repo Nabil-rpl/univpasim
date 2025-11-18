@@ -176,20 +176,20 @@ class MahasiswaController extends Controller
     public function export(Request $request)
     {
         $query = Mahasiswa::query();
-
+    
         if ($request->filled('jurusan')) {
             $query->where('jurusan', $request->jurusan);
         }
-
+    
         $mahasiswas = $query->get();
-
+    
         $filename = 'data_mahasiswa_' . date('YmdHis') . '.csv';
         
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename={$filename}",
         ];
-
+    
         $callback = function() use ($mahasiswas) {
             $file = fopen('php://output', 'w');
             
@@ -197,6 +197,7 @@ class MahasiswaController extends Controller
             fputcsv($file, ['ID', 'Nama', 'Email', 'NIM', 'Jurusan', 'Tanggal Daftar']);
             
             // Data
+            /** @var \App\Models\Mahasiswa $mhs */
             foreach ($mahasiswas as $mhs) {
                 fputcsv($file, [
                     $mhs->id,
@@ -210,7 +211,7 @@ class MahasiswaController extends Controller
             
             fclose($file);
         };
-
+    
         return response()->stream($callback, 200, $headers);
     }
 }

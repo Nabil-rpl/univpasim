@@ -23,6 +23,7 @@ use App\Http\Controllers\Petugas\QRCodeController as PetugasQRCodeController;
 use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
 use App\Http\Controllers\Petugas\PeminjamanController as PetugasPeminjamanController;
 use App\Http\Controllers\Petugas\PengembalianController;
+use App\Http\Controllers\Petugas\PerpanjanganController;
 
 // Mahasiswa
 use App\Http\Controllers\Mahasiswa\MahasiswaController as MahasiswaUserController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\Mahasiswa\BukuController as MahasiswaBukuController;
 use App\Http\Controllers\Mahasiswa\PeminjamanController as MahasiswaPeminjamanController;
 use App\Http\Controllers\Mahasiswa\RiwayatController as MahasiswaRiwayatController;
 use App\Http\Controllers\Mahasiswa\QRScannerController;
+use App\Http\Controllers\Mahasiswa\PerpanjanganController as MahasiswaPerpanjanganController;
 
 // Pengguna Luar
 use App\Http\Controllers\PenggunaLuar\BukuController as PenggunaLuarBukuController;
@@ -149,14 +151,23 @@ Route::middleware(['auth', 'role:petugas'])
             Route::delete('/{id}', [PetugasPeminjamanController::class, 'destroy'])->name('destroy');
         });
 
-       // Pengembalian Routes
-Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
-    Route::get('/', [PengembalianController::class, 'index'])->name('index');
-    Route::get('/search', [PengembalianController::class, 'search'])->name('search');
-    Route::get('/riwayat', [PengembalianController::class, 'riwayat'])->name('riwayat');
-    Route::get('/{peminjaman_id}', [PengembalianController::class, 'show'])->name('show');
-    Route::post('/{peminjaman_id}', [PengembalianController::class, 'store'])->name('store');
-});
+        // Pengembalian Routes
+        Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
+            Route::get('/', [PengembalianController::class, 'index'])->name('index');
+            Route::get('/search', [PengembalianController::class, 'search'])->name('search');
+            Route::get('/riwayat', [PengembalianController::class, 'riwayat'])->name('riwayat');
+            Route::get('/{peminjaman_id}', [PengembalianController::class, 'show'])->name('show');
+            Route::post('/{peminjaman_id}', [PengembalianController::class, 'store'])->name('store');
+        });
+
+        // ✅ PERPANJANGAN ROUTES (PETUGAS) - UPDATED & FIXED
+        Route::prefix('perpanjangan')->name('perpanjangan.')->group(function () {
+            Route::get('/', [PerpanjanganController::class, 'index'])->name('index');
+            Route::get('/riwayat', [PerpanjanganController::class, 'riwayat'])->name('riwayat');
+            Route::get('/{id}', [PerpanjanganController::class, 'show'])->name('show');
+            Route::post('/{id}/approve', [PerpanjanganController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [PerpanjanganController::class, 'reject'])->name('reject');
+        });
 
         // Profile Petugas
         Route::prefix('profile')->as('profile.')->group(function () {
@@ -195,6 +206,13 @@ Route::middleware(['auth', 'role:mahasiswa'])
         Route::get('/peminjaman', [MahasiswaPeminjamanController::class, 'index'])->name('peminjaman.index');
         Route::get('/peminjaman/riwayat', [MahasiswaPeminjamanController::class, 'riwayat'])->name('peminjaman.riwayat');
         Route::get('/peminjaman/{id}', [MahasiswaPeminjamanController::class, 'show'])->name('peminjaman.show');
+
+        // ✅ PERPANJANGAN ROUTES (MAHASISWA) - SUDAH OK
+        Route::prefix('perpanjangan')->name('perpanjangan.')->group(function () {
+            Route::get('/{peminjaman}', [MahasiswaPerpanjanganController::class, 'create'])->name('create');
+            Route::post('/{peminjaman}', [MahasiswaPerpanjanganController::class, 'store'])->name('store');
+            Route::delete('/{perpanjangan}/cancel', [MahasiswaPerpanjanganController::class, 'cancel'])->name('cancel');
+        });
 
         // Riwayat
         Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])->name('riwayat.index');
