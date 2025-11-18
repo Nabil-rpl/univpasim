@@ -312,6 +312,19 @@
         color: white;
     }
 
+    .btn-warning-custom {
+        background: linear-gradient(135deg, #FBBF24, #F59E0B);
+        color: white;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-warning-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        color: white;
+    }
+
     /* Table Card */
     .table-card-custom {
         background: #FFFFFF;
@@ -678,13 +691,13 @@
                         <thead>
                             <tr>
                                 <th width="5%">No</th>
-                                <th width="30%">Buku</th>
-                                <th width="13%">Tanggal Pinjam</th>
-                                <th width="13%">Tanggal Deadline</th>
-                                <th width="13%">Tanggal Kembali</th>
-                                <th width="12%">Status</th>
-                                <th width="12%">Denda</th>
-                                <th width="12%" class="text-center">Aksi</th>
+                                <th width="25%">Buku</th>
+                                <th width="12%">Tanggal Pinjam</th>
+                                <th width="12%">Tanggal Deadline</th>
+                                <th width="12%">Tanggal Kembali</th>
+                                <th width="10%">Status</th>
+                                <th width="10%">Denda</th>
+                                <th width="14%" class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -713,6 +726,14 @@
                                     <td>
                                         <i class="bi bi-calendar-date" style="color: #F59E0B;"></i>
                                         {{ $p->tanggal_deadline->format('d M Y') }}
+                                        
+                                        {{-- Tampilkan badge jika ada perpanjangan --}}
+                                        @if($p->perpanjangan()->where('status', 'disetujui')->count() > 0)
+                                            <br>
+                                            <small class="badge bg-info mt-1">
+                                                <i class="bi bi-arrow-clockwise"></i> Diperpanjang
+                                            </small>
+                                        @endif
                                     </td>
                                     <td>
                                         @if ($p->tanggal_kembali)
@@ -731,6 +752,14 @@
                                             <span class="badge-custom {{ $badgeClass }}">
                                                 <i class="bi bi-hourglass-split"></i>Dipinjam
                                             </span>
+                                            
+                                            {{-- Tampilkan status perpanjangan menunggu --}}
+                                            @if($p->hasPerpanjanganMenunggu())
+                                                <br>
+                                                <small class="badge bg-warning mt-1">
+                                                    <i class="bi bi-clock"></i> Menunggu Persetujuan
+                                                </small>
+                                            @endif
                                         @else
                                             <span class="badge-custom badge-success-custom">
                                                 <i class="bi bi-check-circle"></i>Dikembalikan
@@ -751,9 +780,23 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('mahasiswa.peminjaman.show', $p->id) }}" class="btn-custom btn-info-custom" title="Detail">
-                                            <i class="bi bi-eye"></i>Detail
-                                        </a>
+                                        <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                            <a href="{{ route('mahasiswa.peminjaman.show', $p->id) }}" 
+                                               class="btn-custom btn-info-custom" 
+                                               title="Detail"
+                                               style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                                                <i class="bi bi-eye"></i> Detail
+                                            </a>
+                                            
+                                            @if($p->status == 'dipinjam' && $p->bisakahDiperpanjang())
+                                                <a href="{{ route('mahasiswa.perpanjangan.create', $p->id) }}" 
+                                                   class="btn-custom btn-warning-custom" 
+                                                   title="Perpanjang"
+                                                   style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                                                    <i class="bi bi-arrow-clockwise"></i> Perpanjang
+                                                </a>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

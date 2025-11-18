@@ -432,6 +432,10 @@
         .sidebar-menu li:nth-child(8) {
             animation-delay: 0.8s;
         }
+
+        .sidebar-menu li:nth-child(9) {
+            animation-delay: 0.9s;
+        }
     </style>
 </head>
 
@@ -481,6 +485,21 @@
                 <a href="{{ route('petugas.pengembalian.index') }}"
                     class="{{ request()->routeIs('petugas.pengembalian.*') ? 'active' : '' }}">
                     <i class="bi bi-arrow-return-left"></i> <span>Pengembalian</span>
+                </a>
+            </li>
+            
+            {{-- ✅ MENU PERPANJANGAN BARU --}}
+            <li>
+                <a href="{{ route('petugas.perpanjangan.index') }}"
+                    class="{{ request()->routeIs('petugas.perpanjangan.*') ? 'active' : '' }}">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>Perpanjangan</span>
+                    @php
+                        $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
+                    @endphp
+                    @if ($perpanjanganMenunggu > 0)
+                        <span class="badge">{{ $perpanjanganMenunggu }}</span>
+                    @endif
                 </a>
             </li>
 
