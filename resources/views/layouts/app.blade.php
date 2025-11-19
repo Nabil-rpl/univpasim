@@ -368,12 +368,6 @@
             position: relative;
         }
 
-        /* Notification Badge */
-        .badge.bg-danger {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
-            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.4);
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -526,30 +520,6 @@
             </div>
 
             <div class="navbar-right">
-                <!-- Notifications -->
-                <div class="dropdown">
-                    <button class="btn btn-light position-relative" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-bell-fill"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
-                        </span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <h6 class="dropdown-header">Notifikasi</h6>
-                        </li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle-fill text-info"></i>
-                                User baru terdaftar</a></li>
-                        <li><a class="dropdown-item" href="#"><i
-                                    class="bi bi-exclamation-triangle-fill text-warning"></i> Update sistem tersedia</a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item text-center" href="#">Lihat semua</a></li>
-                    </ul>
-                </div>
-
                 <!-- User Dropdown -->
                 <div class="dropdown">
                     <div class="user-info" data-bs-toggle="dropdown">
