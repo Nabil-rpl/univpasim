@@ -10,12 +10,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
     public function __construct()
     {
         $this->middleware(['auth', 'role:mahasiswa']);
+        
+        // ✅ Set locale Carbon ke Indonesia
+        Carbon::setLocale('id');
     }
 
     /**
@@ -122,6 +126,7 @@ class PeminjamanController extends Controller
 
     /**
      * Proses pinjam buku
+     * ✅ UPDATED: Menggunakan timezone WIB (Asia/Jakarta)
      */
     public function pinjam($id)
     {
@@ -170,15 +175,23 @@ class PeminjamanController extends Controller
                 return redirect()->back()->with('error', 'Anda sudah mencapai batas maksimal peminjaman (3 buku).');
             }
 
-            // Hitung tanggal deadline (3 hari dari sekarang)
-            $tanggalDeadline = now()->addDays(3);
+            // ✅ FIXED: Gunakan Carbon dengan timezone Asia/Jakarta secara eksplisit
+            $tanggalPinjam = Carbon::now('Asia/Jakarta');
+            $tanggalDeadline = Carbon::now('Asia/Jakarta')->addDays(3);
+
+            // Log untuk debugging
+            Log::info('Waktu peminjaman', [
+                'tanggal_pinjam' => $tanggalPinjam->format('Y-m-d H:i:s'),
+                'tanggal_deadline' => $tanggalDeadline->format('Y-m-d H:i:s'),
+                'timezone' => $tanggalPinjam->timezone->getName()
+            ]);
 
             // Buat peminjaman baru
             $peminjaman = Peminjaman::create([
                 'mahasiswa_id' => $user->id,
                 'buku_id' => $buku->id,
-                'petugas_id' => null, // Akan diisi oleh command atau petugas
-                'tanggal_pinjam' => now(),
+                'petugas_id' => null,
+                'tanggal_pinjam' => $tanggalPinjam,
                 'durasi_hari' => 3,
                 'tanggal_deadline' => $tanggalDeadline,
                 'tanggal_kembali' => null,
@@ -193,8 +206,9 @@ class PeminjamanController extends Controller
 
             DB::commit();
 
+            // ✅ Format tanggal dalam Bahasa Indonesia
             return redirect()->route('mahasiswa.peminjaman.index')
-                ->with('success', "Berhasil meminjam buku '{$buku->judul}'. Harap kembalikan sebelum " . $tanggalDeadline->format('d M Y'));
+                ->with('success', "Berhasil meminjam buku '{$buku->judul}'. Harap kembalikan sebelum " . $tanggalDeadline->translatedFormat('l, d F Y H:i') . ' WIB');
 
         } catch (\Exception $e) {
             DB::rollBack();
