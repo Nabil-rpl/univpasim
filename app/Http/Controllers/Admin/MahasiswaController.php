@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mahasiswa;
+use App\Models\Notifikasi;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -70,10 +72,44 @@ class MahasiswaController extends Controller
             'nim.unique' => 'NIM sudah terdaftar',
         ]);
 
-        Mahasiswa::create($validated);
+        DB::beginTransaction();
+        try {
+            // Create mahasiswa
+            $mahasiswa = Mahasiswa::create($validated);
 
-        return redirect()->route('admin.mahasiswa.index')
-                        ->with('success', 'Data mahasiswa berhasil ditambahkan');
+            // ✅ KIRIM NOTIFIKASI KE SEMUA ADMIN
+            $adminUsers = User::where('role', 'admin')->pluck('id');
+            
+            foreach ($adminUsers as $adminId) {
+                Notifikasi::create([
+                    'user_id' => $adminId,
+                    'tipe' => 'mahasiswa_baru',
+                    'judul' => 'Mahasiswa Baru Terdaftar',
+                    'isi' => "Mahasiswa baru dengan nama {$mahasiswa->nama} (NIM: {$mahasiswa->nim}) telah ditambahkan ke sistem.",
+                    'related_type' => 'mahasiswa',
+                    'related_id' => $mahasiswa->id,
+                    'data' => json_encode([
+                        'nama' => $mahasiswa->nama,
+                        'nim' => $mahasiswa->nim,
+                        'email' => $mahasiswa->email,
+                        'jurusan' => $mahasiswa->jurusan ?? '-',
+                    ]),
+                    'dibaca' => false,
+                    'prioritas' => 'normal',
+                    'dibuat_oleh' => auth()->id(),
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.mahasiswa.index')
+                            ->with('success', 'Data mahasiswa berhasil ditambahkan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                            ->withInput()
+                            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -131,6 +167,28 @@ class MahasiswaController extends Controller
                 ]);
             }
 
+            // ✅ KIRIM NOTIFIKASI UPDATE KE ADMIN (OPSIONAL)
+            if ($oldEmail !== $validated['email']) {
+                $adminUsers = User::where('role', 'admin')->pluck('id');
+                
+                foreach ($adminUsers as $adminId) {
+                    Notifikasi::create([
+                        'user_id' => $adminId,
+                        'tipe' => 'sistem',
+                        'judul' => 'Data Mahasiswa Diupdate',
+                        'isi' => "Data mahasiswa {$mahasiswa->nama} (NIM: {$mahasiswa->nim}) telah diperbarui.",
+                        'related_type' => 'mahasiswa',
+                        'related_id' => $mahasiswa->id,
+                        'data' => json_encode([
+                            'perubahan' => 'Email diubah dari ' . $oldEmail . ' ke ' . $validated['email'],
+                        ]),
+                        'dibaca' => false,
+                        'prioritas' => 'rendah',
+                        'dibuat_oleh' => auth()->id(),
+                    ]);
+                }
+            }
+
             DB::commit();
             return redirect()->route('admin.mahasiswa.index')
                             ->with('success', 'Data mahasiswa berhasil diupdate');
@@ -152,6 +210,7 @@ class MahasiswaController extends Controller
         DB::beginTransaction();
         try {
             $namaMahasiswa = $mahasiswa->nama;
+            $nimMahasiswa = $mahasiswa->nim;
             
             // Hapus user terkait jika ada
             if ($mahasiswa->user) {
@@ -159,6 +218,30 @@ class MahasiswaController extends Controller
             }
             
             $mahasiswa->delete();
+
+            // ✅ KIRIM NOTIFIKASI HAPUS KE ADMIN (OPSIONAL)
+            $adminUsers = User::where('role', 'admin')
+                             ->where('id', '!=', auth()->id()) // Exclude current admin
+                             ->pluck('id');
+            
+            foreach ($adminUsers as $adminId) {
+                Notifikasi::create([
+                    'user_id' => $adminId,
+                    'tipe' => 'sistem',
+                    'judul' => 'Data Mahasiswa Dihapus',
+                    'isi' => "Data mahasiswa {$namaMahasiswa} (NIM: {$nimMahasiswa}) telah dihapus dari sistem oleh " . auth()->user()->name . ".",
+                    'related_type' => 'mahasiswa',
+                    'related_id' => null,
+                    'data' => json_encode([
+                        'nama' => $namaMahasiswa,
+                        'nim' => $nimMahasiswa,
+                        'dihapus_oleh' => auth()->user()->name,
+                    ]),
+                    'dibaca' => false,
+                    'prioritas' => 'normal',
+                    'dibuat_oleh' => auth()->id(),
+                ]);
+            }
 
             DB::commit();
             return redirect()->route('admin.mahasiswa.index')

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PeminjamanController;
 use App\Http\Controllers\Admin\QRCodeController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\LaporanController as AdminLaporanController;
+use App\Http\Controllers\Admin\NotifikasiController; // ✅ TAMBAHKAN INI
 
 // Petugas
 use App\Http\Controllers\Petugas\LaporanController;
@@ -97,10 +98,10 @@ Route::middleware(['auth', 'role:admin'])
         // CRUD Buku
         Route::resource('buku', BukuController::class);
 
-        // CRUD Peminjaman (✅ DIPERBAIKI - DITAMBAHKAN ROUTE SHOW)
+        // CRUD Peminjaman
         Route::controller(PeminjamanController::class)->group(function () {
             Route::get('/peminjaman', 'index')->name('peminjaman.index');
-            Route::get('/peminjaman/{id}', 'show')->name('peminjaman.show'); // ✅ ROUTE DETAIL
+            Route::get('/peminjaman/{id}', 'show')->name('peminjaman.show');
             Route::post('/peminjaman', 'store')->name('peminjaman.store');
             Route::put('/peminjaman/{id}', 'update')->name('peminjaman.update');
             Route::delete('/peminjaman/{id}', 'destroy')->name('peminjaman.destroy');
@@ -122,14 +123,27 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/laporan/{laporan}', 'show')->name('laporan.show');
         });
 
-        // Di dalam Route::middleware(['auth', 'role:admin']) group
+        // Perpanjangan (Admin Read-Only)
+        Route::prefix('perpanjangan')->as('perpanjangan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'index'])->name('index');
+            Route::get('/{id}', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'show'])->name('show');
+            Route::get('/export/csv', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'export'])->name('export');
+        });
 
-// Perpanjangan (Admin Read-Only)
-Route::prefix('perpanjangan')->as('perpanjangan.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'index'])->name('index');
-    Route::get('/{id}', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'show'])->name('show');
-    Route::get('/export/csv', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'export'])->name('export');
-});
+        // ✅ NOTIFIKASI ROUTES (ADMIN) - TAMBAHKAN INI
+        Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
+            Route::get('/', [NotifikasiController::class, 'index'])->name('index');
+            Route::get('/{id}', [NotifikasiController::class, 'show'])->name('show');
+            Route::post('/{id}/baca', [NotifikasiController::class, 'markAsRead'])->name('markAsRead');
+            Route::post('/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('markAllAsRead');
+            Route::delete('/{id}', [NotifikasiController::class, 'destroy'])->name('destroy');
+        });
+
+        // ✅ API NOTIFIKASI (UNTUK AJAX) - TAMBAHKAN INI
+        Route::prefix('api/notifikasi')->as('api.notifikasi.')->group(function () {
+            Route::get('/latest', [NotifikasiController::class, 'getLatest'])->name('latest');
+            Route::get('/count', [NotifikasiController::class, 'getUnreadCount'])->name('count');
+        });
     });
 
 // ============================================
@@ -169,7 +183,7 @@ Route::middleware(['auth', 'role:petugas'])
             Route::post('/{peminjaman_id}', [PengembalianController::class, 'store'])->name('store');
         });
 
-        // ✅ PERPANJANGAN ROUTES (PETUGAS) - UPDATED & FIXED
+        // Perpanjangan Routes (Petugas)
         Route::prefix('perpanjangan')->name('perpanjangan.')->group(function () {
             Route::get('/', [PerpanjanganController::class, 'index'])->name('index');
             Route::get('/riwayat', [PerpanjanganController::class, 'riwayat'])->name('riwayat');
@@ -216,7 +230,7 @@ Route::middleware(['auth', 'role:mahasiswa'])
         Route::get('/peminjaman/riwayat', [MahasiswaPeminjamanController::class, 'riwayat'])->name('peminjaman.riwayat');
         Route::get('/peminjaman/{id}', [MahasiswaPeminjamanController::class, 'show'])->name('peminjaman.show');
 
-        // ✅ PERPANJANGAN ROUTES (MAHASISWA) - SUDAH OK
+        // Perpanjangan Routes (Mahasiswa)
         Route::prefix('perpanjangan')->name('perpanjangan.')->group(function () {
             Route::get('/{peminjaman}', [MahasiswaPerpanjanganController::class, 'create'])->name('create');
             Route::post('/{peminjaman}', [MahasiswaPerpanjanganController::class, 'store'])->name('store');

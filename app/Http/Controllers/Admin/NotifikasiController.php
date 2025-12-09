@@ -12,17 +12,40 @@ class NotifikasiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        // ✅ PERBAIKAN: Tambahkan filter user_id untuk admin yang login
+        $query = Notifikasi::where('user_id', auth()->id());
 
-        $belumDibaca = Notifikasi::where('user_id', auth()->id())
-            ->belumDibaca()
-            ->count();
+        // Filter Status
+        if ($request->status == 'unread') {
+            $query->where('dibaca', false);
+        } elseif ($request->status == 'read') {
+            $query->where('dibaca', true);
+        }
 
-        return view('admin.notifikasi.index', compact('notifikasi', 'belumDibaca'));
+        // Filter Tipe
+        if ($request->tipe) {
+            $query->where('tipe', $request->tipe);
+        }
+
+        // Search
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('judul', 'like', '%' . $request->search . '%')
+                  ->orWhere('isi', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Ambil data notifikasi dengan pagination
+        $notifikasi = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        // Hitung notifikasi belum dibaca untuk user yang login
+        $unreadCount = Notifikasi::where('user_id', auth()->id())
+                                 ->where('dibaca', false)
+                                 ->count();
+
+        return view('admin.notifikasi.index', compact('notifikasi', 'unreadCount'));
     }
 
     /**
@@ -85,7 +108,10 @@ class NotifikasiController extends Controller
 
         // Tandai sebagai dibaca
         if (!$notifikasi->dibaca) {
-            $notifikasi->tandaiDibaca();
+            $notifikasi->update([
+                'dibaca' => true,
+                'dibaca_pada' => now()
+            ]);
         }
 
         return view('admin.notifikasi.show', compact('notifikasi'));
@@ -99,7 +125,10 @@ class NotifikasiController extends Controller
         $notifikasi = Notifikasi::where('user_id', auth()->id())
             ->findOrFail($id);
 
-        $notifikasi->tandaiDibaca();
+        $notifikasi->update([
+            'dibaca' => true,
+            'dibaca_pada' => now()
+        ]);
 
         if (request()->ajax()) {
             return response()->json(['success' => true]);
@@ -166,7 +195,7 @@ class NotifikasiController extends Controller
     public function getUnreadCount()
     {
         $count = Notifikasi::where('user_id', auth()->id())
-            ->belumDibaca()
+            ->where('dibaca', false)
             ->count();
 
         return response()->json(['count' => $count]);
