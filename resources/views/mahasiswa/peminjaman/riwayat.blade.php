@@ -708,7 +708,8 @@
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="book-icon-custom">
                                                 @if ($p->buku->foto)
-                                                    <img src="{{ asset('storage/foto_buku/' . $p->buku->foto) }}" alt="{{ $p->buku->judul }}">
+                                                    <img src="{{ asset('storage/' . $p->buku->foto) }}"
+                                                        alt="{{ $p->buku->judul }}">
                                                 @else
                                                     <i class="bi bi-book-fill"></i>
                                                 @endif

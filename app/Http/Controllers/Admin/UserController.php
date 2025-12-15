@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Mahasiswa;
+use App\Models\Notifikasi; // ✅ TAMBAHAN: Import Model Notifikasi
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -139,9 +140,12 @@ class UserController extends Controller
                 ]);
             }
 
+            // ✅ KIRIM NOTIFIKASI KE ADMIN & PETUGAS
+            $this->kirimNotifikasiUserBaru($user);
+
             DB::commit();
             return redirect()->route('admin.users.index')
-                            ->with('success', 'User berhasil ditambahkan');
+                            ->with('success', 'User berhasil ditambahkan dan notifikasi telah dikirim');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -402,5 +406,55 @@ class UserController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    // ✅ PRIVATE METHOD: Kirim notifikasi user baru
+    private function kirimNotifikasiUserBaru(User $user)
+    {
+        // Tentukan label role
+        $roleLabel = match($user->role) {
+            'admin' => 'Admin',
+            'petugas' => 'Petugas',
+            'mahasiswa' => 'Mahasiswa',
+            'pengguna_luar' => 'Pengguna Luar',
+            default => 'User'
+        };
+
+        // Buat detail informasi
+        $detailInfo = "Nama: {$user->name}\n";
+        $detailInfo .= "Email: {$user->email}\n";
+        $detailInfo .= "Role: {$roleLabel}\n";
+
+        if ($user->role === 'mahasiswa' && $user->nim) {
+            $detailInfo .= "NIM: {$user->nim}\n";
+            if ($user->mahasiswa && $user->mahasiswa->jurusan) {
+                $detailInfo .= "Jurusan: {$user->mahasiswa->jurusan}\n";
+            }
+        } elseif ($user->role === 'pengguna_luar') {
+            if ($user->no_hp) {
+                $detailInfo .= "No HP: {$user->no_hp}\n";
+            }
+            if ($user->alamat) {
+                $detailInfo .= "Alamat: {$user->alamat}\n";
+            }
+        }
+
+        // Kirim notifikasi ke semua admin dan petugas
+        Notifikasi::kirimKePetugas(
+            'user_baru',
+            "User Baru Terdaftar: {$user->name}",
+            "User baru dengan role {$roleLabel} telah ditambahkan ke sistem.\n\n{$detailInfo}",
+            [
+                'user_id' => $user->id,
+                'nama' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'nim' => $user->nim,
+                'no_hp' => $user->no_hp
+            ],
+            route('admin.users.show', $user->id),
+            'normal',
+            auth()->id()
+        );
     }
 }

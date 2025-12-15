@@ -5,72 +5,154 @@ namespace App\Http\Controllers\PenggunaLuar;
 use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class NotifikasiController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of notifications
      */
-    public function index()
+    public function index(Request $request)
     {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        try {
+            $query = Notifikasi::where('user_id', auth()->id())
+                ->orderBy('created_at', 'desc');
 
-        $belumDibaca = Notifikasi::where('user_id', auth()->id())
-            ->belumDibaca()
-            ->count();
+            // Filter berdasarkan status
+            if ($request->filled('status')) {
+                if ($request->status === 'unread') {
+                    $query->where('dibaca', false);
+                } elseif ($request->status === 'read') {
+                    $query->where('dibaca', true);
+                }
+            }
 
-        // Statistik notifikasi untuk pengguna luar
-        $stats = [
-            'terlambat' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'terlambat')
-                ->belumDibaca()
-                ->count(),
-            'reminder_deadline' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'reminder_deadline')
-                ->belumDibaca()
-                ->count(),
-            'denda_belum_dibayar' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'denda_belum_dibayar')
-                ->belumDibaca()
-                ->count(),
-        ];
+            // Filter berdasarkan tipe
+            if ($request->filled('tipe')) {
+                $query->where('tipe', $request->tipe);
+            }
 
-        return view('pengguna_luar.notifikasi.index', compact('notifikasi', 'belumDibaca', 'stats'));
+            // Filter pencarian
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                      ->orWhere('isi', 'like', "%{$search}%");
+                });
+            }
+
+            $notifikasi = $query->paginate(20)->withQueryString();
+
+            $unreadCount = Notifikasi::where('user_id', auth()->id())
+                ->where('dibaca', false)
+                ->count();
+
+            // Statistik notifikasi
+            $stats = [
+                'terlambat' => Notifikasi::where('user_id', auth()->id())
+                    ->where('tipe', 'terlambat')
+                    ->where('dibaca', false)
+                    ->count(),
+                'reminder_deadline' => Notifikasi::where('user_id', auth()->id())
+                    ->where('tipe', 'reminder_deadline')
+                    ->where('dibaca', false)
+                    ->count(),
+                'denda_belum_dibayar' => Notifikasi::where('user_id', auth()->id())
+                    ->where('tipe', 'denda_belum_dibayar')
+                    ->where('dibaca', false)
+                    ->count(),
+            ];
+
+            return view('pengguna_luar.notifikasi.index', compact('notifikasi', 'unreadCount', 'stats'));
+
+        } catch (\Exception $e) {
+            Log::error('Error pada index notifikasi pengguna luar', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('pengguna-luar.dashboard')
+                ->with('error', 'Terjadi kesalahan saat memuat notifikasi');
+        }
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified notification (redirect to index with highlight)
      */
     public function show(string $id)
     {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())
-            ->findOrFail($id);
+        try {
+            $notifikasi = Notifikasi::where('user_id', auth()->id())
+                ->findOrFail($id);
 
-        // Tandai sebagai dibaca
-        if (!$notifikasi->dibaca) {
-            $notifikasi->tandaiDibaca();
+            // Tandai sebagai dibaca jika belum
+            if (!$notifikasi->dibaca) {
+                $notifikasi->update([
+                    'dibaca' => true,
+                    'dibaca_pada' => now()
+                ]);
+
+                Log::info('Notifikasi pengguna luar ditandai sebagai dibaca', [
+                    'notifikasi_id' => $id,
+                    'user_id' => auth()->id()
+                ]);
+            }
+
+            // Redirect ke index dengan highlight
+            return redirect()->route('pengguna-luar.notifikasi.index', ['highlight' => $id])
+                ->with('notif_opened', $id);
+
+        } catch (\Exception $e) {
+            Log::error('Error menampilkan detail notifikasi pengguna luar', [
+                'notifikasi_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return redirect()->route('pengguna-luar.notifikasi.index')
+                ->with('error', 'Notifikasi tidak ditemukan');
         }
-
-        return view('pengguna_luar.notifikasi.show', compact('notifikasi'));
     }
 
     /**
-     * Mark notification as read
+     * Mark notification as read (AJAX)
      */
     public function markAsRead($id)
     {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())
-            ->findOrFail($id);
+        try {
+            $notifikasi = Notifikasi::where('user_id', auth()->id())
+                ->findOrFail($id);
 
-        $notifikasi->tandaiDibaca();
+            if (!$notifikasi->dibaca) {
+                $notifikasi->update([
+                    'dibaca' => true,
+                    'dibaca_pada' => now()
+                ]);
+            }
 
-        if (request()->ajax()) {
-            return response()->json(['success' => true]);
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Notifikasi ditandai sebagai dibaca'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Notifikasi ditandai sebagai dibaca');
+
+        } catch (\Exception $e) {
+            Log::error('Error mark as read pengguna luar', [
+                'notifikasi_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan'
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan');
         }
-
-        return redirect()->back()->with('success', 'Notifikasi ditandai sebagai dibaca');
     }
 
     /**
@@ -78,51 +160,85 @@ class NotifikasiController extends Controller
      */
     public function markAllAsRead()
     {
-        Notifikasi::where('user_id', auth()->id())
-            ->where('dibaca', false)
-            ->update([
-                'dibaca' => true,
-                'dibaca_pada' => now(),
+        try {
+            $updated = Notifikasi::where('user_id', auth()->id())
+                ->where('dibaca', false)
+                ->update([
+                    'dibaca' => true,
+                    'dibaca_pada' => now(),
+                ]);
+
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Berhasil menandai {$updated} notifikasi sebagai dibaca",
+                    'count' => $updated
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('success', "Berhasil menandai {$updated} notifikasi sebagai dibaca");
+
+        } catch (\Exception $e) {
+            Log::error('Error mark all as read pengguna luar', [
+                'error' => $e->getMessage()
             ]);
 
-        if (request()->ajax()) {
-            return response()->json(['success' => true]);
-        }
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan'
+                ], 500);
+            }
 
-        return redirect()->back()->with('success', 'Semua notifikasi ditandai sebagai dibaca');
+            return redirect()->back()->with('error', 'Terjadi kesalahan');
+        }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified notification
      */
     public function destroy(string $id)
     {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())
-            ->findOrFail($id);
+        try {
+            $notifikasi = Notifikasi::where('user_id', auth()->id())
+                ->findOrFail($id);
 
-        $notifikasi->delete();
+            $judul = $notifikasi->judul;
+            $notifikasi->delete();
 
-        if (request()->ajax()) {
-            return response()->json(['success' => true]);
+            Log::info('Notifikasi pengguna luar dihapus', [
+                'notifikasi_id' => $id,
+                'judul' => $judul,
+                'user_id' => auth()->id()
+            ]);
+
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Notifikasi berhasil dihapus'
+                ]);
+            }
+
+            return redirect()->route('pengguna-luar.notifikasi.index')
+                ->with('success', 'Notifikasi berhasil dihapus');
+
+        } catch (\Exception $e) {
+            Log::error('Error menghapus notifikasi pengguna luar', [
+                'notifikasi_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan'
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat menghapus notifikasi');
         }
-
-        return redirect()->back()->with('success', 'Notifikasi berhasil dihapus');
-    }
-
-    /**
-     * Delete all read notifications
-     */
-    public function deleteRead()
-    {
-        Notifikasi::where('user_id', auth()->id())
-            ->where('dibaca', true)
-            ->delete();
-
-        if (request()->ajax()) {
-            return response()->json(['success' => true]);
-        }
-
-        return redirect()->back()->with('success', 'Notifikasi yang sudah dibaca berhasil dihapus');
     }
 
     /**
@@ -130,11 +246,26 @@ class NotifikasiController extends Controller
      */
     public function getUnreadCount()
     {
-        $count = Notifikasi::where('user_id', auth()->id())
-            ->belumDibaca()
-            ->count();
+        try {
+            $count = Notifikasi::where('user_id', auth()->id())
+                ->where('dibaca', false)
+                ->count();
 
-        return response()->json(['count' => $count]);
+            return response()->json([
+                'success' => true,
+                'count' => $count
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error get unread count pengguna luar', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'count' => 0
+            ], 500);
+        }
     }
 
     /**
@@ -142,108 +273,46 @@ class NotifikasiController extends Controller
      */
     public function getLatest()
     {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
+        try {
+            $notifikasi = Notifikasi::where('user_id', auth()->id())
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function($n) {
+                    return [
+                        'id' => $n->id,
+                        'judul' => $n->judul,
+                        'isi' => \Str::limit($n->isi, 100),
+                        'tipe' => $n->tipe,
+                        'dibaca' => $n->dibaca,
+                        'waktu' => $n->getWaktuRelatif(),
+                        'icon' => $n->getIcon(),
+                        'badge_color' => $n->getBadgeColor(),
+                        'link' => route('pengguna-luar.notifikasi.show', $n->id),
+                        'created_at' => $n->created_at->format('Y-m-d H:i:s')
+                    ];
+                });
 
-        return response()->json([
-            'notifikasi' => $notifikasi,
-            'count' => $notifikasi->where('dibaca', false)->count(),
-        ]);
-    }
+            $unreadCount = Notifikasi::where('user_id', auth()->id())
+                ->where('dibaca', false)
+                ->count();
 
-    /**
-     * Filter by notification type
-     */
-    public function filterByType($type)
-    {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())
-            ->where('tipe', $type)
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            return response()->json([
+                'success' => true,
+                'notifikasi' => $notifikasi,
+                'unread_count' => $unreadCount
+            ]);
 
-        $belumDibaca = Notifikasi::where('user_id', auth()->id())
-            ->belumDibaca()
-            ->count();
+        } catch (\Exception $e) {
+            Log::error('Error get latest notifications pengguna luar', [
+                'error' => $e->getMessage()
+            ]);
 
-        $stats = [
-            'terlambat' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'terlambat')
-                ->belumDibaca()
-                ->count(),
-            'reminder_deadline' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'reminder_deadline')
-                ->belumDibaca()
-                ->count(),
-            'denda_belum_dibayar' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'denda_belum_dibayar')
-                ->belumDibaca()
-                ->count(),
-        ];
-
-        return view('pengguna_luar.notifikasi.index', compact('notifikasi', 'belumDibaca', 'stats'));
-    }
-
-    /**
-     * Show unread notifications only
-     */
-    public function unread()
-    {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())
-            ->belumDibaca()
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-
-        $belumDibaca = $notifikasi->total();
-
-        $stats = [
-            'terlambat' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'terlambat')
-                ->belumDibaca()
-                ->count(),
-            'reminder_deadline' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'reminder_deadline')
-                ->belumDibaca()
-                ->count(),
-            'denda_belum_dibayar' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'denda_belum_dibayar')
-                ->belumDibaca()
-                ->count(),
-        ];
-
-        return view('pengguna_luar.notifikasi.index', compact('notifikasi', 'belumDibaca', 'stats'));
-    }
-
-    /**
-     * Show important notifications (terlambat, denda, reminder)
-     */
-    public function important()
-    {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())
-            ->whereIn('tipe', ['terlambat', 'denda_belum_dibayar', 'reminder_deadline'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-
-        $belumDibaca = Notifikasi::where('user_id', auth()->id())
-            ->belumDibaca()
-            ->count();
-
-        $stats = [
-            'terlambat' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'terlambat')
-                ->belumDibaca()
-                ->count(),
-            'reminder_deadline' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'reminder_deadline')
-                ->belumDibaca()
-                ->count(),
-            'denda_belum_dibayar' => Notifikasi::where('user_id', auth()->id())
-                ->where('tipe', 'denda_belum_dibayar')
-                ->belumDibaca()
-                ->count(),
-        ];
-
-        return view('pengguna_luar.notifikasi.index', compact('notifikasi', 'belumDibaca', 'stats'));
+            return response()->json([
+                'success' => false,
+                'notifikasi' => [],
+                'unread_count' => 0
+            ], 500);
+        }
     }
 }

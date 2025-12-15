@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Petugas;
 use App\Http\Controllers\Controller;
 use App\Models\Perpanjangan;
 use App\Models\Peminjaman;
+use App\Models\Notifikasi; // ✅ TAMBAHAN
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -67,7 +68,6 @@ class PerpanjanganController extends Controller
 
     /**
      * Setujui perpanjangan
-     * ✅ FIXED - Update konsisten ke seluruh tabel terkait
      */
     public function approve($id)
     {
@@ -84,7 +84,7 @@ class PerpanjanganController extends Controller
             return redirect()->back()->with('error', 'Peminjaman sudah tidak aktif');
         }
 
-        // ✅ VALIDASI: Cek apakah peminjaman sudah terlambat
+        // Validasi: Cek apakah peminjaman sudah terlambat
         if ($perpanjangan->peminjaman->isTerlambat()) {
             return redirect()->back()->with('error', 
                 'Tidak dapat menyetujui perpanjangan. Peminjaman sudah melewati deadline dan dikenakan denda. Harap proses pengembalian terlebih dahulu.');
@@ -99,10 +99,11 @@ class PerpanjanganController extends Controller
             ]);
 
             $petugasId = Auth::id();
+            $petugas = Auth::user();
             $tanggalDeadlineBaru = Carbon::parse($perpanjangan->tanggal_deadline_baru);
             $durasiTambahanHari = $perpanjangan->durasi_tambahan;
 
-            // 1. ✅ Update status perpanjangan
+            // 1. Update status perpanjangan
             $perpanjangan->update([
                 'status' => 'disetujui',
                 'diproses_oleh' => $petugasId,
@@ -110,14 +111,14 @@ class PerpanjanganController extends Controller
 
             Log::info('Status perpanjangan berhasil diupdate');
 
-            // 2. ✅ Update peminjaman (deadline & durasi)
+            // 2. Update peminjaman (deadline & durasi)
             $peminjaman = $perpanjangan->peminjaman;
             $durasiTotal = $peminjaman->durasi_hari + $durasiTambahanHari;
 
             $peminjaman->update([
                 'tanggal_deadline' => $tanggalDeadlineBaru,
                 'durasi_hari' => $durasiTotal,
-                'petugas_id' => $petugasId, // Update petugas yang menyetujui
+                'petugas_id' => $petugasId,
             ]);
 
             Log::info('Peminjaman berhasil diupdate', [
@@ -127,6 +128,32 @@ class PerpanjanganController extends Controller
                 'durasi_baru' => $durasiTotal
             ]);
 
+            // ✅ KIRIM NOTIFIKASI KE MAHASISWA
+            Notifikasi::kirim(
+                $peminjaman->mahasiswa_id,
+                'perpanjangan_disetujui',
+                "Perpanjangan Disetujui: {$peminjaman->buku->judul}",
+                "Selamat! Pengajuan perpanjangan Anda telah disetujui.\n\n" .
+                "📚 Buku: {$peminjaman->buku->judul}\n" .
+                "✅ Status: DISETUJUI\n" .
+                "📅 Deadline Lama: " . Carbon::parse($perpanjangan->tanggal_deadline_lama)->translatedFormat('d F Y') . "\n" .
+                "📅 Deadline Baru: " . $tanggalDeadlineBaru->translatedFormat('d F Y') . "\n" .
+                "⏱️ Durasi Tambahan: {$durasiTambahanHari} hari\n" .
+                "👤 Disetujui oleh: {$petugas->name}\n\n" .
+                "⚠️ Harap kembalikan buku sebelum deadline baru untuk menghindari denda.",
+                [
+                    'perpanjangan_id' => $perpanjangan->id,
+                    'peminjaman_id' => $peminjaman->id,
+                    'deadline_baru' => $tanggalDeadlineBaru->format('Y-m-d'),
+                    'durasi_tambahan' => $durasiTambahanHari
+                ],
+                route('mahasiswa.peminjaman.show', $peminjaman->id),
+                'normal',
+                $petugasId
+            );
+
+            Log::info('Notifikasi perpanjangan disetujui dikirim ke mahasiswa');
+
             DB::commit();
 
             $namaPeminjam = $peminjaman->mahasiswa->name;
@@ -134,7 +161,7 @@ class PerpanjanganController extends Controller
 
             return redirect()->back()->with('success', 
                 "Perpanjangan disetujui! Peminjaman '{$judulBuku}' oleh {$namaPeminjam} diperpanjang hingga " . 
-                $tanggalDeadlineBaru->format('d M Y'));
+                $tanggalDeadlineBaru->translatedFormat('d F Y'));
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -153,7 +180,7 @@ class PerpanjanganController extends Controller
      */
     public function reject(Request $request, $id)
     {
-        $perpanjangan = Perpanjangan::with('peminjaman.mahasiswa')->findOrFail($id);
+        $perpanjangan = Perpanjangan::with('peminjaman.mahasiswa', 'peminjaman.buku')->findOrFail($id);
 
         if ($perpanjangan->status !== 'menunggu') {
             return redirect()->back()->with('error', 'Perpanjangan sudah diproses sebelumnya');
@@ -168,11 +195,37 @@ class PerpanjanganController extends Controller
 
         DB::beginTransaction();
         try {
+            $petugas = Auth::user();
+            
             $perpanjangan->update([
                 'status' => 'ditolak',
                 'catatan_petugas' => $request->catatan_petugas,
                 'diproses_oleh' => Auth::id(),
             ]);
+
+            // ✅ KIRIM NOTIFIKASI KE MAHASISWA
+            Notifikasi::kirim(
+                $perpanjangan->peminjaman->mahasiswa_id,
+                'perpanjangan_ditolak',
+                "Perpanjangan Ditolak: {$perpanjangan->peminjaman->buku->judul}",
+                "Maaf, pengajuan perpanjangan Anda ditolak.\n\n" .
+                "📚 Buku: {$perpanjangan->peminjaman->buku->judul}\n" .
+                "❌ Status: DITOLAK\n" .
+                "📝 Alasan Penolakan:\n{$request->catatan_petugas}\n\n" .
+                "👤 Ditolak oleh: {$petugas->name}\n" .
+                "📅 Deadline Tetap: " . Carbon::parse($perpanjangan->tanggal_deadline_lama)->translatedFormat('d F Y') . "\n\n" .
+                "⚠️ Harap kembalikan buku sesuai deadline awal untuk menghindari denda.",
+                [
+                    'perpanjangan_id' => $perpanjangan->id,
+                    'peminjaman_id' => $perpanjangan->peminjaman_id,
+                    'alasan_ditolak' => $request->catatan_petugas
+                ],
+                route('mahasiswa.peminjaman.show', $perpanjangan->peminjaman_id),
+                'tinggi',
+                Auth::id()
+            );
+
+            Log::info('Notifikasi perpanjangan ditolak dikirim ke mahasiswa');
 
             DB::commit();
 
@@ -247,7 +300,6 @@ class PerpanjanganController extends Controller
 
     /**
      * Batalkan perpanjangan yang sudah disetujui (emergency only)
-     * Hanya untuk kasus khusus dan harus ada alasan kuat
      */
     public function cancel(Request $request, $id)
     {

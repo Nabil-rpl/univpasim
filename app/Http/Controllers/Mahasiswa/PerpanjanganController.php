@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use App\Models\Perpanjangan;
+use App\Models\Notifikasi; // ✅ TAMBAHAN
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +37,8 @@ class PerpanjanganController extends Controller
      */
     public function store(Request $request, $peminjamanId)
     {
-        $peminjaman = Peminjaman::where('id', $peminjamanId)
+        $peminjaman = Peminjaman::with('buku')
+            ->where('id', $peminjamanId)
             ->where('mahasiswa_id', Auth::id())
             ->where('status', 'dipinjam')
             ->firstOrFail();
@@ -64,7 +66,7 @@ class PerpanjanganController extends Controller
             $tanggalDeadlineBaru = Carbon::parse($peminjaman->tanggal_deadline)
                 ->addDays($validated['durasi_tambahan']);
 
-            Perpanjangan::create([
+            $perpanjangan = Perpanjangan::create([
                 'peminjaman_id' => $peminjaman->id,
                 'tanggal_perpanjangan' => now(),
                 'tanggal_deadline_lama' => $peminjaman->tanggal_deadline,
@@ -73,6 +75,33 @@ class PerpanjanganController extends Controller
                 'alasan' => $validated['alasan'],
                 'status' => 'menunggu',
             ]);
+
+            // ✅ KIRIM NOTIFIKASI KE PETUGAS/ADMIN
+            $user = Auth::user();
+            Notifikasi::kirimKePetugas(
+                'perpanjangan_baru',
+                "Pengajuan Perpanjangan: {$peminjaman->buku->judul}",
+                "Mahasiswa {$user->name} mengajukan perpanjangan peminjaman.\n\n" .
+                "📚 Buku: {$peminjaman->buku->judul}\n" .
+                "👤 Peminjam: {$user->name}\n" .
+                "📅 Deadline Saat Ini: " . Carbon::parse($peminjaman->tanggal_deadline)->translatedFormat('d F Y') . "\n" .
+                "📅 Deadline Baru (jika disetujui): " . $tanggalDeadlineBaru->translatedFormat('d F Y') . "\n" .
+                "⏱️ Durasi Tambahan: {$validated['durasi_tambahan']} hari\n" .
+                "📝 Alasan: {$validated['alasan']}\n\n" .
+                "Harap segera proses pengajuan ini.",
+                [
+                    'perpanjangan_id' => $perpanjangan->id,
+                    'peminjaman_id' => $peminjaman->id,
+                    'mahasiswa_id' => $user->id,
+                    'buku_id' => $peminjaman->buku_id,
+                    'durasi_tambahan' => $validated['durasi_tambahan'],
+                    'deadline_lama' => $peminjaman->tanggal_deadline,
+                    'deadline_baru' => $tanggalDeadlineBaru
+                ],
+                route('petugas.perpanjangan.show', $perpanjangan->id),
+                'normal',
+                $user->id
+            );
 
             DB::commit();
 

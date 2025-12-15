@@ -151,6 +151,7 @@
         padding: 25px;
         border-radius: 16px;
         border-left: 4px solid #2563eb;
+        white-space: pre-wrap;
     }
 
     .info-grid {
@@ -259,6 +260,7 @@
         border-color: #2563eb;
         color: #2563eb;
         background: #f8fafc;
+        text-decoration: none;
     }
 
     .related-section {
@@ -400,9 +402,7 @@
                     <i class="bi bi-file-text"></i>
                     Isi Notifikasi
                 </h2>
-                <div class="content-text">
-                    {{ $notifikasi->isi }}
-                </div>
+                <div class="content-text">{{ $notifikasi->isi }}</div>
             </div>
 
             <!-- Information Grid -->
@@ -438,7 +438,20 @@
                         <div class="info-label">
                             <i class="bi bi-check2-circle me-1"></i> Dibaca Pada
                         </div>
-                        <div class="info-value">{{ $notifikasi->updated_at->format('d M Y, H:i') }}</div>
+                        <div class="info-value">{{ $notifikasi->dibaca_pada->format('d M Y, H:i') }}</div>
+                    </div>
+                    @endif
+
+                    @if($notifikasi->prioritas && $notifikasi->prioritas !== 'normal')
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="bi bi-exclamation-triangle me-1"></i> Prioritas
+                        </div>
+                        <div class="info-value">
+                            <span class="badge bg-{{ $notifikasi->getPrioritasColor() }}">
+                                {{ ucfirst($notifikasi->prioritas) }}
+                            </span>
+                        </div>
                     </div>
                     @endif
                 </div>

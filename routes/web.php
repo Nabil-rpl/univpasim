@@ -15,7 +15,7 @@ use App\Http\Controllers\Admin\PeminjamanController;
 use App\Http\Controllers\Admin\QRCodeController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\LaporanController as AdminLaporanController;
-use App\Http\Controllers\Admin\NotifikasiController; // ✅ TAMBAHKAN INI
+use App\Http\Controllers\Admin\NotifikasiController;
 
 // Petugas
 use App\Http\Controllers\Petugas\LaporanController;
@@ -25,6 +25,7 @@ use App\Http\Controllers\Petugas\BukuController as PetugasBukuController;
 use App\Http\Controllers\Petugas\PeminjamanController as PetugasPeminjamanController;
 use App\Http\Controllers\Petugas\PengembalianController;
 use App\Http\Controllers\Petugas\PerpanjanganController;
+use App\Http\Controllers\Petugas\NotifikasiController as PetugasNotifikasiController;
 
 // Mahasiswa
 use App\Http\Controllers\Mahasiswa\MahasiswaController as MahasiswaUserController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\Mahasiswa\PeminjamanController as MahasiswaPeminjamanCo
 use App\Http\Controllers\Mahasiswa\RiwayatController as MahasiswaRiwayatController;
 use App\Http\Controllers\Mahasiswa\QRScannerController;
 use App\Http\Controllers\Mahasiswa\PerpanjanganController as MahasiswaPerpanjanganController;
+use App\Http\Controllers\Mahasiswa\NotifikasiController as MahasiswaNotifikasiController;
 
 // Pengguna Luar
 use App\Http\Controllers\PenggunaLuar\BukuController as PenggunaLuarBukuController;
@@ -40,6 +42,7 @@ use App\Http\Controllers\PenggunaLuar\PeminjamanController as PenggunaLuarPeminj
 use App\Http\Controllers\PenggunaLuar\RiwayatController as PenggunaLuarRiwayatController;
 use App\Http\Controllers\PenggunaLuar\QRScannerController as PenggunaLuarQRScannerController;
 use App\Http\Controllers\PenggunaLuar\PengaturanController as PenggunaLuarPengaturanController;
+use App\Http\Controllers\PenggunaLuar\NotifikasiController as PenggunaLuarNotifikasiController; // ✅ TAMBAHAN
 
 
 // ============================================
@@ -130,21 +133,18 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/export/csv', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'export'])->name('export');
         });
 
-        // ✅ NOTIFIKASI ROUTES (ADMIN) - TAMBAHKAN INI
+        // ✅ NOTIFIKASI ADMIN - LENGKAP
         Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
             Route::get('/', [NotifikasiController::class, 'index'])->name('index');
-            Route::get('/{id}', [NotifikasiController::class, 'show'])->name('show');
-            Route::post('/{id}/baca', [NotifikasiController::class, 'markAsRead'])->name('markAsRead');
-            Route::post('/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('markAllAsRead');
-            Route::delete('/{id}', [NotifikasiController::class, 'destroy'])->name('destroy');
-        });
-
-        // ✅ API NOTIFIKASI (UNTUK AJAX) - TAMBAHKAN INI
-        Route::prefix('api/notifikasi')->as('api.notifikasi.')->group(function () {
             Route::get('/latest', [NotifikasiController::class, 'getLatest'])->name('latest');
             Route::get('/count', [NotifikasiController::class, 'getUnreadCount'])->name('count');
+            Route::get('/{id}', [NotifikasiController::class, 'show'])->name('show');
+            Route::post('/{id}/baca', [NotifikasiController::class, 'markAsRead'])->name('baca');
+            Route::post('/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('baca-semua');
+            Route::delete('/{id}', [NotifikasiController::class, 'destroy'])->name('destroy');
         });
     });
+
 
 // ============================================
 // 👮 PETUGAS
@@ -206,6 +206,17 @@ Route::middleware(['auth', 'role:petugas'])
         Route::get('/qrcode', [PetugasQRCodeController::class, 'index'])->name('qrcode.index');
         Route::get('/qrcode/generate/{type}/{id}', [PetugasQRCodeController::class, 'generate'])->name('qrcode.generate');
         Route::delete('/qrcode/{id}', [PetugasQRCodeController::class, 'destroy'])->name('qrcode.destroy');
+
+        // ✅ NOTIFIKASI PETUGAS - LENGKAP
+        Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
+            Route::get('/', [PetugasNotifikasiController::class, 'index'])->name('index');
+            Route::get('/latest', [PetugasNotifikasiController::class, 'getLatest'])->name('latest');
+            Route::get('/count', [PetugasNotifikasiController::class, 'getUnreadCount'])->name('count');
+            Route::get('/{id}', [PetugasNotifikasiController::class, 'show'])->name('show');
+            Route::post('/{id}/baca', [PetugasNotifikasiController::class, 'markAsRead'])->name('baca');
+            Route::post('/baca-semua', [PetugasNotifikasiController::class, 'markAllAsRead'])->name('baca-semua');
+            Route::delete('/{id}', [PetugasNotifikasiController::class, 'destroy'])->name('destroy');
+        });
     });
 
 
@@ -240,7 +251,7 @@ Route::middleware(['auth', 'role:mahasiswa'])
         // Riwayat
         Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])->name('riwayat.index');
 
-        // QR Scanner Routes
+        // QR Scanner
         Route::get('/qr-scanner', [QRScannerController::class, 'index'])->name('qr.scanner');
         Route::post('/qr-scanner/preview', [QRScannerController::class, 'preview'])->name('qr.preview');
         Route::post('/qr-scanner/process', [QRScannerController::class, 'process'])->name('qr.process');
@@ -248,8 +259,20 @@ Route::middleware(['auth', 'role:mahasiswa'])
         // Pengaturan Mahasiswa
         Route::get('/pengaturan', [\App\Http\Controllers\Mahasiswa\PengaturanController::class, 'index'])->name('pengaturan.index');
         Route::post('/pengaturan/update', [\App\Http\Controllers\Mahasiswa\PengaturanController::class, 'update'])->name('pengaturan.update');
+
+        // ✅ NOTIFIKASI MAHASISWA - LENGKAP
+        Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
+            Route::get('/', [MahasiswaNotifikasiController::class, 'index'])->name('index');
+            Route::get('/latest', [MahasiswaNotifikasiController::class, 'getLatest'])->name('latest');
+            Route::get('/count', [MahasiswaNotifikasiController::class, 'getUnreadCount'])->name('count');
+            Route::get('/{id}', [MahasiswaNotifikasiController::class, 'show'])->name('show');
+            Route::post('/{id}/baca', [MahasiswaNotifikasiController::class, 'markAsRead'])->name('baca');
+            Route::post('/baca-semua', [MahasiswaNotifikasiController::class, 'markAllAsRead'])->name('baca-semua');
+            Route::delete('/{id}', [MahasiswaNotifikasiController::class, 'destroy'])->name('destroy');
+        });
     });
 
+// ✅ FIX UNTUK WEB.PHP - Ganti section notifikasi pengguna luar dengan ini:
 
 // ============================================
 // 👤 PENGGUNA LUAR
@@ -275,7 +298,7 @@ Route::middleware(['auth', 'role:pengguna_luar'])
         // Riwayat
         Route::get('/riwayat', [PenggunaLuarRiwayatController::class, 'index'])->name('riwayat.index');
 
-        // QR Scanner Routes
+        // QR Scanner
         Route::get('/qr-scanner', [PenggunaLuarQRScannerController::class, 'index'])->name('qr.scanner');
         Route::post('/qr-scanner/preview', [PenggunaLuarQRScannerController::class, 'preview'])->name('qr.preview');
         Route::post('/qr-scanner/process', [PenggunaLuarQRScannerController::class, 'process'])->name('qr.process');
@@ -283,4 +306,21 @@ Route::middleware(['auth', 'role:pengguna_luar'])
         // Pengaturan Pengguna Luar
         Route::get('/pengaturan', [PenggunaLuarPengaturanController::class, 'index'])->name('pengaturan.index');
         Route::post('/pengaturan/update', [PenggunaLuarPengaturanController::class, 'update'])->name('pengaturan.update');
+
+        // ✅ NOTIFIKASI PENGGUNA LUAR - URUTAN PENTING!
+        // Route spesifik HARUS di atas route dengan parameter {id}
+        Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
+            // Route index
+            Route::get('/', [PenggunaLuarNotifikasiController::class, 'index'])->name('index');
+            
+            // Route spesifik (tanpa parameter) harus di atas
+            Route::get('/latest', [PenggunaLuarNotifikasiController::class, 'getLatest'])->name('latest');
+            Route::get('/count', [PenggunaLuarNotifikasiController::class, 'getUnreadCount'])->name('count');
+            Route::post('/mark-all-read', [PenggunaLuarNotifikasiController::class, 'markAllAsRead'])->name('mark-all-read');
+            
+            // Route dengan parameter {id} di bawah
+            Route::post('/{id}/mark-as-read', [PenggunaLuarNotifikasiController::class, 'markAsRead'])->name('mark-as-read');
+            Route::delete('/{id}', [PenggunaLuarNotifikasiController::class, 'destroy'])->name('destroy');
+            Route::get('/{id}', [PenggunaLuarNotifikasiController::class, 'show'])->name('show');
+        });
     });
