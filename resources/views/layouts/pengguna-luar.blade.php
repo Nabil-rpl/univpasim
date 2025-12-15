@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('page-title', 'Dashboard Pengguna Luar')</title>
 
     {{-- Bootstrap 5 --}}
@@ -69,7 +70,6 @@
             font-weight: 500;
         }
 
-        /* Indikator kiri */
         .sidebar a::before {
             content: '';
             position: absolute;
@@ -83,7 +83,6 @@
             transition: height 0.3s ease;
         }
 
-        /* Efek hover background */
         .sidebar a::after {
             content: '';
             position: absolute;
@@ -155,7 +154,7 @@
         .user-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 20px;
         }
 
         .user-info span {
@@ -165,6 +164,230 @@
 
         .user-info img {
             border: 2px solid #dbeafe;
+        }
+
+        /* Notifikasi Styling */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .notification-bell:hover {
+            transform: scale(1.1);
+        }
+
+        .notification-bell i {
+            font-size: 24px;
+            color: #64748b;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            border: 2px solid #fff;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            width: 380px;
+            max-height: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1050;
+            overflow: hidden;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #60A5FA, #3B82F6);
+            color: white;
+        }
+
+        .notification-header h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .mark-all-read {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mark-all-read:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .notification-item:hover {
+            background: #f8fafc;
+        }
+
+        .notification-item.unread {
+            background: #eff6ff;
+        }
+
+        .notification-item.unread:hover {
+            background: #dbeafe;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-icon.terlambat {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .notification-icon.reminder_deadline {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .notification-icon.denda_belum_dibayar {
+            background: #fce7f3;
+            color: #ec4899;
+        }
+
+        .notification-icon.peminjaman_disetujui {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .notification-icon.peminjaman_ditolak {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .notification-icon.default {
+            background: #e0e7ff;
+            color: #6366f1;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .notification-text {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .notification-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .notification-footer a {
+            color: #3B82F6;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .notification-footer a:hover {
+            color: #2563eb;
+        }
+
+        .empty-notification {
+            padding: 40px 20px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .empty-notification i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
         }
 
         .content {
@@ -195,6 +418,10 @@
             .main-content {
                 margin-left: 80px;
             }
+            .notification-dropdown {
+                width: 320px;
+                right: 10px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -212,6 +439,11 @@
                 flex-direction: column;
                 text-align: center;
                 gap: 10px;
+            }
+            .notification-dropdown {
+                width: calc(100% - 30px);
+                right: 15px;
+                left: 15px;
             }
         }
     </style>
@@ -234,6 +466,10 @@
             <i class="bi bi-book"></i>
             <span>Data Buku</span>
         </a>
+        <a href="{{ route('pengguna-luar.notifikasi.index') }}" class="{{ request()->routeIs('pengguna-luar.notifikasi.*') ? 'active' : '' }}">
+            <i class="bi bi-bell"></i>
+            <span>Notifikasi</span>
+        </a>
         <a href="{{ route('pengguna-luar.pengaturan.index') }}" class="{{ request()->routeIs('pengguna-luar.pengaturan') ? 'active' : '' }}">
             <i class="bi bi-person-circle"></i>
             <span>Profil</span>
@@ -255,9 +491,35 @@
         <div class="navbar">
             <h5>@yield('page-title', 'Dashboard Pengguna Luar')</h5>
             <div class="user-info">
+                {{-- Notification Bell --}}
+                <div class="notification-bell" id="notificationBell">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                </div>
+
                 <span>{{ auth()->user()->name ?? 'Pengguna' }}</span>
                 <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Pengguna') }}&background=60A5FA&color=fff&bold=true" 
                      class="rounded-circle" width="40" height="40" alt="User">
+            </div>
+        </div>
+
+        {{-- Notification Dropdown --}}
+        <div class="notification-dropdown" id="notificationDropdown">
+            <div class="notification-header">
+                <h6>Notifikasi</h6>
+                <button class="mark-all-read" id="markAllReadBtn">
+                    <i class="bi bi-check-all"></i> Tandai Semua
+                </button>
+            </div>
+            <div class="notification-list" id="notificationList">
+                {{-- Loading state --}}
+                <div class="empty-notification">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <p class="mb-0">Memuat notifikasi...</p>
+                </div>
+            </div>
+            <div class="notification-footer">
+                <a href="{{ route('pengguna-luar.notifikasi.index') }}">Lihat Semua Notifikasi</a>
             </div>
         </div>
 
@@ -271,7 +533,184 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Tooltip Bootstrap (opsional)
+        // Setup CSRF token untuk AJAX
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Notification Dropdown Toggle
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationBadge = document.getElementById('notificationBadge');
+        const notificationList = document.getElementById('notificationList');
+        const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+        // Toggle dropdown
+        notificationBell.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('show');
+            if (notificationDropdown.classList.contains('show')) {
+                loadNotifications();
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!notificationDropdown.contains(e.target) && !notificationBell.contains(e.target)) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+
+        // Load notifications
+        function loadNotifications() {
+            fetch('{{ route("pengguna-luar.notifikasi.latest") }}', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    displayNotifications(data.notifikasi);
+                    updateBadge(data.unread_count);
+                } else {
+                    throw new Error(data.message || 'Gagal memuat');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                notificationList.innerHTML = `
+                    <div class="empty-notification">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <p class="mb-0">Gagal memuat notifikasi</p>
+                        <small class="text-muted d-block mt-1">${error.message}</small>
+                    </div>
+                `;
+            });
+        }
+
+        // Display notifications
+        function displayNotifications(notifikasi) {
+            if (!notifikasi || notifikasi.length === 0) {
+                notificationList.innerHTML = `
+                    <div class="empty-notification">
+                        <i class="bi bi-bell-slash"></i>
+                        <p class="mb-0">Tidak ada notifikasi</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            notifikasi.forEach(notif => {
+                const unreadClass = !notif.dibaca ? 'unread' : '';
+                const iconClass = notif.tipe || 'default';
+                const icon = getNotificationIcon(notif.tipe);
+                
+                html += `
+                    <a href="${notif.link}" class="notification-item ${unreadClass}" data-id="${notif.id}">
+                        <div class="notification-icon ${iconClass}">
+                            <i class="${icon}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">${notif.judul}</div>
+                            <div class="notification-text">${notif.isi}</div>
+                            <div class="notification-time">
+                                <i class="bi bi-clock"></i> ${notif.waktu}
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+
+            notificationList.innerHTML = html;
+
+            // Add click handler to mark as read
+            document.querySelectorAll('.notification-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    const notifId = this.getAttribute('data-id');
+                    markAsRead(notifId);
+                });
+            });
+        }
+
+        // Get notification icon
+        function getNotificationIcon(tipe) {
+            const icons = {
+                'terlambat': 'bi bi-exclamation-triangle-fill',
+                'reminder_deadline': 'bi bi-clock-fill',
+                'denda_belum_dibayar': 'bi bi-cash-coin',
+                'peminjaman_disetujui': 'bi bi-check-circle-fill',
+                'peminjaman_ditolak': 'bi bi-x-circle-fill',
+                'default': 'bi bi-bell-fill'
+            };
+            return icons[tipe] || icons['default'];
+        }
+
+        // Update badge
+        function updateBadge(count) {
+            if (count > 0) {
+                notificationBadge.textContent = count > 99 ? '99+' : count;
+                notificationBadge.style.display = 'flex';
+            } else {
+                notificationBadge.style.display = 'none';
+            }
+        }
+
+        // Mark as read
+        function markAsRead(notifId) {
+            fetch(`/pengguna-luar/notifikasi/${notifId}/mark-as-read`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadNotifications();
+                }
+            })
+            .catch(error => console.error('Error marking as read:', error));
+        }
+
+        // Mark all as read
+        markAllReadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (confirm('Tandai semua notifikasi sebagai dibaca?')) {
+                fetch('{{ route("pengguna-luar.notifikasi.mark-all-read") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadNotifications();
+                    }
+                })
+                .catch(error => console.error('Error marking all as read:', error));
+            }
+        });
+
+        // Load initial notification count
+        loadNotifications();
+
+        // Auto refresh every 60 seconds
+        setInterval(loadNotifications, 60000);
+
+        // Tooltip Bootstrap
         document.addEventListener('DOMContentLoaded', function () {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {

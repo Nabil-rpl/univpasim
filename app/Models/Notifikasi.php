@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class Notifikasi extends Model
@@ -58,6 +59,11 @@ class Notifikasi extends Model
             $this->update([
                 'dibaca' => true,
                 'dibaca_pada' => now(),
+            ]);
+
+            Log::info('Notifikasi ditandai sebagai dibaca', [
+                'notifikasi_id' => $this->id,
+                'user_id' => $this->user_id
             ]);
         }
         return $this;
@@ -138,13 +144,12 @@ class Notifikasi extends Model
             'perpanjangan_baru' => 'arrow-clockwise',
             'perpanjangan_disetujui' => 'check2-circle',
             'perpanjangan_ditolak' => 'x-octagon',
+            'pengembalian_baru' => 'box-arrow-in-left',
+            'pengembalian_sukses' => 'check-circle',
             'reminder_deadline' => 'alarm',
             'terlambat' => 'exclamation-triangle-fill',
-            'pengembalian_sukses' => 'check-circle',
             'buku_tersedia' => 'bell-fill',
             'denda_belum_dibayar' => 'cash-coin',
-            'user_baru' => 'person-plus-fill',
-            'buku_baru' => 'journal-plus',
             'laporan_baru' => 'file-earmark-text',
             'stok_menipis' => 'exclamation-circle',
             'sistem' => 'info-circle-fill',
@@ -164,13 +169,12 @@ class Notifikasi extends Model
             'perpanjangan_baru' => 'info',
             'perpanjangan_disetujui' => 'success',
             'perpanjangan_ditolak' => 'danger',
+            'pengembalian_baru' => 'warning',
+            'pengembalian_sukses' => 'success',
             'reminder_deadline' => 'warning',
             'terlambat' => 'danger',
-            'pengembalian_sukses' => 'success',
             'buku_tersedia' => 'info',
             'denda_belum_dibayar' => 'warning',
-            'user_baru' => 'primary',
-            'buku_baru' => 'success',
             'laporan_baru' => 'info',
             'stok_menipis' => 'warning',
             'sistem' => 'secondary',
@@ -197,6 +201,7 @@ class Notifikasi extends Model
      */
     public function getWaktuRelatif()
     {
+        Carbon::setLocale('id');
         return $this->created_at->diffForHumans();
     }
 
@@ -213,16 +218,33 @@ class Notifikasi extends Model
      */
     public static function kirim($userId, $tipe, $judul, $isi, $data = null, $url = null, $prioritas = 'normal', $dibuatOleh = null)
     {
-        return self::create([
-            'user_id' => $userId,
-            'tipe' => $tipe,
-            'judul' => $judul,
-            'isi' => $isi,
-            'data' => $data,
-            'url' => $url,
-            'prioritas' => $prioritas,
-            'dibuat_oleh' => $dibuatOleh,
-        ]);
+        try {
+            $notif = self::create([
+                'user_id' => $userId,
+                'tipe' => $tipe,
+                'judul' => $judul,
+                'isi' => $isi,
+                'data' => $data,
+                'url' => $url,
+                'prioritas' => $prioritas,
+                'dibuat_oleh' => $dibuatOleh,
+            ]);
+
+            Log::info('Notifikasi berhasil dibuat', [
+                'notifikasi_id' => $notif->id,
+                'user_id' => $userId,
+                'tipe' => $tipe
+            ]);
+
+            return $notif;
+        } catch (\Exception $e) {
+            Log::error('Error membuat notifikasi', [
+                'error' => $e->getMessage(),
+                'user_id' => $userId,
+                'tipe' => $tipe
+            ]);
+            return false;
+        }
     }
 
     /**
@@ -230,33 +252,94 @@ class Notifikasi extends Model
      */
     public static function kirimKeMultipleUsers($userIds, $tipe, $judul, $isi, $data = null, $url = null, $prioritas = 'normal', $dibuatOleh = null)
     {
-        $notifikasi = [];
-        
-        foreach ($userIds as $userId) {
-            $notifikasi[] = [
-                'user_id' => $userId,
-                'tipe' => $tipe,
-                'judul' => $judul,
-                'isi' => $isi,
-                'data' => json_encode($data),
-                'url' => $url,
-                'prioritas' => $prioritas,
-                'dibuat_oleh' => $dibuatOleh,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+        try {
+            $notifikasi = [];
+            
+            foreach ($userIds as $userId) {
+                $notifikasi[] = [
+                    'user_id' => $userId,
+                    'tipe' => $tipe,
+                    'judul' => $judul,
+                    'isi' => $isi,
+                    'data' => json_encode($data),
+                    'url' => $url,
+                    'prioritas' => $prioritas,
+                    'dibuat_oleh' => $dibuatOleh,
+                    'dibaca' => false,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            
+            $result = self::insert($notifikasi);
+
+            Log::info('Notifikasi batch berhasil dikirim', [
+                'jumlah' => count($notifikasi),
+                'tipe' => $tipe
+            ]);
+
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Error kirim batch notifikasi', [
+                'error' => $e->getMessage(),
+                'tipe' => $tipe
+            ]);
+            return false;
         }
-        
-        return self::insert($notifikasi);
     }
 
     /**
-     * Static method untuk kirim ke semua petugas
+     * ✅ Static method untuk kirim ke semua petugas (TANPA CEK STATUS)
      */
     public static function kirimKePetugas($tipe, $judul, $isi, $data = null, $url = null, $prioritas = 'normal', $dibuatOleh = null)
     {
-        $petugasIds = User::whereIn('role', ['petugas', 'admin'])->pluck('id');
-        return self::kirimKeMultipleUsers($petugasIds, $tipe, $judul, $isi, $data, $url, $prioritas, $dibuatOleh);
+        try {
+            Log::info('========== MULAI KIRIM NOTIFIKASI KE PETUGAS ==========', [
+                'tipe' => $tipe,
+                'judul' => $judul
+            ]);
+
+            // ✅ Ambil semua petugas dan admin (TANPA CEK STATUS)
+            $petugasIds = User::whereIn('role', ['petugas', 'admin'])->pluck('id');
+
+            if ($petugasIds->isEmpty()) {
+                Log::warning('❌ TIDAK ADA PETUGAS/ADMIN DITEMUKAN');
+                return false;
+            }
+
+            Log::info('✅ Petugas ditemukan', [
+                'jumlah' => $petugasIds->count(),
+                'ids' => $petugasIds->toArray()
+            ]);
+
+            $result = self::kirimKeMultipleUsers($petugasIds, $tipe, $judul, $isi, $data, $url, $prioritas, $dibuatOleh);
+
+            if ($result) {
+                Log::info('✅ Notifikasi berhasil dikirim ke semua petugas', [
+                    'jumlah_penerima' => $petugasIds->count()
+                ]);
+
+                // ✅ Verifikasi notifikasi tersimpan
+                $countBaru = self::where('tipe', $tipe)
+                    ->where('created_at', '>=', now()->subMinute())
+                    ->count();
+
+                Log::info('✅ Verifikasi: Notifikasi baru di database', [
+                    'jumlah' => $countBaru
+                ]);
+            } else {
+                Log::error('❌ Gagal insert notifikasi ke database');
+            }
+
+            return $result;
+
+        } catch (\Exception $e) {
+            Log::error('❌ ERROR KIRIM NOTIFIKASI KE PETUGAS', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
     }
 
     /**
@@ -264,17 +347,42 @@ class Notifikasi extends Model
      */
     public static function kirimKeMahasiswa($tipe, $judul, $isi, $data = null, $url = null, $prioritas = 'normal', $dibuatOleh = null)
     {
-        $mahasiswaIds = User::whereIn('role', ['mahasiswa', 'pengguna_luar'])->pluck('id');
+        $mahasiswaIds = User::where('role', 'mahasiswa')->pluck('id');
+        
+        if ($mahasiswaIds->isEmpty()) {
+            Log::warning('Tidak ada mahasiswa ditemukan');
+            return false;
+        }
+
         return self::kirimKeMultipleUsers($mahasiswaIds, $tipe, $judul, $isi, $data, $url, $prioritas, $dibuatOleh);
     }
 
     /**
-     * Static method untuk kirim ke semua user
+     * Static method untuk kirim ke mahasiswa tertentu
      */
-    public static function kirimKeSemuaUser($tipe, $judul, $isi, $data = null, $url = null, $prioritas = 'normal', $dibuatOleh = null)
+    public static function kirimKeMahasiswaTertentu($mahasiswaId, $tipe, $judul, $isi, $data = null, $url = null, $prioritas = 'normal', $dibuatOleh = null)
     {
-        $allUserIds = User::pluck('id');
-        return self::kirimKeMultipleUsers($allUserIds, $tipe, $judul, $isi, $data, $url, $prioritas, $dibuatOleh);
+        try {
+            $mahasiswa = User::where('id', $mahasiswaId)
+                ->where('role', 'mahasiswa')
+                ->first();
+
+            if (!$mahasiswa) {
+                Log::warning('Mahasiswa tidak ditemukan', [
+                    'mahasiswa_id' => $mahasiswaId
+                ]);
+                return false;
+            }
+
+            return self::kirim($mahasiswaId, $tipe, $judul, $isi, $data, $url, $prioritas, $dibuatOleh);
+
+        } catch (\Exception $e) {
+            Log::error('Error kirim notifikasi ke mahasiswa', [
+                'mahasiswa_id' => $mahasiswaId,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
     }
 
     /**
@@ -282,8 +390,22 @@ class Notifikasi extends Model
      */
     public static function hapusNotifikasiLama($hari = 30)
     {
-        return self::where('created_at', '<', now()->subDays($hari))
-            ->where('dibaca', true)
-            ->delete();
+        try {
+            $deleted = self::where('created_at', '<', now()->subDays($hari))
+                ->where('dibaca', true)
+                ->delete();
+
+            Log::info('Notifikasi lama berhasil dihapus', [
+                'jumlah' => $deleted,
+                'hari' => $hari
+            ]);
+
+            return $deleted;
+        } catch (\Exception $e) {
+            Log::error('Error hapus notifikasi lama', [
+                'error' => $e->getMessage()
+            ]);
+            return 0;
+        }
     }
 }

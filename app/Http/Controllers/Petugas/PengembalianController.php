@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
+use App\Models\Notifikasi; // ✅ TAMBAHAN
 use Carbon\Carbon;
 
 class PengembalianController extends Controller
@@ -26,7 +27,7 @@ class PengembalianController extends Controller
             ->where('status', 'dipinjam')
             ->orderBy('tanggal_deadline', 'asc');
 
-        // Filter pencarian (support untuk mahasiswa dan pengguna luar)
+        // Filter pencarian
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -116,7 +117,7 @@ class PengembalianController extends Controller
      */
     public function store(Request $request, $id)
     {
-        $peminjaman = Peminjaman::findOrFail($id);
+        $peminjaman = Peminjaman::with(['mahasiswa', 'buku'])->findOrFail($id);
         
         // Cek apakah sudah dikembalikan
         if ($peminjaman->status === 'dikembalikan') {
@@ -127,10 +128,12 @@ class PengembalianController extends Controller
         
         try {
             $tanggalPengembalian = Carbon::now();
-            $petugasId = Auth::id(); // ID petugas yang sedang login
+            $petugasId = Auth::id();
+            $petugas = Auth::user();
             
             // Hitung denda jika terlambat
             $denda = $peminjaman->hitungDenda();
+            $hariTerlambat = $peminjaman->getHariTerlambat();
 
             // Buat record pengembalian
             Pengembalian::create([
@@ -140,25 +143,71 @@ class PengembalianController extends Controller
                 'denda' => $denda,
             ]);
 
-            // Update status peminjaman DAN petugas_id
+            // Update status peminjaman
             $peminjaman->update([
                 'status' => 'dikembalikan',
                 'tanggal_kembali' => $tanggalPengembalian,
-                'petugas_id' => $petugasId, // UPDATE PETUGAS ID DISINI!
+                'petugas_id' => $petugasId,
             ]);
 
             // Tambah stok buku
             $peminjaman->buku->increment('stok');
 
+            // ✅ KIRIM NOTIFIKASI KE MAHASISWA
+            $statusKeterlambatan = $denda > 0 ? 'terlambat' : 'tepat waktu';
+            
+            $pesanNotif = "Pengembalian buku Anda telah diproses oleh petugas.\n\n" .
+                         "📚 Buku: {$peminjaman->buku->judul}\n" .
+                         "📅 Tanggal Pengembalian: " . $tanggalPengembalian->translatedFormat('d F Y, H:i') . " WIB\n" .
+                         "📅 Deadline: " . $peminjaman->tanggal_deadline->translatedFormat('d F Y') . "\n" .
+                         "✅ Status: " . strtoupper($statusKeterlambatan) . "\n" .
+                         "👤 Diproses oleh: {$petugas->name}\n";
+            
+            if ($denda > 0) {
+                $pesanNotif .= "\n💰 Denda: Rp " . number_format($denda, 0, ',', '.') . "\n" .
+                              "📊 Hari Terlambat: {$hariTerlambat} hari\n" .
+                              "💵 Tarif Denda: Rp 5.000/hari\n\n" .
+                              "⚠️ PENTING: Harap segera melunasi denda di perpustakaan.\n" .
+                              "Anda tidak dapat meminjam buku lain sebelum denda dilunasi.";
+                $tipePrioritas = 'mendesak';
+                $tipeNotif = 'denda_belum_dibayar';
+            } else {
+                $pesanNotif .= "\n✅ Tidak ada denda.\n\n" .
+                              "🎉 Terima kasih telah mengembalikan buku tepat waktu!\n" .
+                              "Anda dapat meminjam buku lain kapan saja.";
+                $tipePrioritas = 'normal';
+                $tipeNotif = 'pengembalian_sukses';
+            }
+            
+            Notifikasi::kirim(
+                $peminjaman->mahasiswa_id,
+                $tipeNotif,
+                ($denda > 0 ? "Pengembalian dengan Denda" : "Pengembalian Berhasil") . ": {$peminjaman->buku->judul}",
+                $pesanNotif,
+                [
+                    'peminjaman_id' => $peminjaman->id,
+                    'buku_id' => $peminjaman->buku_id,
+                    'denda' => $denda,
+                    'hari_terlambat' => $hariTerlambat,
+                    'status' => $statusKeterlambatan,
+                    'tanggal_pengembalian' => $tanggalPengembalian->format('Y-m-d H:i:s')
+                ],
+                route('mahasiswa.peminjaman.show', $peminjaman->id),
+                $tipePrioritas,
+                $petugasId
+            );
+
             DB::commit();
 
             $message = 'Pengembalian berhasil diproses';
             if ($denda > 0) {
-                $message .= ' dengan denda Rp ' . number_format($denda, 0, ',', '.');
+                $message .= ' dengan denda Rp ' . number_format($denda, 0, ',', '.') . 
+                           ". Notifikasi denda telah dikirim ke {$peminjaman->mahasiswa->name}.";
+            } else {
+                $message .= ". Notifikasi telah dikirim ke {$peminjaman->mahasiswa->name}.";
             }
 
-            return redirect()->route('petugas.pengembalian.index')
-                ->with('success', $message);
+            return redirect()->route('petugas.pengembalian.index')->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();

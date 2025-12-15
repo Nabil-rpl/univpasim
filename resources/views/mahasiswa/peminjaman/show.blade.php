@@ -479,7 +479,7 @@
                                 </div>
                             </div>
                         @endif
-                    </div>
+                    </div> 
                 </div>
 
                 <!-- Petugas Info -->

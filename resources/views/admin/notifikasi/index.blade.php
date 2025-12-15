@@ -141,6 +141,14 @@
     .empty-state p {
         color: #a0aec0;
     }
+
+    /* ✅ TAMBAHAN: Gradient colors untuk icon */
+    .bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .bg-gradient-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+    .bg-gradient-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
+    .bg-gradient-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .bg-gradient-warning { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .bg-gradient-secondary { background: linear-gradient(135deg, #a8caba 0%, #5d4e6d 100%); }
 </style>
 @endpush
 
@@ -200,7 +208,6 @@
                             <option value="reminder_deadline" {{ request('tipe') == 'reminder_deadline' ? 'selected' : '' }}>Reminder Deadline</option>
                             <option value="terlambat" {{ request('tipe') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
                             <option value="user_baru" {{ request('tipe') == 'user_baru' ? 'selected' : '' }}>User Baru</option>
-                            <option value="mahasiswa_baru" {{ request('tipe') == 'mahasiswa_baru' ? 'selected' : '' }}>Mahasiswa Baru</option>
                             <option value="buku_baru" {{ request('tipe') == 'buku_baru' ? 'selected' : '' }}>Buku Baru</option>
                             <option value="laporan_baru" {{ request('tipe') == 'laporan_baru' ? 'selected' : '' }}>Laporan Baru</option>
                             <option value="sistem" {{ request('tipe') == 'sistem' ? 'selected' : '' }}>Sistem</option>
@@ -236,8 +243,9 @@
         <div class="notification-card {{ !$n->dibaca ? 'unread' : '' }}">
             <div class="card-body p-4">
                 <div class="d-flex gap-3">
-                    <div class="notification-icon-box" style="background: {{ getNotificationColor($n->tipe) }}">
-                        <i class="bi bi-{{ getNotificationIcon($n->tipe) }}"></i>
+                    {{-- ✅ PERBAIKAN: Gunakan method dari model --}}
+                    <div class="notification-icon-box bg-gradient-{{ $n->getBadgeColor() }}">
+                        <i class="bi bi-{{ $n->getIcon() }}"></i>
                     </div>
                     <div class="notification-content">
                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -279,8 +287,13 @@
                         </div>
                         <p class="notification-text">{{ Str::limit($n->isi, 200) }}</p>
                         <div class="notification-meta">
-                            <span><i class="bi bi-clock"></i> {{ $n->created_at->diffForHumans() }}</span>
+                            <span><i class="bi bi-clock"></i> {{ $n->getWaktuRelatif() }}</span>
                             <span><i class="bi bi-tag"></i> {{ ucwords(str_replace('_', ' ', $n->tipe)) }}</span>
+                            @if($n->prioritas && $n->prioritas !== 'normal')
+                            <span class="badge bg-{{ $n->getPrioritasColor() }}">
+                                {{ ucfirst($n->prioritas) }}
+                            </span>
+                            @endif
                         </div>
                     </div>
                 </div>

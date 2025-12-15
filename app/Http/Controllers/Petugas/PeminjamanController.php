@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use App\Models\Buku; 
 use App\Models\User;
+use App\Models\Notifikasi; // ✅ TAMBAHAN
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,7 @@ class PeminjamanController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Filter berdasarkan role peminjam (mahasiswa/pengguna_luar)
+        // Filter berdasarkan role peminjam
         if ($request->filled('role')) {
             $query->whereHas('mahasiswa', function($q) use ($request) {
                 $q->where('role', $request->role);
@@ -45,7 +46,7 @@ class PeminjamanController extends Controller
             $query->whereDate('tanggal_pinjam', '<=', $request->tanggal_sampai);
         }
 
-        // Pencarian (support nama, nim, no_hp, dan judul buku)
+        // Pencarian
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -63,10 +64,9 @@ class PeminjamanController extends Controller
         }
 
         $peminjamans = $query
-    ->orderByDesc('created_at')
-    ->simplePaginate(15)
-    ->appends(request()->query());
-
+            ->orderByDesc('created_at')
+            ->simplePaginate(15)
+            ->appends(request()->query());
 
         // Statistik
         $stats = [
@@ -111,6 +111,8 @@ class PeminjamanController extends Controller
         DB::beginTransaction();
         try {
             $buku = Buku::findOrFail($request->buku_id);
+            $mahasiswa = User::findOrFail($request->mahasiswa_id);
+            $petugas = Auth::user();
 
             // Cek stok
             if ($buku->stok <= 0) {
@@ -132,7 +134,7 @@ class PeminjamanController extends Controller
             $tanggalDeadline = now()->addDays($request->durasi_hari);
 
             // Buat peminjaman
-            Peminjaman::create([
+            $peminjaman = Peminjaman::create([
                 'mahasiswa_id' => $request->mahasiswa_id,
                 'buku_id' => $request->buku_id,
                 'petugas_id' => Auth::id(),
@@ -145,9 +147,42 @@ class PeminjamanController extends Controller
             // Kurangi stok
             $buku->decrement('stok');
 
+            // ✅ KIRIM NOTIFIKASI KE MAHASISWA
+            $roleLabel = $mahasiswa->role === 'mahasiswa' ? 'Mahasiswa' : 'Pengguna Luar';
+            $identitas = $mahasiswa->nim ? "NIM: {$mahasiswa->nim}" : "No HP: {$mahasiswa->no_hp}";
+            
+            Notifikasi::kirim(
+                $mahasiswa->id,
+                'peminjaman_disetujui',
+                "Peminjaman Disetujui: {$buku->judul}",
+                "Peminjaman buku Anda telah disetujui oleh petugas.\n\n" .
+                "📚 Buku: {$buku->judul}\n" .
+                "✍️ Penulis: {$buku->penulis}\n" .
+                "🏢 Penerbit: {$buku->penerbit}\n" .
+                "📅 Tanggal Pinjam: " . $tanggalPinjam->translatedFormat('d F Y, H:i') . " WIB\n" .
+                "⏰ Deadline: " . $tanggalDeadline->translatedFormat('d F Y, H:i') . " WIB\n" .
+                "⏱️ Durasi: {$request->durasi_hari} hari\n" .
+                "👤 Diproses oleh: {$petugas->name} (Petugas)\n\n" .
+                "⚠️ PENTING:\n" .
+                "• Harap kembalikan buku sebelum deadline\n" .
+                "• Denda Rp 5.000/hari untuk keterlambatan\n" .
+                "• Jaga kondisi buku dengan baik",
+                [
+                    'peminjaman_id' => $peminjaman->id,
+                    'buku_id' => $buku->id,
+                    'deadline' => $tanggalDeadline->format('Y-m-d H:i:s'),
+                    'durasi' => $request->durasi_hari
+                ],
+                route('mahasiswa.peminjaman.show', $peminjaman->id),
+                'normal',
+                Auth::id()
+            );
+
             DB::commit();
+            
             return redirect()->route('petugas.peminjaman.index')
-                ->with('success', 'Peminjaman berhasil ditambahkan.');
+                ->with('success', "Peminjaman berhasil ditambahkan. Notifikasi telah dikirim ke {$mahasiswa->name}.");
+                
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
