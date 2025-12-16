@@ -1,4 +1,4 @@
-@extends('layouts.petugas')
+@extends('layouts.app')
 
 @section('title', 'Detail Notifikasi')
 @section('page-title', 'Detail Notifikasi')
@@ -14,7 +14,7 @@
     }
 
     .detail-header {
-        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 40px 35px;
         color: white;
         position: relative;
@@ -67,6 +67,7 @@
         font-weight: 800;
         margin-bottom: 15px;
         color: white;
+        line-height: 1.3;
     }
 
     .detail-meta {
@@ -139,7 +140,7 @@
     }
 
     .section-title i {
-        color: #2563eb;
+        color: #667eea;
         font-size: 1.5rem;
     }
 
@@ -150,7 +151,7 @@
         background: #f8fafc;
         padding: 25px;
         border-radius: 16px;
-        border-left: 4px solid #2563eb;
+        border-left: 4px solid #667eea;
     }
 
     .info-grid {
@@ -171,7 +172,7 @@
     .info-item:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        border-color: #2563eb;
+        border-color: #667eea;
     }
 
     .info-label {
@@ -213,14 +214,14 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        background: linear-gradient(135deg, #667eea, #764ba2);
         color: white;
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
     }
 
     .btn-primary:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         color: white;
     }
 
@@ -256,9 +257,10 @@
     }
 
     .btn-secondary:hover {
-        border-color: #2563eb;
-        color: #2563eb;
+        border-color: #667eea;
+        color: #667eea;
         background: #f8fafc;
+        transform: translateY(-2px);
     }
 
     .related-section {
@@ -285,18 +287,18 @@
         gap: 8px;
         padding: 12px 24px;
         background: white;
-        color: #2563eb;
+        color: #667eea;
         border-radius: 12px;
         text-decoration: none;
         font-weight: 600;
         transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
     }
 
     .related-link:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.25);
-        color: #2563eb;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+        color: #667eea;
     }
 
     /* Gradient backgrounds for icons */
@@ -346,14 +348,14 @@
     <!-- Alert Messages -->
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+        <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     @endif
 
     @if(session('error'))
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-x-circle me-2"></i>{{ session('error') }}
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     @endif
@@ -371,22 +373,23 @@
 
                 <div class="detail-meta">
                     <span class="meta-item">
-                        <i class="bi bi-clock"></i>
+                        <i class="bi bi-clock-history"></i>
                         {{ $notifikasi->getWaktuRelatif() }}
                     </span>
                     <span class="meta-item">
-                        <i class="bi bi-calendar"></i>
+                        <i class="bi bi-calendar3"></i>
                         {{ $notifikasi->created_at->format('d M Y, H:i') }} WIB
                     </span>
                     <span class="meta-item">
-                        <i class="bi bi-tag"></i>
+                        <i class="bi bi-tag-fill"></i>
                         {{ ucwords(str_replace('_', ' ', $notifikasi->tipe)) }}
                     </span>
                 </div>
 
                 <div>
                     <span class="status-badge {{ !$notifikasi->dibaca ? 'badge-unread' : 'badge-read' }}">
-                        {{ !$notifikasi->dibaca ? '● Belum Dibaca' : '✓ Sudah Dibaca' }}
+                        <i class="bi bi-{{ !$notifikasi->dibaca ? 'circle-fill' : 'check-circle-fill' }}"></i>
+                        {{ !$notifikasi->dibaca ? 'Belum Dibaca' : 'Sudah Dibaca' }}
                     </span>
                 </div>
             </div>
@@ -397,7 +400,7 @@
             <!-- Content Section -->
             <div class="content-section">
                 <h2 class="section-title">
-                    <i class="bi bi-file-text"></i>
+                    <i class="bi bi-file-text-fill"></i>
                     Isi Notifikasi
                 </h2>
                 <div class="content-text">
@@ -408,37 +411,48 @@
             <!-- Information Grid -->
             <div class="content-section">
                 <h2 class="section-title">
-                    <i class="bi bi-info-circle"></i>
+                    <i class="bi bi-info-circle-fill"></i>
                     Informasi Detail
                 </h2>
                 <div class="info-grid">
                     <div class="info-item">
                         <div class="info-label">
-                            <i class="bi bi-fingerprint me-1"></i> ID Notifikasi
+                            <i class="bi bi-hash me-1"></i> ID Notifikasi
                         </div>
                         <div class="info-value">#{{ $notifikasi->id }}</div>
                     </div>
 
                     <div class="info-item">
                         <div class="info-label">
-                            <i class="bi bi-bookmark me-1"></i> Kategori
+                            <i class="bi bi-bookmark-fill me-1"></i> Kategori
                         </div>
                         <div class="info-value">{{ ucwords(str_replace('_', ' ', $notifikasi->tipe)) }}</div>
                     </div>
 
                     <div class="info-item">
                         <div class="info-label">
-                            <i class="bi bi-clock-history me-1"></i> Diterima
+                            <i class="bi bi-clock-fill me-1"></i> Diterima
                         </div>
                         <div class="info-value">{{ $notifikasi->created_at->format('d M Y, H:i') }}</div>
                     </div>
 
-                    @if($notifikasi->dibaca)
+                    @if($notifikasi->dibaca && $notifikasi->dibaca_pada)
                     <div class="info-item">
                         <div class="info-label">
                             <i class="bi bi-check2-circle me-1"></i> Dibaca Pada
                         </div>
-                        <div class="info-value">{{ $notifikasi->updated_at->format('d M Y, H:i') }}</div>
+                        <div class="info-value">{{ $notifikasi->dibaca_pada->format('d M Y, H:i') }}</div>
+                    </div>
+                    @endif
+
+                    @if($notifikasi->prioritas && $notifikasi->prioritas !== 'normal')
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Prioritas
+                        </div>
+                        <div class="info-value text-{{ $notifikasi->getPrioritasColor() }}">
+                            {{ ucfirst($notifikasi->prioritas) }}
+                        </div>
                     </div>
                     @endif
                 </div>
@@ -451,7 +465,9 @@
                     <i class="bi bi-link-45deg"></i>
                     Tindakan Terkait
                 </h3>
-                <p class="mb-3" style="color: #1e40af;">Klik tombol di bawah untuk melihat detail atau melakukan tindakan terkait notifikasi ini:</p>
+                <p class="mb-3" style="color: #1e40af;">
+                    Klik tombol di bawah untuk melihat detail atau melakukan tindakan terkait notifikasi ini:
+                </p>
                 <a href="{{ $notifikasi->url }}" class="related-link">
                     <i class="bi bi-box-arrow-up-right"></i>
                     Lihat Detail Lengkap
@@ -461,30 +477,33 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <a href="{{ route('petugas.notifikasi.index') }}" class="btn-action btn-secondary">
+                <a href="{{ route('admin.notifikasi.index') }}" class="btn-action btn-secondary">
                     <i class="bi bi-arrow-left"></i>
                     Kembali ke Daftar
                 </a>
 
                 @if(!$notifikasi->dibaca)
-                <button type="button" class="btn-action btn-success" onclick="markAsRead({{ $notifikasi->id }})">
-                    <i class="bi bi-check-circle"></i>
+                <button type="button" class="btn-action btn-success" onclick="markAsReadInline({{ $notifikasi->id }})">
+                    <i class="bi bi-check-circle-fill"></i>
                     Tandai Sudah Dibaca
                 </button>
                 @endif
 
                 @if($notifikasi->url)
                 <a href="{{ $notifikasi->url }}" class="btn-action btn-primary">
-                    <i class="bi bi-arrow-right-circle"></i>
+                    <i class="bi bi-arrow-right-circle-fill"></i>
                     Buka Link Terkait
                 </a>
                 @endif
 
-                <form action="{{ route('petugas.notifikasi.destroy', $notifikasi->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus notifikasi ini?')">
+                <form action="{{ route('admin.notifikasi.destroy', $notifikasi->id) }}" 
+                      method="POST" 
+                      style="display: inline;" 
+                      onsubmit="return confirm('Yakin ingin menghapus notifikasi ini?')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn-action btn-danger">
-                        <i class="bi bi-trash"></i>
+                        <i class="bi bi-trash3-fill"></i>
                         Hapus Notifikasi
                     </button>
                 </form>
@@ -496,9 +515,13 @@
 
 @push('scripts')
 <script>
-// Mark notification as read
-function markAsRead(id) {
-    fetch(`/petugas/notifikasi/${id}/baca`, {
+// Mark notification as read WITHOUT reload
+function markAsReadInline(id) {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Memproses...';
+    
+    fetch(`/admin/notifikasi/${id}/baca`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -508,22 +531,47 @@ function markAsRead(id) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            location.reload();
+            // Update badge
+            const statusBadge = document.querySelector('.status-badge');
+            statusBadge.classList.remove('badge-unread');
+            statusBadge.classList.add('badge-read');
+            statusBadge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Sudah Dibaca';
+            
+            // Remove button
+            btn.remove();
+            
+            // Show success message
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success alert-dismissible fade show';
+            alert.innerHTML = `
+                <i class="bi bi-check-circle-fill me-2"></i>Notifikasi berhasil ditandai sebagai dibaca
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container-fluid').insertBefore(alert, document.querySelector('.detail-card'));
+            
+            // Auto hide alert
+            setTimeout(() => {
+                new bootstrap.Alert(alert).close();
+            }, 3000);
         }
     })
     .catch(error => {
         console.error('Error:', error);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Tandai Sudah Dibaca';
         alert('Terjadi kesalahan. Silakan coba lagi.');
     });
 }
 
 // Auto dismiss alerts after 5 seconds
-setTimeout(function() {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(function(alert) {
-        const bsAlert = new bootstrap.Alert(alert);
-        bsAlert.close();
-    });
-}, 5000);
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+});
 </script>
 @endpush

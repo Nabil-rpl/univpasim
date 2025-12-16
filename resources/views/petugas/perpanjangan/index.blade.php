@@ -627,6 +627,11 @@
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
                 submitBtn.disabled = true;
                 
+                // Reset badge perpanjangan setelah approve/reject
+                if (typeof resetPerpanjanganBadge === 'function') {
+                    resetPerpanjanganBadge();
+                }
+                
                 // Reset if form submission fails
                 setTimeout(() => {
                     submitBtn.innerHTML = originalContent;

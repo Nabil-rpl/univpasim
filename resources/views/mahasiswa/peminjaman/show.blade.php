@@ -335,7 +335,7 @@
                             <div class="col-md-3 text-center mb-3 mb-md-0">
                                 <div class="book-cover-detail">
                                     @if($peminjaman->buku->foto)
-                                        <img src="{{ asset('storage/foto_buku/' . $peminjaman->buku->foto) }}" alt="{{ $peminjaman->buku->judul }}">
+                                        <img src="{{ asset('storage/' . $peminjaman->buku->foto) }}" alt="{{ $peminjaman->buku->judul }}">
                                     @else
                                         <i class="bi bi-book-fill"></i>
                                     @endif

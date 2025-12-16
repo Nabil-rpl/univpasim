@@ -590,32 +590,112 @@ body {
         <div class="sidebar-brand">
             <h4><i class="bi bi-mortarboard-fill"></i> AdminPASIM</h4>
         </div>
-        <ul class="sidebar-menu">
-            <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i><span>Dashboard</span></a></li>
-            
-            <div class="menu-section">Management</div>
-            <li><a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                <i class="bi bi-people-fill"></i><span>Kelola User</span></a></li>
-            <li><a href="{{ route('admin.mahasiswa.index') }}" class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}">
-                <i class="bi bi-person-badge-fill"></i><span>Data Mahasiswa</span><span class="menu-badge">New</span></a></li>
-            <li><a href="{{ route('admin.buku.index') }}" class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
-                <i class="bi bi-book-fill"></i><span>Kelola Buku</span></a></li>
-            
-            <div class="menu-section">Transaksi</div>
-            <li><a href="{{ route('admin.peminjaman.index') }}" class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}">
-                <i class="bi bi-journal-text"></i><span>Peminjaman</span></a></li>
-            <li><a href="{{ route('admin.perpanjangan.index') }}" class="{{ request()->routeIs('admin.perpanjangan.*') ? 'active' : '' }}">
-                <i class="bi bi-calendar-check"></i><span>Perpanjangan</span></a></li>
-            
-            <div class="menu-section">Komunikasi</div>
-            <li><a href="{{ route('admin.notifikasi.index') }}" class="{{ request()->routeIs('admin.notifikasi.*') ? 'active' : '' }}">
-                <i class="bi bi-bell-fill"></i><span>Notifikasi</span></a></li>
-            
-            <div class="menu-section">Laporan</div>
-            <li><a href="{{ route('admin.laporan.index') }}" class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
-                <i class="bi bi-file-earmark-text-fill"></i><span>Laporan Petugas</span></a></li>
-        </ul>
+        <!-- Ganti bagian sidebar menu di admin layout dengan kode ini -->
+
+<ul class="sidebar-menu">
+    <li>
+        <a href="{{ route('admin.dashboard') }}" 
+           class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+    
+    <div class="menu-section">Management</div>
+    
+    <li>
+        <a href="{{ route('admin.users.index') }}" 
+           class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+            <i class="bi bi-people-fill"></i>
+            <span>Kelola User</span>
+        </a>
+    </li>
+    
+    <li>
+        <a href="{{ route('admin.mahasiswa.index') }}" 
+           class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}"
+           id="mahasiswaLink">
+            <i class="bi bi-person-badge-fill"></i>
+            <span>Data Mahasiswa</span>
+            @php
+                // Hitung mahasiswa yang terdaftar hari ini
+                $mahasiswaBaru = \App\Models\Mahasiswa::whereDate('created_at', today())->count();
+            @endphp
+            @if($mahasiswaBaru > 0)
+                <span class="menu-badge" id="mahasiswaBadge">{{ $mahasiswaBaru }}</span>
+            @endif
+        </a>
+    </li>
+    
+    <li>
+        <a href="{{ route('admin.buku.index') }}" 
+           class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
+            <i class="bi bi-book-fill"></i>
+            <span>Kelola Buku</span>
+        </a>
+    </li>
+    
+    <div class="menu-section">Transaksi</div>
+    
+    <li>
+        <a href="{{ route('admin.peminjaman.index') }}" 
+           class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}"
+           id="peminjamanLink">
+            <i class="bi bi-journal-text"></i>
+            <span>Peminjaman</span>
+            @php
+                $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
+            @endphp
+            @if($peminjamanAktif > 0)
+                <span class="menu-badge" id="peminjamanBadge">{{ $peminjamanAktif }}</span>
+            @endif
+        </a>
+    </li>
+    
+    <li>
+        <a href="{{ route('admin.perpanjangan.index') }}" 
+           class="{{ request()->routeIs('admin.perpanjangan.*') ? 'active' : '' }}"
+           id="perpanjanganLink">
+            <i class="bi bi-calendar-check"></i>
+            <span>Perpanjangan</span>
+            @php
+                $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
+            @endphp
+            @if($perpanjanganMenunggu > 0)
+                <span class="menu-badge" id="perpanjanganBadge">{{ $perpanjanganMenunggu }}</span>
+            @endif
+        </a>
+    </li>
+    
+    <div class="menu-section">Komunikasi</div>
+    
+    <li>
+        <a href="{{ route('admin.notifikasi.index') }}" 
+           class="{{ request()->routeIs('admin.notifikasi.*') ? 'active' : '' }}"
+           id="notifikasiLink">
+            <i class="bi bi-bell-fill"></i>
+            <span>Notifikasi</span>
+            @php
+                $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
+                    ->where('dibaca', false)
+                    ->count();
+            @endphp
+            @if($unreadNotifCount > 0)
+                <span class="menu-badge" id="notifikasiBadge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
+            @endif
+        </a>
+    </li>
+    
+    <div class="menu-section">Laporan</div>
+    
+    <li>
+        <a href="{{ route('admin.laporan.index') }}" 
+           class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+            <i class="bi bi-file-earmark-text-fill"></i>
+            <span>Laporan Petugas</span>
+        </a>
+    </li>
+</ul>
     </aside>
 
     <main class="main-content">
@@ -685,271 +765,330 @@ body {
 
     <!-- Custom JS -->
     <script>
-        // admin-notifications.js - Complete Notification System
+        // ========== MOBILE MENU ==========
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-// ========== MOBILE MENU ==========
-const menuToggle = document.getElementById('menuToggle');
-const sidebar = document.getElementById('sidebar');
-const sidebarOverlay = document.getElementById('sidebarOverlay');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            });
+        }
 
-if (menuToggle) {
-    menuToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
-    });
-}
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+        }
 
-if (sidebarOverlay) {
-    sidebarOverlay.addEventListener('click', function() {
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-    });
-}
+        // Close sidebar when clicking menu on mobile
+        if (window.innerWidth <= 768) {
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                });
+            });
+        }
 
-// Close sidebar when clicking menu on mobile
-if (window.innerWidth <= 768) {
-    document.querySelectorAll('.sidebar-menu a').forEach(link => {
-        link.addEventListener('click', function() {
-            sidebar.classList.remove('active');
-            sidebarOverlay.classList.remove('active');
+        // ========== NOTIFICATION SYSTEM ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotifications();
+            setInterval(loadNotifications, 30000);
         });
-    });
-}
 
-// ========== NOTIFICATION SYSTEM ==========
+        function loadNotifications() {
+            const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
+            
+            fetch(`${baseUrl}/admin/api/notifikasi/latest`)
+                .then(response => response.json())
+                .then(data => {
+                    updateNotificationUI(data.notifikasi, data.count);
+                })
+                .catch(error => console.error('Error loading notifications:', error));
+        }
 
-// Load notifications on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadNotifications();
-    // Auto refresh every 30 seconds
-    setInterval(loadNotifications, 30000);
-});
-
-// Load latest notifications
-function loadNotifications() {
-    // Get the base URL from meta tag or use default
-    const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
-    
-    fetch(`${baseUrl}/admin/api/notifikasi/latest`)
-        .then(response => response.json())
-        .then(data => {
-            updateNotificationUI(data.notifikasi, data.count);
-        })
-        .catch(error => console.error('Error loading notifications:', error));
-}
-
-// Update notification UI
-function updateNotificationUI(notifikasi, count) {
-    const badge = document.getElementById('notificationBadge');
-    const list = document.getElementById('notificationList');
-    
-    if (!badge || !list) return;
-    
-    // Update badge
-    if (count > 0) {
-        badge.textContent = count > 99 ? '99+' : count;
-        badge.style.display = 'flex';
-    } else {
-        badge.style.display = 'none';
-    }
-    
-    // Update list
-    if (notifikasi.length === 0) {
-        list.innerHTML = `
-            <div class="empty-notification">
-                <i class="bi bi-bell-slash"></i>
-                <p>Tidak ada notifikasi</p>
-            </div>
-        `;
-        return;
-    }
-    
-    list.innerHTML = notifikasi.map(n => {
-        const iconBg = getNotificationColor(n.tipe);
-        const icon = getNotificationIcon(n.tipe);
-        const timeAgo = formatTimeAgo(n.created_at);
-        const unreadClass = !n.dibaca ? 'unread' : '';
-        
-        return `
-            <div class="notification-item ${unreadClass}" onclick="viewNotification(${n.id})">
-                <div class="notification-icon-small" style="background: ${iconBg}">
-                    <i class="bi bi-${icon}"></i>
-                </div>
-                <div class="notification-content">
-                    <div class="notification-title">${escapeHtml(n.judul)}</div>
-                    <div class="notification-text">${escapeHtml(truncateText(n.isi, 60))}</div>
-                    <div class="notification-time">
-                        <i class="bi bi-clock"></i> ${timeAgo}
+        function updateNotificationUI(notifikasi, count) {
+            const badge = document.getElementById('notificationBadge');
+            const list = document.getElementById('notificationList');
+            
+            if (!badge || !list) return;
+            
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+            
+            if (notifikasi.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-notification">
+                        <i class="bi bi-bell-slash"></i>
+                        <p>Tidak ada notifikasi</p>
                     </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// Get notification color based on type
-function getNotificationColor(tipe) {
-    const colors = {
-        'peminjaman_baru': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'peminjaman_disetujui': 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-        'peminjaman_ditolak': 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
-        'perpanjangan_baru': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'perpanjangan_disetujui': 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-        'perpanjangan_ditolak': 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
-        'reminder_deadline': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'terlambat': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'pengembalian_sukses': 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-        'buku_tersedia': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'denda_belum_dibayar': 'linear-gradient(135deg, #ffa751 0%, #ffe259 100%)',
-        'user_baru': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'buku_baru': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        'laporan_baru': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'stok_menipis': 'linear-gradient(135deg, #ffa751 0%, #ffe259 100%)',
-        'sistem': 'linear-gradient(135deg, #a8caba 0%, #5d4e6d 100%)'
-    };
-    return colors[tipe] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-}
-
-// Get notification icon based on type
-function getNotificationIcon(tipe) {
-    const icons = {
-        'peminjaman_baru': 'book-fill',
-        'peminjaman_disetujui': 'check-circle-fill',
-        'peminjaman_ditolak': 'x-circle-fill',
-        'perpanjangan_baru': 'arrow-clockwise',
-        'perpanjangan_disetujui': 'check2-circle',
-        'perpanjangan_ditolak': 'x-octagon',
-        'reminder_deadline': 'alarm',
-        'terlambat': 'exclamation-triangle-fill',
-        'pengembalian_sukses': 'check-circle',
-        'buku_tersedia': 'bell-fill',
-        'denda_belum_dibayar': 'cash-coin',
-        'user_baru': 'person-plus-fill',
-        'buku_baru': 'journal-plus',
-        'laporan_baru': 'file-earmark-text',
-        'stok_menipis': 'exclamation-circle',
-        'sistem': 'info-circle-fill'
-    };
-    return icons[tipe] || 'bell';
-}
-
-// Format time ago (relative time)
-function formatTimeAgo(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
-    
-    const intervals = {
-        tahun: 31536000,
-        bulan: 2592000,
-        minggu: 604800,
-        hari: 86400,
-        jam: 3600,
-        menit: 60,
-        detik: 1
-    };
-    
-    for (const [name, secondsCount] of Object.entries(intervals)) {
-        const interval = Math.floor(seconds / secondsCount);
-        if (interval >= 1) {
-            return `${interval} ${name} yang lalu`;
+                `;
+                return;
+            }
+            
+            list.innerHTML = notifikasi.map(n => {
+                const iconBg = getNotificationColor(n.tipe);
+                const icon = getNotificationIcon(n.tipe);
+                const timeAgo = formatTimeAgo(n.created_at);
+                const unreadClass = !n.dibaca ? 'unread' : '';
+                
+                return `
+                    <div class="notification-item ${unreadClass}" onclick="viewNotification(${n.id})">
+                        <div class="notification-icon-small" style="background: ${iconBg}">
+                            <i class="bi bi-${icon}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">${escapeHtml(n.judul)}</div>
+                            <div class="notification-text">${escapeHtml(truncateText(n.isi, 60))}</div>
+                            <div class="notification-time">
+                                <i class="bi bi-clock"></i> ${timeAgo}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
-    }
-    
-    return 'Baru saja';
-}
 
-// Truncate text
-function truncateText(text, maxLength) {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substr(0, maxLength) + '...';
-}
-
-// Escape HTML for security
-function escapeHtml(text) {
-    if (!text) return '';
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return text.toString().replace(/[&<>"']/g, m => map[m]);
-}
-
-// View notification (redirect to detail)
-function viewNotification(id) {
-    // Mark as read
-    markAsRead(id);
-    
-    // Redirect to detail page
-    const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
-    window.location.href = `${baseUrl}/admin/notifikasi/${id}`;
-}
-
-// Mark notification as read
-function markAsRead(id) {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
-    
-    fetch(`${baseUrl}/admin/notifikasi/${id}/baca`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
+        function getNotificationColor(tipe) {
+            const colors = {
+                'peminjaman_baru': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'peminjaman_disetujui': 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                'peminjaman_ditolak': 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
+                'perpanjangan_baru': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                'perpanjangan_disetujui': 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                'perpanjangan_ditolak': 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
+                'reminder_deadline': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                'terlambat': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                'user_baru': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'buku_baru': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'sistem': 'linear-gradient(135deg, #a8caba 0%, #5d4e6d 100%)'
+            };
+            return colors[tipe] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            loadNotifications(); // Refresh notifications
-        }
-    })
-    .catch(error => console.error('Error marking as read:', error));
-}
 
-// Mark all notifications as read
-function markAllAsRead() {
-    if (!confirm('Tandai semua notifikasi sebagai dibaca?')) return;
-    
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
-    
-    fetch(`${baseUrl}/admin/notifikasi/baca-semua`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
+        function getNotificationIcon(tipe) {
+            const icons = {
+                'peminjaman_baru': 'book-fill',
+                'peminjaman_disetujui': 'check-circle-fill',
+                'peminjaman_ditolak': 'x-circle-fill',
+                'perpanjangan_baru': 'arrow-clockwise',
+                'perpanjangan_disetujui': 'check2-circle',
+                'perpanjangan_ditolak': 'x-octagon',
+                'reminder_deadline': 'alarm',
+                'terlambat': 'exclamation-triangle-fill',
+                'user_baru': 'person-plus-fill',
+                'buku_baru': 'journal-plus',
+                'sistem': 'info-circle-fill'
+            };
+            return icons[tipe] || 'bell';
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            loadNotifications(); // Refresh notifications
-            showToast('Semua notifikasi ditandai sebagai dibaca', 'success');
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            const intervals = {
+                tahun: 31536000,
+                bulan: 2592000,
+                minggu: 604800,
+                hari: 86400,
+                jam: 3600,
+                menit: 60,
+                detik: 1
+            };
+            
+            for (const [name, secondsCount] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsCount);
+                if (interval >= 1) {
+                    return `${interval} ${name} yang lalu`;
+                }
+            }
+            
+            return 'Baru saja';
         }
-    })
-    .catch(error => console.error('Error marking all as read:', error));
-}
 
-// Show toast notification (optional - can use Bootstrap Toast)
-function showToast(message, type = 'info') {
-    console.log(`[${type.toUpperCase()}] ${message}`);
-    
-    // Optional: Implement Bootstrap toast or custom toast here
-    // Example with alert:
-    // alert(message);
-}
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            if (text.length <= maxLength) return text;
+            return text.substr(0, maxLength) + '...';
+        }
 
-// Export functions for use in other scripts
-window.notificationSystem = {
-    loadNotifications,
-    markAsRead,
-    markAllAsRead,
-    viewNotification
-};
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.toString().replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function viewNotification(id) {
+            markAsRead(id);
+            const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
+            window.location.href = `${baseUrl}/admin/notifikasi/${id}`;
+        }
+
+        function markAsRead(id) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
+            
+            fetch(`${baseUrl}/admin/notifikasi/${id}/baca`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadNotifications();
+                }
+            })
+            .catch(error => console.error('Error marking as read:', error));
+        }
+
+        function markAllAsRead() {
+            if (!confirm('Tandai semua notifikasi sebagai dibaca?')) return;
+            
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
+            
+            fetch(`${baseUrl}/admin/notifikasi/baca-semua`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadNotifications();
+                    console.log('Semua notifikasi ditandai sebagai dibaca');
+                }
+            })
+            .catch(error => console.error('Error marking all as read:', error));
+        }
+
+        // ========== 🎯 BADGE MANAGEMENT SYSTEM ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ========== BADGE PEMINJAMAN ==========
+            const peminjamanLink = document.getElementById('peminjamanLink');
+            const peminjamanBadge = document.getElementById('peminjamanBadge');
+
+            if (peminjamanBadge) {
+                const currentCount = parseInt(peminjamanBadge.textContent) || 0;
+                const lastSeenCount = parseInt(localStorage.getItem('admin_lastSeenPeminjamanCount')) || 0;
+
+                if (currentCount <= lastSeenCount) {
+                    peminjamanBadge.style.display = 'none';
+                }
+
+                if (peminjamanLink) {
+                    peminjamanLink.addEventListener('click', function() {
+                        localStorage.setItem('admin_lastSeenPeminjamanCount', currentCount);
+                        peminjamanBadge.style.display = 'none';
+                    });
+                }
+            }
+
+            // ========== BADGE PERPANJANGAN ==========
+            const perpanjanganLink = document.getElementById('perpanjanganLink');
+            const perpanjanganBadge = document.getElementById('perpanjanganBadge');
+
+            if (perpanjanganBadge) {
+                const currentCount = parseInt(perpanjanganBadge.textContent) || 0;
+                const lastSeenCount = parseInt(localStorage.getItem('admin_lastSeenPerpanjanganCount')) || 0;
+
+                if (currentCount <= lastSeenCount) {
+                    perpanjanganBadge.style.display = 'none';
+                }
+
+                if (perpanjanganLink) {
+                    perpanjanganLink.addEventListener('click', function() {
+                        localStorage.setItem('admin_lastSeenPerpanjanganCount', currentCount);
+                        perpanjanganBadge.style.display = 'none';
+                    });
+                }
+            }
+
+            // ========== BADGE NOTIFIKASI SIDEBAR ==========
+            const notifikasiLink = document.getElementById('notifikasiLink');
+            const notifikasiBadge = document.getElementById('notifikasiBadge');
+
+            if (notifikasiBadge) {
+                const currentCount = parseInt(notifikasiBadge.textContent.replace('+', '')) || 0;
+                const lastSeenCount = parseInt(localStorage.getItem('admin_lastSeenNotifikasiCount')) || 0;
+
+                if (currentCount <= lastSeenCount) {
+                    notifikasiBadge.style.display = 'none';
+                }
+
+                if (notifikasiLink) {
+                    notifikasiLink.addEventListener('click', function() {
+                        localStorage.setItem('admin_lastSeenNotifikasiCount', currentCount);
+                        notifikasiBadge.style.display = 'none';
+                    });
+                }
+            }
+
+            // ========== BADGE MAHASISWA BARU (Per Hari) ==========
+            const mahasiswaLink = document.getElementById('mahasiswaLink');
+            const mahasiswaBadge = document.getElementById('mahasiswaBadge');
+
+            if (mahasiswaBadge) {
+                const currentCount = parseInt(mahasiswaBadge.textContent) || 0;
+                const today = new Date().toDateString();
+                const lastSeenDate = localStorage.getItem('admin_mahasiswaLastSeenDate');
+
+                // Reset jika ganti hari
+                if (lastSeenDate !== today) {
+                    localStorage.removeItem('admin_mahasiswaLastSeenCount');
+                    localStorage.setItem('admin_mahasiswaLastSeenDate', today);
+                }
+
+                const lastSeenCount = parseInt(localStorage.getItem('admin_mahasiswaLastSeenCount')) || 0;
+
+                if (currentCount <= lastSeenCount) {
+                    mahasiswaBadge.style.display = 'none';
+                }
+
+                if (mahasiswaLink) {
+                    mahasiswaLink.addEventListener('click', function() {
+                        localStorage.setItem('admin_mahasiswaLastSeenCount', currentCount);
+                        localStorage.setItem('admin_mahasiswaLastSeenDate', today);
+                        mahasiswaBadge.style.display = 'none';
+                    });
+                }
+            }
+        });
+
+        // Fungsi reset badge untuk testing
+        function resetAdminBadges() {
+            localStorage.removeItem('admin_lastSeenPeminjamanCount');
+            localStorage.removeItem('admin_lastSeenPerpanjanganCount');
+            localStorage.removeItem('admin_lastSeenNotifikasiCount');
+            localStorage.removeItem('admin_mahasiswaLastSeenCount');
+            localStorage.removeItem('admin_mahasiswaLastSeenDate');
+            location.reload();
+            console.log('Admin badges reset!');
+        }
+
+        console.log('✅ Admin Badge System Loaded');
     </script>
 
     @stack('scripts')

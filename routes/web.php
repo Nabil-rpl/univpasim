@@ -307,20 +307,23 @@ Route::middleware(['auth', 'role:pengguna_luar'])
         Route::get('/pengaturan', [PenggunaLuarPengaturanController::class, 'index'])->name('pengaturan.index');
         Route::post('/pengaturan/update', [PenggunaLuarPengaturanController::class, 'update'])->name('pengaturan.update');
 
-        // ✅ NOTIFIKASI PENGGUNA LUAR - URUTAN PENTING!
+        // ✅ NOTIFIKASI PENGGUNA LUAR - SUDAH DIPERBAIKI!
         // Route spesifik HARUS di atas route dengan parameter {id}
         Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
-            // Route index
+            // Halaman index notifikasi
             Route::get('/', [PenggunaLuarNotifikasiController::class, 'index'])->name('index');
             
-            // Route spesifik (tanpa parameter) harus di atas
-            Route::get('/latest', [PenggunaLuarNotifikasiController::class, 'getLatest'])->name('latest');
-            Route::get('/count', [PenggunaLuarNotifikasiController::class, 'getUnreadCount'])->name('count');
-            Route::post('/mark-all-read', [PenggunaLuarNotifikasiController::class, 'markAllAsRead'])->name('mark-all-read');
+            // Route spesifik untuk AJAX (HARUS DI ATAS route {id})
+            Route::get('/latest', [PenggunaLuarNotifikasiController::class, 'latest'])->name('latest');
             
-            // Route dengan parameter {id} di bawah
-            Route::post('/{id}/mark-as-read', [PenggunaLuarNotifikasiController::class, 'markAsRead'])->name('mark-as-read');
-            Route::delete('/{id}', [PenggunaLuarNotifikasiController::class, 'destroy'])->name('destroy');
+            // Route untuk actions bulk (HARUS DI ATAS route {id})
+            Route::post('/mark-all-read', [PenggunaLuarNotifikasiController::class, 'markAllRead'])->name('mark-all-read');
+            Route::delete('/delete-read', [PenggunaLuarNotifikasiController::class, 'deleteRead'])->name('delete-read');
+            
+            // Route dengan parameter {id} (HARUS DI BAWAH)
             Route::get('/{id}', [PenggunaLuarNotifikasiController::class, 'show'])->name('show');
+            Route::post('/{id}/mark-as-read', [PenggunaLuarNotifikasiController::class, 'markAsRead'])->name('mark-as-read');
+            Route::post('/{id}/mark-as-unread', [PenggunaLuarNotifikasiController::class, 'markAsUnread'])->name('mark-as-unread');
+            Route::delete('/{id}', [PenggunaLuarNotifikasiController::class, 'destroy'])->name('destroy');
         });
     });
