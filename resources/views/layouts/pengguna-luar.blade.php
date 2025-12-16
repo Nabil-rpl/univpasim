@@ -271,6 +271,23 @@
             overflow-y: auto;
         }
 
+        .notification-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
         .notification-item {
             padding: 16px 20px;
             border-bottom: 1px solid #f1f5f9;
@@ -327,6 +344,31 @@
         .notification-icon.peminjaman_ditolak {
             background: #fee2e2;
             color: #dc2626;
+        }
+
+        .notification-icon.perpanjangan_disetujui {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .notification-icon.perpanjangan_ditolak {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .notification-icon.pengembalian_sukses {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .notification-icon.buku_tersedia {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        .notification-icon.sistem {
+            background: #e2e8f0;
+            color: #64748b;
         }
 
         .notification-icon.default {
@@ -561,6 +603,8 @@
 
         // Load notifications
         function loadNotifications() {
+            console.log('🔔 Loading notifications...');
+            
             fetch('{{ route("pengguna-luar.notifikasi.latest") }}', {
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
@@ -568,12 +612,14 @@
                 }
             })
             .then(response => {
+                console.log('📥 Response status:', response.status);
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
+                console.log('✅ Data received:', data);
                 if (data.success) {
                     displayNotifications(data.notifikasi);
                     updateBadge(data.unread_count);
@@ -582,7 +628,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error loading notifications:', error);
+                console.error('❌ Error loading notifications:', error);
                 notificationList.innerHTML = `
                     <div class="empty-notification">
                         <i class="bi bi-exclamation-circle"></i>
@@ -595,6 +641,8 @@
 
         // Display notifications
         function displayNotifications(notifikasi) {
+            console.log('📋 Displaying notifications:', notifikasi.length, 'items');
+            
             if (!notifikasi || notifikasi.length === 0) {
                 notificationList.innerHTML = `
                     <div class="empty-notification">
@@ -611,14 +659,22 @@
                 const iconClass = notif.tipe || 'default';
                 const icon = getNotificationIcon(notif.tipe);
                 
+                console.log('📝 Notif item:', {
+                    id: notif.id,
+                    judul: notif.judul,
+                    tipe: notif.tipe,
+                    dibaca: notif.dibaca,
+                    link: notif.link
+                });
+                
                 html += `
-                    <a href="${notif.link}" class="notification-item ${unreadClass}" data-id="${notif.id}">
+                    <a href="${notif.link || '#'}" class="notification-item ${unreadClass}" data-id="${notif.id}" onclick="handleNotificationClick(event, ${notif.id}, '${notif.link || ''}')">
                         <div class="notification-icon ${iconClass}">
                             <i class="${icon}"></i>
                         </div>
                         <div class="notification-content">
-                            <div class="notification-title">${notif.judul}</div>
-                            <div class="notification-text">${notif.isi}</div>
+                            <div class="notification-title">${escapeHtml(notif.judul)}</div>
+                            <div class="notification-text">${escapeHtml(notif.isi)}</div>
                             <div class="notification-time">
                                 <i class="bi bi-clock"></i> ${notif.waktu}
                             </div>
@@ -628,13 +684,42 @@
             });
 
             notificationList.innerHTML = html;
+            console.log('✅ Notifications displayed successfully');
+        }
 
-            // Add click handler to mark as read
-            document.querySelectorAll('.notification-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    const notifId = this.getAttribute('data-id');
-                    markAsRead(notifId);
-                });
+        // Handle notification click
+        function handleNotificationClick(event, notifId, link) {
+            event.preventDefault();
+            console.log('🔔 Notification clicked:', notifId);
+            
+            // Mark as read first
+            fetch(`/pengguna-luar/notifikasi/${notifId}/mark-as-read`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ Marked as read:', data);
+                if (data.success) {
+                    // Reload notifications to update badge
+                    loadNotifications();
+                    
+                    // Redirect to link
+                    if (link && link !== '#' && link !== '') {
+                        window.location.href = link;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error marking as read:', error);
+                // Still redirect even if marking fails
+                if (link && link !== '#' && link !== '') {
+                    window.location.href = link;
+                }
             });
         }
 
@@ -646,6 +731,13 @@
                 'denda_belum_dibayar': 'bi bi-cash-coin',
                 'peminjaman_disetujui': 'bi bi-check-circle-fill',
                 'peminjaman_ditolak': 'bi bi-x-circle-fill',
+                'peminjaman_baru': 'bi bi-book-fill',
+                'perpanjangan_disetujui': 'bi bi-check2-circle',
+                'perpanjangan_ditolak': 'bi bi-x-octagon',
+                'perpanjangan_baru': 'bi bi-arrow-clockwise',
+                'pengembalian_sukses': 'bi bi-check-circle',
+                'buku_tersedia': 'bi bi-bell-fill',
+                'sistem': 'bi bi-info-circle-fill',
                 'default': 'bi bi-bell-fill'
             };
             return icons[tipe] || icons['default'];
@@ -653,6 +745,7 @@
 
         // Update badge
         function updateBadge(count) {
+            console.log('🔔 Updating badge count:', count);
             if (count > 0) {
                 notificationBadge.textContent = count > 99 ? '99+' : count;
                 notificationBadge.style.display = 'flex';
@@ -661,29 +754,19 @@
             }
         }
 
-        // Mark as read
-        function markAsRead(notifId) {
-            fetch(`/pengguna-luar/notifikasi/${notifId}/mark-as-read`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    loadNotifications();
-                }
-            })
-            .catch(error => console.error('Error marking as read:', error));
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Mark all as read
         markAllReadBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
+            
+            console.log('🔔 Mark all as read clicked');
             
             if (confirm('Tandai semua notifikasi sebagai dibaca?')) {
                 fetch('{{ route("pengguna-luar.notifikasi.mark-all-read") }}', {
@@ -696,19 +779,24 @@
                 })
                 .then(response => response.json())
                 .then(data => {
+                    console.log('✅ Mark all read response:', data);
                     if (data.success) {
                         loadNotifications();
                     }
                 })
-                .catch(error => console.error('Error marking all as read:', error));
+                .catch(error => console.error('❌ Error marking all as read:', error));
             }
         });
 
         // Load initial notification count
+        console.log('🚀 Initializing notifications...');
         loadNotifications();
 
         // Auto refresh every 60 seconds
-        setInterval(loadNotifications, 60000);
+        setInterval(function() {
+            console.log('🔄 Auto-refreshing notifications...');
+            loadNotifications();
+        }, 60000);
 
         // Tooltip Bootstrap
         document.addEventListener('DOMContentLoaded', function () {

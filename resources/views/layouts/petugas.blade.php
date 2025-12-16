@@ -641,18 +641,19 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('petugas.peminjaman.index') }}"
-                    class="{{ request()->routeIs('petugas.peminjaman.*') ? 'active' : '' }}">
-                    <i class="bi bi-journal-bookmark-fill"></i>
-                    <span>Peminjaman</span>
-                    @php
-                        $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
-                    @endphp
-                    @if ($peminjamanAktif > 0)
-                        <span class="badge">{{ $peminjamanAktif }}</span>
-                    @endif
-                </a>
-            </li>
+    <a href="{{ route('petugas.peminjaman.index') }}"
+        class="{{ request()->routeIs('petugas.peminjaman.*') ? 'active' : '' }}"
+        id="peminjamanLink">
+        <i class="bi bi-journal-bookmark-fill"></i>
+        <span>Peminjaman</span>
+        @php
+            $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
+        @endphp
+        @if ($peminjamanAktif > 0)
+            <span class="badge" id="peminjamanBadge">{{ $peminjamanAktif }}</span>
+        @endif
+    </a>
+</li>
             <li>
                 <a href="{{ route('petugas.pengembalian.index') }}"
                     class="{{ request()->routeIs('petugas.pengembalian.*') ? 'active' : '' }}">
@@ -661,34 +662,36 @@
             </li>
             
             <li>
-                <a href="{{ route('petugas.perpanjangan.index') }}"
-                    class="{{ request()->routeIs('petugas.perpanjangan.*') ? 'active' : '' }}">
-                    <i class="bi bi-arrow-clockwise"></i>
-                    <span>Perpanjangan</span>
-                    @php
-                        $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
-                    @endphp
-                    @if ($perpanjanganMenunggu > 0)
-                        <span class="badge">{{ $perpanjanganMenunggu }}</span>
-                    @endif
-                </a>
-            </li>
+    <a href="{{ route('petugas.perpanjangan.index') }}"
+        class="{{ request()->routeIs('petugas.perpanjangan.*') ? 'active' : '' }}"
+        id="perpanjanganLink">
+        <i class="bi bi-arrow-clockwise"></i>
+        <span>Perpanjangan</span>
+        @php
+            $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
+        @endphp
+        @if ($perpanjanganMenunggu > 0)
+            <span class="badge" id="perpanjanganBadge">{{ $perpanjanganMenunggu }}</span>
+        @endif
+    </a>
+</li>
 
             <li>
-                <a href="{{ route('petugas.notifikasi.index') }}"
-                    class="{{ request()->routeIs('petugas.notifikasi.*') ? 'active' : '' }}">
-                    <i class="bi bi-bell"></i>
-                    <span>Notifikasi</span>
-                    @php
-                        $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
-                            ->where('dibaca', false)
-                            ->count();
-                    @endphp
-                    @if ($unreadNotifCount > 0)
-                        <span class="badge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
-                    @endif
-                </a>
-            </li>
+    <a href="{{ route('petugas.notifikasi.index') }}"
+        class="{{ request()->routeIs('petugas.notifikasi.*') ? 'active' : '' }}"
+        id="notifikasiLink">
+        <i class="bi bi-bell"></i>
+        <span>Notifikasi</span>
+        @php
+            $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
+                ->where('dibaca', false)
+                ->count();
+        @endphp
+        @if ($unreadNotifCount > 0)
+            <span class="badge" id="notifikasiBadge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
+        @endif
+    </a>
+</li>
 
             <div class="menu-section-title">Lainnya</div>
             <li>
@@ -807,192 +810,275 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Sidebar Toggle
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
+    // Sidebar Toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
 
+    if (menuToggle) {
         menuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('active');
             sidebarOverlay.classList.toggle('active');
         });
+    }
 
+    if (sidebarOverlay) {
         sidebarOverlay.addEventListener('click', () => {
             sidebar.classList.remove('active');
             sidebarOverlay.classList.remove('active');
         });
+    }
 
-        if (window.innerWidth <= 768) {
-            document.querySelectorAll('.sidebar-menu a').forEach(link => {
-                link.addEventListener('click', () => {
-                    sidebar.classList.remove('active');
-                    sidebarOverlay.classList.remove('active');
-                });
+    if (window.innerWidth <= 768) {
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+        });
+    }
+
+    // ========== BADGE PEMINJAMAN - HILANG SETELAH DIKLIK ==========
+document.addEventListener('DOMContentLoaded', function() {
+    const peminjamanLink = document.getElementById('peminjamanLink');
+    const peminjamanBadge = document.getElementById('peminjamanBadge');
+
+    if (peminjamanBadge) {
+        const currentCount = parseInt(peminjamanBadge.textContent) || 0;
+        const lastSeenCount = parseInt(localStorage.getItem('lastSeenPeminjamanCount')) || 0;
+
+        // Sembunyikan badge jika jumlah sama dengan terakhir dilihat
+        if (currentCount <= lastSeenCount) {
+            peminjamanBadge.style.display = 'none';
+        }
+
+        // Saat link diklik, simpan jumlah saat ini dan sembunyikan badge
+        if (peminjamanLink) {
+            peminjamanLink.addEventListener('click', function() {
+                localStorage.setItem('lastSeenPeminjamanCount', currentCount);
+                peminjamanBadge.style.display = 'none';
             });
         }
+    }
+});
 
-        // Load Notifications via AJAX
-        document.getElementById('notificationBell').addEventListener('click', function() {
-            loadNotifications();
-        });
+// ========== BADGE PERPANJANGAN - HILANG SETELAH DIKLIK ==========
+document.addEventListener('DOMContentLoaded', function() {
+    const perpanjanganLink = document.getElementById('perpanjanganLink');
+    const perpanjanganBadge = document.getElementById('perpanjanganBadge');
 
-        function loadNotifications() {
-            fetch('/petugas/notifikasi/latest')
-                .then(response => response.json())
-                .then(data => {
-                    const notificationList = document.getElementById('notificationList');
-                    
-                    if (data.notifikasi && data.notifikasi.length > 0) {
-                        let html = '';
-                        data.notifikasi.forEach(notif => {
-                            const unreadClass = !notif.dibaca ? 'unread' : '';
-                            const iconBg = getNotificationBgClass(notif.tipe);
-                            const icon = getNotificationIcon(notif.tipe);
-                            const timeAgo = getTimeAgo(notif.created_at);
-                            
-                            html += `
-                                <a href="${notif.url || '#'}" class="notification-item ${unreadClass}" data-id="${notif.id}">
-                                    <div class="notification-item-icon ${iconBg}">
-                                        <i class="bi ${icon}"></i>
-                                    </div>
-                                    <div class="notification-item-content">
-                                        <div class="notification-item-title">${notif.judul}</div>
-                                        <div class="notification-item-text">${notif.pesan}</div>
-                                        <div class="notification-item-time">
-                                            <i class="bi bi-clock"></i> ${timeAgo}
-                                        </div>
-                                    </div>
-                                </a>
-                            `;
-                        });
-                        notificationList.innerHTML = html;
-                        
-                        // Mark as read when clicked
-                        document.querySelectorAll('.notification-item').forEach(item => {
-                            item.addEventListener('click', function() {
-                                const notifId = this.dataset.id;
-                                markAsRead(notifId);
-                            });
-                        });
-                    } else {
-                        notificationList.innerHTML = `
-                            <div class="notification-empty">
-                                <i class="bi bi-bell-slash"></i>
-                                <p>Tidak ada notifikasi</p>
-                            </div>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading notifications:', error);
-                    document.getElementById('notificationList').innerHTML = `
-                        <div class="notification-empty">
-                            <i class="bi bi-exclamation-triangle"></i>
-                            <p>Gagal memuat notifikasi</p>
-                        </div>
-                    `;
-                });
+    if (perpanjanganBadge) {
+        const currentCount = parseInt(perpanjanganBadge.textContent) || 0;
+        const lastSeenCount = parseInt(localStorage.getItem('lastSeenPerpanjanganCount')) || 0;
+
+        // Sembunyikan badge jika jumlah sama dengan terakhir dilihat
+        if (currentCount <= lastSeenCount) {
+            perpanjanganBadge.style.display = 'none';
         }
 
-        function getNotificationBgClass(tipe) {
-            const bgClasses = {
-                'peminjaman_baru': 'bg-gradient-info',
-                'perpanjangan_baru': 'bg-gradient-warning',
-                'user_baru': 'bg-gradient-success',
-                'buku_baru': 'bg-gradient-primary',
-                'stok_menipis': 'bg-gradient-danger',
-                'pengembalian': 'bg-gradient-success',
-                'keterlambatan': 'bg-gradient-danger',
-                'perpanjangan': 'bg-gradient-warning',
-                'persetujuan': 'bg-gradient-primary',
-                'penolakan': 'bg-gradient-danger',
-                'pengingat': 'bg-gradient-warning',
-                'sistem': 'bg-gradient-secondary'
-            };
-            return bgClasses[tipe] || 'bg-gradient-secondary';
+        // Saat link diklik, simpan jumlah saat ini dan sembunyikan badge
+        if (perpanjanganLink) {
+            perpanjanganLink.addEventListener('click', function() {
+                localStorage.setItem('lastSeenPerpanjanganCount', currentCount);
+                perpanjanganBadge.style.display = 'none';
+            });
+        }
+    }
+});
+
+// ========== BADGE NOTIFIKASI - HILANG SETELAH DIKLIK ==========
+document.addEventListener('DOMContentLoaded', function() {
+    const notifikasiLink = document.getElementById('notifikasiLink');
+    const notifikasiBadge = document.getElementById('notifikasiBadge');
+
+    if (notifikasiBadge) {
+        const currentCount = parseInt(notifikasiBadge.textContent.replace('+', '')) || 0;
+        const lastSeenCount = parseInt(localStorage.getItem('lastSeenNotifikasiCount')) || 0;
+
+        // Sembunyikan badge jika jumlah sama atau lebih kecil dari terakhir dilihat
+        if (currentCount <= lastSeenCount) {
+            notifikasiBadge.style.display = 'none';
         }
 
-        function getNotificationIcon(tipe) {
-            const icons = {
-                'peminjaman_baru': 'bi-journal-plus',
-                'perpanjangan_baru': 'bi-arrow-clockwise',
-                'user_baru': 'bi-person-plus-fill',
-                'buku_baru': 'bi-book-fill',
-                'stok_menipis': 'bi-exclamation-triangle-fill',
-                'pengembalian': 'bi-arrow-return-left',
-                'keterlambatan': 'bi-exclamation-triangle-fill',
-                'perpanjangan': 'bi-arrow-clockwise',
-                'persetujuan': 'bi-check-circle-fill',
-                'penolakan': 'bi-x-circle-fill',
-                'pengingat': 'bi-bell-fill',
-                'sistem': 'bi-gear-fill'
-            };
-            return icons[tipe] || 'bi-info-circle-fill';
+        // Saat link diklik, simpan jumlah saat ini dan sembunyikan badge
+        if (notifikasiLink) {
+            notifikasiLink.addEventListener('click', function() {
+                localStorage.setItem('lastSeenNotifikasiCount', currentCount);
+                notifikasiBadge.style.display = 'none';
+            });
         }
+    }
+});
 
-        function getTimeAgo(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const seconds = Math.floor((now - date) / 1000);
-            
-            if (seconds < 60) return 'Baru saja';
-            if (seconds < 3600) return Math.floor(seconds / 60) + ' menit lalu';
-            if (seconds < 86400) return Math.floor(seconds / 3600) + ' jam lalu';
-            if (seconds < 604800) return Math.floor(seconds / 86400) + ' hari lalu';
-            
-            return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-        }
+// Fungsi reset badge (opsional, untuk testing)
+function resetAllBadges() {
+    localStorage.removeItem('lastSeenPeminjamanCount');
+    localStorage.removeItem('lastSeenPerpanjanganCount');
+    localStorage.removeItem('lastSeenNotifikasiCount');
+    location.reload();
+}
 
-        function markAsRead(notifId) {
-            fetch(`/petugas/notifikasi/${notifId}/mark-read`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
+    // Load Notifications via AJAX
+    document.getElementById('notificationBell').addEventListener('click', function() {
+        loadNotifications();
+    });
+
+    function loadNotifications() {
+        fetch('/petugas/notifikasi/latest')
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    // Update badge count
-                    const badge = document.querySelector('.notification-badge');
-                    if (badge) {
-                        const currentCount = parseInt(badge.textContent);
-                        const newCount = currentCount - 1;
-                        if (newCount > 0) {
-                            badge.textContent = newCount > 9 ? '9+' : newCount;
-                        } else {
-                            badge.remove();
-                        }
-                    }
+                const notificationList = document.getElementById('notificationList');
+                
+                if (data.notifikasi && data.notifikasi.length > 0) {
+                    let html = '';
+                    data.notifikasi.forEach(notif => {
+                        const unreadClass = !notif.dibaca ? 'unread' : '';
+                        const iconBg = getNotificationBgClass(notif.tipe);
+                        const icon = getNotificationIcon(notif.tipe);
+                        const timeAgo = getTimeAgo(notif.created_at);
+                        
+                        html += `
+                            <a href="${notif.url || '#'}" class="notification-item ${unreadClass}" data-id="${notif.id}">
+                                <div class="notification-item-icon ${iconBg}">
+                                    <i class="bi ${icon}"></i>
+                                </div>
+                                <div class="notification-item-content">
+                                    <div class="notification-item-title">${notif.judul}</div>
+                                    <div class="notification-item-text">${notif.pesan}</div>
+                                    <div class="notification-item-time">
+                                        <i class="bi bi-clock"></i> ${timeAgo}
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                    });
+                    notificationList.innerHTML = html;
+                    
+                    // Mark as read when clicked
+                    document.querySelectorAll('.notification-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const notifId = this.dataset.id;
+                            markAsRead(notifId);
+                        });
+                    });
+                } else {
+                    notificationList.innerHTML = `
+                        <div class="notification-empty">
+                            <i class="bi bi-bell-slash"></i>
+                            <p>Tidak ada notifikasi</p>
+                        </div>
+                    `;
                 }
             })
-            .catch(error => console.error('Error marking notification as read:', error));
-        }
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notificationList').innerHTML = `
+                    <div class="notification-empty">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <p>Gagal memuat notifikasi</p>
+                    </div>
+                `;
+            });
+    }
 
-        // Auto-refresh notifications every 60 seconds
-        setInterval(() => {
-            fetch('/petugas/notifikasi/count')
-                .then(response => response.json())
-                .then(data => {
-                    const badge = document.querySelector('.notification-badge');
-                    if (data.count > 0) {
-                        if (badge) {
-                            badge.textContent = data.count > 9 ? '9+' : data.count;
-                        } else {
-                            const bellIcon = document.querySelector('.notification-bell');
-                            const newBadge = document.createElement('span');
-                            newBadge.className = 'notification-badge';
-                            newBadge.textContent = data.count > 9 ? '9+' : data.count;
-                            bellIcon.appendChild(newBadge);
-                        }
-                    } else if (badge) {
+    function getNotificationBgClass(tipe) {
+        const bgClasses = {
+            'peminjaman_baru': 'bg-gradient-info',
+            'perpanjangan_baru': 'bg-gradient-warning',
+            'user_baru': 'bg-gradient-success',
+            'buku_baru': 'bg-gradient-primary',
+            'stok_menipis': 'bg-gradient-danger',
+            'pengembalian': 'bg-gradient-success',
+            'keterlambatan': 'bg-gradient-danger',
+            'perpanjangan': 'bg-gradient-warning',
+            'persetujuan': 'bg-gradient-primary',
+            'penolakan': 'bg-gradient-danger',
+            'pengingat': 'bg-gradient-warning',
+            'sistem': 'bg-gradient-secondary'
+        };
+        return bgClasses[tipe] || 'bg-gradient-secondary';
+    }
+
+    function getNotificationIcon(tipe) {
+        const icons = {
+            'peminjaman_baru': 'bi-journal-plus',
+            'perpanjangan_baru': 'bi-arrow-clockwise',
+            'user_baru': 'bi-person-plus-fill',
+            'buku_baru': 'bi-book-fill',
+            'stok_menipis': 'bi-exclamation-triangle-fill',
+            'pengembalian': 'bi-arrow-return-left',
+            'keterlambatan': 'bi-exclamation-triangle-fill',
+            'perpanjangan': 'bi-arrow-clockwise',
+            'persetujuan': 'bi-check-circle-fill',
+            'penolakan': 'bi-x-circle-fill',
+            'pengingat': 'bi-bell-fill',
+            'sistem': 'bi-gear-fill'
+        };
+        return icons[tipe] || 'bi-info-circle-fill';
+    }
+
+    function getTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+        
+        if (seconds < 60) return 'Baru saja';
+        if (seconds < 3600) return Math.floor(seconds / 60) + ' menit lalu';
+        if (seconds < 86400) return Math.floor(seconds / 3600) + ' jam lalu';
+        if (seconds < 604800) return Math.floor(seconds / 86400) + ' hari lalu';
+        
+        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function markAsRead(notifId) {
+        fetch(`/petugas/notifikasi/${notifId}/mark-read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    const currentCount = parseInt(badge.textContent);
+                    const newCount = currentCount - 1;
+                    if (newCount > 0) {
+                        badge.textContent = newCount > 9 ? '9+' : newCount;
+                    } else {
                         badge.remove();
                     }
-                })
-                .catch(error => console.error('Error checking notification count:', error));
-        }, 60000);
-    </script>
+                }
+            }
+        })
+        .catch(error => console.error('Error marking notification as read:', error));
+    }
+
+    // Auto-refresh notifications every 60 seconds
+    setInterval(() => {
+        fetch('/petugas/notifikasi/count')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.notification-badge');
+                if (data.count > 0) {
+                    if (badge) {
+                        badge.textContent = data.count > 9 ? '9+' : data.count;
+                    } else {
+                        const bellIcon = document.querySelector('.notification-bell');
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'notification-badge';
+                        newBadge.textContent = data.count > 9 ? '9+' : data.count;
+                        bellIcon.appendChild(newBadge);
+                    }
+                } else if (badge) {
+                    badge.remove();
+                }
+            })
+            .catch(error => console.error('Error checking notification count:', error));
+    }, 60000);
+</script>
 
     @stack('scripts')
 

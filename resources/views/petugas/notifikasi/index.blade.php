@@ -710,7 +710,12 @@ function markAsRead(id) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            location.reload();
+            // Reset badge notifikasi
+            if (typeof resetNotifikasiBadge === 'function') {
+                resetNotifikasiBadge();
+            } else {
+                location.reload();
+            }
         }
     })
     .catch(error => {
@@ -732,7 +737,12 @@ function markAllAsReadConfirm() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                location.reload();
+                // Reset badge notifikasi
+                if (typeof resetNotifikasiBadge === 'function') {
+                    resetNotifikasiBadge();
+                } else {
+                    location.reload();
+                }
             }
         })
         .catch(error => {

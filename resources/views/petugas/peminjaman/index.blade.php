@@ -919,6 +919,11 @@
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
                 submitBtn.disabled = true;
                 
+                // Reset badge peminjaman jika form berhasil
+                if (typeof resetPeminjamanBadge === 'function') {
+                    resetPeminjamanBadge();
+                }
+                
                 // Reset if form submission fails
                 setTimeout(() => {
                     submitBtn.innerHTML = originalContent;
