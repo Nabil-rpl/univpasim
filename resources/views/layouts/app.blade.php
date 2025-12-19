@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    {{-- ✅ TAMBAHAN: Meta tag untuk base URL --}}
+    <meta name="base-url" content="{{ url('/') }}">
 
     <title>{{ config('app.name', 'Admin Dashboard') }} - @yield('title', 'Dashboard')</title>
 
@@ -590,112 +592,110 @@ body {
         <div class="sidebar-brand">
             <h4><i class="bi bi-mortarboard-fill"></i> AdminPASIM</h4>
         </div>
-        <!-- Ganti bagian sidebar menu di admin layout dengan kode ini -->
 
-<ul class="sidebar-menu">
-    <li>
-        <a href="{{ route('admin.dashboard') }}" 
-           class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
-        </a>
-    </li>
-    
-    <div class="menu-section">Management</div>
-    
-    <li>
-        <a href="{{ route('admin.users.index') }}" 
-           class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-            <i class="bi bi-people-fill"></i>
-            <span>Kelola User</span>
-        </a>
-    </li>
-    
-    <li>
-        <a href="{{ route('admin.mahasiswa.index') }}" 
-           class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}"
-           id="mahasiswaLink">
-            <i class="bi bi-person-badge-fill"></i>
-            <span>Data Mahasiswa</span>
-            @php
-                // Hitung mahasiswa yang terdaftar hari ini
-                $mahasiswaBaru = \App\Models\Mahasiswa::whereDate('created_at', today())->count();
-            @endphp
-            @if($mahasiswaBaru > 0)
-                <span class="menu-badge" id="mahasiswaBadge">{{ $mahasiswaBaru }}</span>
-            @endif
-        </a>
-    </li>
-    
-    <li>
-        <a href="{{ route('admin.buku.index') }}" 
-           class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
-            <i class="bi bi-book-fill"></i>
-            <span>Kelola Buku</span>
-        </a>
-    </li>
-    
-    <div class="menu-section">Transaksi</div>
-    
-    <li>
-        <a href="{{ route('admin.peminjaman.index') }}" 
-           class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}"
-           id="peminjamanLink">
-            <i class="bi bi-journal-text"></i>
-            <span>Peminjaman</span>
-            @php
-                $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
-            @endphp
-            @if($peminjamanAktif > 0)
-                <span class="menu-badge" id="peminjamanBadge">{{ $peminjamanAktif }}</span>
-            @endif
-        </a>
-    </li>
-    
-    <li>
-        <a href="{{ route('admin.perpanjangan.index') }}" 
-           class="{{ request()->routeIs('admin.perpanjangan.*') ? 'active' : '' }}"
-           id="perpanjanganLink">
-            <i class="bi bi-calendar-check"></i>
-            <span>Perpanjangan</span>
-            @php
-                $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
-            @endphp
-            @if($perpanjanganMenunggu > 0)
-                <span class="menu-badge" id="perpanjanganBadge">{{ $perpanjanganMenunggu }}</span>
-            @endif
-        </a>
-    </li>
-    
-    <div class="menu-section">Komunikasi</div>
-    
-    <li>
-        <a href="{{ route('admin.notifikasi.index') }}" 
-           class="{{ request()->routeIs('admin.notifikasi.*') ? 'active' : '' }}"
-           id="notifikasiLink">
-            <i class="bi bi-bell-fill"></i>
-            <span>Notifikasi</span>
-            @php
-                $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
-                    ->where('dibaca', false)
-                    ->count();
-            @endphp
-            @if($unreadNotifCount > 0)
-                <span class="menu-badge" id="notifikasiBadge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
-            @endif
-        </a>
-    </li>
-    
-    <div class="menu-section">Laporan</div>
-    
-    <li>
-        <a href="{{ route('admin.laporan.index') }}" 
-           class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
-            <i class="bi bi-file-earmark-text-fill"></i>
-            <span>Laporan Petugas</span>
-        </a>
-    </li>
-</ul>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{{ route('admin.dashboard') }}" 
+                   class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            
+            <div class="menu-section">Management</div>
+            
+            <li>
+                <a href="{{ route('admin.users.index') }}" 
+                   class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Kelola User</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="{{ route('admin.mahasiswa.index') }}" 
+                   class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}"
+                   id="mahasiswaLink">
+                    <i class="bi bi-person-badge-fill"></i>
+                    <span>Data Mahasiswa</span>
+                    @php
+                        $mahasiswaBaru = \App\Models\Mahasiswa::whereDate('created_at', today())->count();
+                    @endphp
+                    @if($mahasiswaBaru > 0)
+                        <span class="menu-badge" id="mahasiswaBadge">{{ $mahasiswaBaru }}</span>
+                    @endif
+                </a>
+            </li>
+            
+            <li>
+                <a href="{{ route('admin.buku.index') }}" 
+                   class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
+                    <i class="bi bi-book-fill"></i>
+                    <span>Kelola Buku</span>
+                </a>
+            </li>
+            
+            <div class="menu-section">Transaksi</div>
+            
+            <li>
+                <a href="{{ route('admin.peminjaman.index') }}" 
+                   class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}"
+                   id="peminjamanLink">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Peminjaman</span>
+                    @php
+                        $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
+                    @endphp
+                    @if($peminjamanAktif > 0)
+                        <span class="menu-badge" id="peminjamanBadge">{{ $peminjamanAktif }}</span>
+                    @endif
+                </a>
+            </li>
+            
+            <li>
+                <a href="{{ route('admin.perpanjangan.index') }}" 
+                   class="{{ request()->routeIs('admin.perpanjangan.*') ? 'active' : '' }}"
+                   id="perpanjanganLink">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Perpanjangan</span>
+                    @php
+                        $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
+                    @endphp
+                    @if($perpanjanganMenunggu > 0)
+                        <span class="menu-badge" id="perpanjanganBadge">{{ $perpanjanganMenunggu }}</span>
+                    @endif
+                </a>
+            </li>
+            
+            <div class="menu-section">Komunikasi</div>
+            
+            <li>
+                <a href="{{ route('admin.notifikasi.index') }}" 
+                   class="{{ request()->routeIs('admin.notifikasi.*') ? 'active' : '' }}"
+                   id="notifikasiLink">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifikasi</span>
+                    @php
+                        $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
+                            ->where('dibaca', false)
+                            ->count();
+                    @endphp
+                    @if($unreadNotifCount > 0)
+                        <span class="menu-badge" id="notifikasiBadge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
+                    @endif
+                </a>
+            </li>
+            
+            <div class="menu-section">Laporan</div>
+            
+            <li>
+                <a href="{{ route('admin.laporan.index') }}" 
+                   class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                    <span>Laporan Petugas</span>
+                </a>
+            </li>
+        </ul>
     </aside>
 
     <main class="main-content">
@@ -763,7 +763,7 @@ body {
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Custom JS -->
+    <!-- ✅ CUSTOM JAVASCRIPT - DIPERBAIKI -->
     <script>
         // ========== MOBILE MENU ==========
         const menuToggle = document.getElementById('menuToggle');
@@ -797,26 +797,44 @@ body {
         // ========== NOTIFICATION SYSTEM ==========
         document.addEventListener('DOMContentLoaded', function() {
             loadNotifications();
-            setInterval(loadNotifications, 30000);
+            setInterval(loadNotifications, 30000); // Refresh setiap 30 detik
         });
 
         function loadNotifications() {
             const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
             
-            fetch(`${baseUrl}/admin/api/notifikasi/latest`)
-                .then(response => response.json())
-                .then(data => {
-                    updateNotificationUI(data.notifikasi, data.count);
-                })
-                .catch(error => console.error('Error loading notifications:', error));
+            // ✅ PERBAIKAN: Route tanpa /api/
+            fetch(`${baseUrl}/admin/notifikasi/latest`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('✅ Notifikasi loaded:', data);
+                updateNotificationUI(data.notifikasi, data.count);
+            })
+            .catch(error => {
+                console.error('❌ Error loading notifications:', error);
+            });
         }
 
         function updateNotificationUI(notifikasi, count) {
             const badge = document.getElementById('notificationBadge');
             const list = document.getElementById('notificationList');
             
-            if (!badge || !list) return;
+            if (!badge || !list) {
+                console.error('❌ Notification elements not found');
+                return;
+            }
             
+            // Update badge
             if (count > 0) {
                 badge.textContent = count > 99 ? '99+' : count;
                 badge.style.display = 'flex';
@@ -824,7 +842,8 @@ body {
                 badge.style.display = 'none';
             }
             
-            if (notifikasi.length === 0) {
+            // Update notification list
+            if (!notifikasi || notifikasi.length === 0) {
                 list.innerHTML = `
                     <div class="empty-notification">
                         <i class="bi bi-bell-slash"></i>
@@ -948,16 +967,18 @@ body {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    console.log('✅ Notifikasi ditandai sebagai dibaca');
                     loadNotifications();
                 }
             })
-            .catch(error => console.error('Error marking as read:', error));
+            .catch(error => console.error('❌ Error marking as read:', error));
         }
 
         function markAllAsRead() {
@@ -970,17 +991,18 @@ body {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     loadNotifications();
-                    console.log('Semua notifikasi ditandai sebagai dibaca');
+                    console.log('✅ Semua notifikasi ditandai sebagai dibaca');
                 }
             })
-            .catch(error => console.error('Error marking all as read:', error));
+            .catch(error => console.error('❌ Error marking all as read:', error));
         }
 
         // ========== 🎯 BADGE MANAGEMENT SYSTEM ==========
@@ -1085,10 +1107,10 @@ body {
             localStorage.removeItem('admin_mahasiswaLastSeenCount');
             localStorage.removeItem('admin_mahasiswaLastSeenDate');
             location.reload();
-            console.log('Admin badges reset!');
+            console.log('✅ Admin badges reset!');
         }
 
-        console.log('✅ Admin Badge System Loaded');
+        console.log('✅ Admin Layout & Notification System Loaded');
     </script>
 
     @stack('scripts')

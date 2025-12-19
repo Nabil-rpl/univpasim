@@ -572,7 +572,7 @@
                                     Pengarang
                                 </th>
                                 <td>
-                                    {{ $perpanjangan->peminjaman->buku->pengarang ?? '-' }}
+                                    {{ $perpanjangan->peminjaman->buku->penulis ?? '-' }}
                                 </td>
                             </tr>
                             <tr>

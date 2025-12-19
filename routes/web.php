@@ -42,7 +42,7 @@ use App\Http\Controllers\PenggunaLuar\PeminjamanController as PenggunaLuarPeminj
 use App\Http\Controllers\PenggunaLuar\RiwayatController as PenggunaLuarRiwayatController;
 use App\Http\Controllers\PenggunaLuar\QRScannerController as PenggunaLuarQRScannerController;
 use App\Http\Controllers\PenggunaLuar\PengaturanController as PenggunaLuarPengaturanController;
-use App\Http\Controllers\PenggunaLuar\NotifikasiController as PenggunaLuarNotifikasiController; // ✅ TAMBAHAN
+use App\Http\Controllers\PenggunaLuar\NotifikasiController as PenggunaLuarNotifikasiController;
 
 
 // ============================================
@@ -133,14 +133,18 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/export/csv', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'export'])->name('export');
         });
 
-        // ✅ NOTIFIKASI ADMIN - LENGKAP
+        // ✅ NOTIFIKASI ADMIN - DIPERBAIKI
         Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
+            // Route spesifik HARUS di atas route dengan parameter {id}
             Route::get('/', [NotifikasiController::class, 'index'])->name('index');
             Route::get('/latest', [NotifikasiController::class, 'getLatest'])->name('latest');
             Route::get('/count', [NotifikasiController::class, 'getUnreadCount'])->name('count');
+            Route::post('/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('baca-semua');
+            Route::delete('/delete-read', [NotifikasiController::class, 'deleteRead'])->name('delete-read');
+            
+            // Route dengan parameter {id} HARUS di bawah
             Route::get('/{id}', [NotifikasiController::class, 'show'])->name('show');
             Route::post('/{id}/baca', [NotifikasiController::class, 'markAsRead'])->name('baca');
-            Route::post('/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('baca-semua');
             Route::delete('/{id}', [NotifikasiController::class, 'destroy'])->name('destroy');
         });
     });
@@ -207,14 +211,18 @@ Route::middleware(['auth', 'role:petugas'])
         Route::get('/qrcode/generate/{type}/{id}', [PetugasQRCodeController::class, 'generate'])->name('qrcode.generate');
         Route::delete('/qrcode/{id}', [PetugasQRCodeController::class, 'destroy'])->name('qrcode.destroy');
 
-        // ✅ NOTIFIKASI PETUGAS - LENGKAP
+        // ✅ NOTIFIKASI PETUGAS - DIPERBAIKI
         Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
+            // Route spesifik HARUS di atas route dengan parameter {id}
             Route::get('/', [PetugasNotifikasiController::class, 'index'])->name('index');
             Route::get('/latest', [PetugasNotifikasiController::class, 'getLatest'])->name('latest');
             Route::get('/count', [PetugasNotifikasiController::class, 'getUnreadCount'])->name('count');
+            Route::post('/baca-semua', [PetugasNotifikasiController::class, 'markAllAsRead'])->name('baca-semua');
+            Route::delete('/delete-read', [PetugasNotifikasiController::class, 'deleteRead'])->name('delete-read');
+            
+            // Route dengan parameter {id} HARUS di bawah
             Route::get('/{id}', [PetugasNotifikasiController::class, 'show'])->name('show');
             Route::post('/{id}/baca', [PetugasNotifikasiController::class, 'markAsRead'])->name('baca');
-            Route::post('/baca-semua', [PetugasNotifikasiController::class, 'markAllAsRead'])->name('baca-semua');
             Route::delete('/{id}', [PetugasNotifikasiController::class, 'destroy'])->name('destroy');
         });
     });
@@ -260,19 +268,22 @@ Route::middleware(['auth', 'role:mahasiswa'])
         Route::get('/pengaturan', [\App\Http\Controllers\Mahasiswa\PengaturanController::class, 'index'])->name('pengaturan.index');
         Route::post('/pengaturan/update', [\App\Http\Controllers\Mahasiswa\PengaturanController::class, 'update'])->name('pengaturan.update');
 
-        // ✅ NOTIFIKASI MAHASISWA - LENGKAP
+        // ✅ NOTIFIKASI MAHASISWA - DIPERBAIKI
         Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
+            // Route spesifik HARUS di atas route dengan parameter {id}
             Route::get('/', [MahasiswaNotifikasiController::class, 'index'])->name('index');
             Route::get('/latest', [MahasiswaNotifikasiController::class, 'getLatest'])->name('latest');
             Route::get('/count', [MahasiswaNotifikasiController::class, 'getUnreadCount'])->name('count');
+            Route::post('/baca-semua', [MahasiswaNotifikasiController::class, 'markAllAsRead'])->name('baca-semua');
+            Route::delete('/delete-read', [MahasiswaNotifikasiController::class, 'deleteRead'])->name('delete-read');
+            
+            // Route dengan parameter {id} HARUS di bawah
             Route::get('/{id}', [MahasiswaNotifikasiController::class, 'show'])->name('show');
             Route::post('/{id}/baca', [MahasiswaNotifikasiController::class, 'markAsRead'])->name('baca');
-            Route::post('/baca-semua', [MahasiswaNotifikasiController::class, 'markAllAsRead'])->name('baca-semua');
             Route::delete('/{id}', [MahasiswaNotifikasiController::class, 'destroy'])->name('destroy');
         });
     });
 
-// ✅ FIX UNTUK WEB.PHP - Ganti section notifikasi pengguna luar dengan ini:
 
 // ============================================
 // 👤 PENGGUNA LUAR
@@ -307,20 +318,15 @@ Route::middleware(['auth', 'role:pengguna_luar'])
         Route::get('/pengaturan', [PenggunaLuarPengaturanController::class, 'index'])->name('pengaturan.index');
         Route::post('/pengaturan/update', [PenggunaLuarPengaturanController::class, 'update'])->name('pengaturan.update');
 
-        // ✅ NOTIFIKASI PENGGUNA LUAR - SUDAH DIPERBAIKI!
-        // Route spesifik HARUS di atas route dengan parameter {id}
+        // ✅ NOTIFIKASI PENGGUNA LUAR - DIPERBAIKI
         Route::prefix('notifikasi')->as('notifikasi.')->group(function () {
-            // Halaman index notifikasi
+            // Route spesifik HARUS di atas route dengan parameter {id}
             Route::get('/', [PenggunaLuarNotifikasiController::class, 'index'])->name('index');
-            
-            // Route spesifik untuk AJAX (HARUS DI ATAS route {id})
             Route::get('/latest', [PenggunaLuarNotifikasiController::class, 'latest'])->name('latest');
-            
-            // Route untuk actions bulk (HARUS DI ATAS route {id})
             Route::post('/mark-all-read', [PenggunaLuarNotifikasiController::class, 'markAllRead'])->name('mark-all-read');
             Route::delete('/delete-read', [PenggunaLuarNotifikasiController::class, 'deleteRead'])->name('delete-read');
             
-            // Route dengan parameter {id} (HARUS DI BAWAH)
+            // Route dengan parameter {id} HARUS di bawah
             Route::get('/{id}', [PenggunaLuarNotifikasiController::class, 'show'])->name('show');
             Route::post('/{id}/mark-as-read', [PenggunaLuarNotifikasiController::class, 'markAsRead'])->name('mark-as-read');
             Route::post('/{id}/mark-as-unread', [PenggunaLuarNotifikasiController::class, 'markAsUnread'])->name('mark-as-unread');

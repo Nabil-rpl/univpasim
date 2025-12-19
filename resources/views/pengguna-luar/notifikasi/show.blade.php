@@ -129,21 +129,6 @@
                         </div>
                     @endif
 
-                    <!-- URL Action -->
-                    @if($notifikasi->url)
-                        <div class="alert alert-info border-0">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <i class="bi bi-info-circle-fill me-2"></i>
-                                    <strong>Ada tindakan yang perlu dilakukan</strong>
-                                </div>
-                                <a href="{{ $notifikasi->url }}" class="btn btn-info btn-sm">
-                                    <i class="bi bi-box-arrow-up-right me-1"></i> Buka Link
-                                </a>
-                            </div>
-                        </div>
-                    @endif
-
                     <!-- Pembuat Notifikasi -->
                     @if($notifikasi->pembuat)
                         <div class="mt-4 pt-3 border-top">
@@ -165,9 +150,6 @@
                         </a>
                         
                         @if($notifikasi->url)
-                            <a href="{{ $notifikasi->url }}" class="btn btn-primary">
-                                <i class="bi bi-box-arrow-up-right me-1"></i> Lihat Detail
-                            </a>
                         @endif
                     </div>
                 </div>
@@ -225,14 +207,14 @@
 
 <!-- Form untuk Tandai Dibaca -->
 <form id="form-tandai-dibaca" 
-      action="{{ route('pengguna-luar.notifikasi.tandai-dibaca', $notifikasi->id) }}" 
+      action="{{ route('pengguna-luar.notifikasi.show', $notifikasi->id) }}" 
       method="POST" class="d-none">
     @csrf
 </form>
 
 <!-- Form untuk Tandai Tidak Dibaca -->
 <form id="form-tandai-tidak-dibaca" 
-      action="{{ route('pengguna-luar.notifikasi.tandai-tidak-dibaca', $notifikasi->id) }}" 
+      action="{{ route('pengguna-luar.notifikasi.show', $notifikasi->id) }}" 
       method="POST" class="d-none">
     @csrf
 </form>

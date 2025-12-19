@@ -13,7 +13,12 @@ class PerpanjanganController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Perpanjangan::with(['peminjaman.buku', 'peminjaman.mahasiswa', 'petugas']);
+        // ✅ Tambahkan qrCode di eager loading
+        $query = Perpanjangan::with([
+            'peminjaman.buku.qrCode',  // Load relasi qrCode
+            'peminjaman.mahasiswa', 
+            'petugas'
+        ]);
 
         // Filter berdasarkan status
         if ($request->filled('status')) {
@@ -46,8 +51,11 @@ class PerpanjanganController extends Controller
                         ->orWhere('no_hp', 'like', "%{$search}%");
                 })
                 ->orWhereHas('peminjaman.buku', function($buku) use ($search) {
-                    $buku->where('judul', 'like', "%{$search}%")
-                        ->orWhere('kode_buku', 'like', "%{$search}%");
+                    $buku->where('judul', 'like', "%{$search}%");
+                })
+                // ✅ Tambahkan pencarian di qrCode
+                ->orWhereHas('peminjaman.buku.qrCode', function($qr) use ($search) {
+                    $qr->where('kode_buku', 'like', "%{$search}%");
                 });
             });
         }
@@ -73,8 +81,9 @@ class PerpanjanganController extends Controller
      */
     public function show($id)
     {
+        // ✅ Tambahkan qrCode di eager loading
         $perpanjangan = Perpanjangan::with([
-            'peminjaman.buku',
+            'peminjaman.buku.qrCode',  // Load relasi qrCode
             'peminjaman.mahasiswa',
             'peminjaman.petugas',
             'petugas'
@@ -88,7 +97,12 @@ class PerpanjanganController extends Controller
      */
     public function export(Request $request)
     {
-        $query = Perpanjangan::with(['peminjaman.buku', 'peminjaman.mahasiswa', 'petugas']);
+        // ✅ Tambahkan qrCode di eager loading
+        $query = Perpanjangan::with([
+            'peminjaman.buku.qrCode',  // Load relasi qrCode
+            'peminjaman.mahasiswa', 
+            'petugas'
+        ]);
 
         // Apply filters sama seperti di index
         if ($request->filled('status')) {
@@ -141,7 +155,7 @@ class PerpanjanganController extends Controller
                     $item->peminjaman->mahasiswa->name ?? '-',
                     $item->peminjaman->mahasiswa->nim ?? $item->peminjaman->mahasiswa->nik ?? '-',
                     $item->peminjaman->buku->judul ?? '-',
-                    $item->peminjaman->buku->kode_buku ?? '-',
+                    $item->peminjaman->buku->kode_buku ?? '-',  // ✅ Sekarang akan ambil dari accessor
                     $item->tanggal_deadline_lama->format('d/m/Y'),
                     $item->tanggal_deadline_baru->format('d/m/Y'),
                     $item->durasi_tambahan,
