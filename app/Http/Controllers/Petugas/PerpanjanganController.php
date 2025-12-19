@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Petugas;
 use App\Http\Controllers\Controller;
 use App\Models\Perpanjangan;
 use App\Models\Peminjaman;
-use App\Models\Notifikasi; // ✅ TAMBAHAN
+use App\Models\Notifikasi;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class PerpanjanganController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Perpanjangan::with(['peminjaman.buku', 'peminjaman.mahasiswa', 'petugas']);
+        $query = Perpanjangan::with(['peminjaman.buku.qrCode', 'peminjaman.mahasiswa', 'petugas']);
 
         // Filter berdasarkan status
         if ($request->filled('status')) {
@@ -71,7 +72,7 @@ class PerpanjanganController extends Controller
      */
     public function approve($id)
     {
-        $perpanjangan = Perpanjangan::with('peminjaman.buku', 'peminjaman.mahasiswa')
+        $perpanjangan = Perpanjangan::with('peminjaman.buku.qrCode', 'peminjaman.mahasiswa')
             ->findOrFail($id);
 
         // Validasi status
@@ -102,6 +103,9 @@ class PerpanjanganController extends Controller
             $petugas = Auth::user();
             $tanggalDeadlineBaru = Carbon::parse($perpanjangan->tanggal_deadline_baru);
             $durasiTambahanHari = $perpanjangan->durasi_tambahan;
+            $peminjaman = $perpanjangan->peminjaman;
+            $mahasiswa = $peminjaman->mahasiswa;
+            $buku = $peminjaman->buku;
 
             // 1. Update status perpanjangan
             $perpanjangan->update([
@@ -112,7 +116,6 @@ class PerpanjanganController extends Controller
             Log::info('Status perpanjangan berhasil diupdate');
 
             // 2. Update peminjaman (deadline & durasi)
-            $peminjaman = $perpanjangan->peminjaman;
             $durasiTotal = $peminjaman->durasi_hari + $durasiTambahanHari;
 
             $peminjaman->update([
@@ -128,13 +131,14 @@ class PerpanjanganController extends Controller
                 'durasi_baru' => $durasiTotal
             ]);
 
-            // ✅ KIRIM NOTIFIKASI KE MAHASISWA
+            // ✅ 3. KIRIM NOTIFIKASI KE MAHASISWA
             Notifikasi::kirim(
-                $peminjaman->mahasiswa_id,
+                $mahasiswa->id,
                 'perpanjangan_disetujui',
-                "Perpanjangan Disetujui: {$peminjaman->buku->judul}",
+                "Perpanjangan Disetujui: {$buku->judul}",
                 "Selamat! Pengajuan perpanjangan Anda telah disetujui.\n\n" .
-                "📚 Buku: {$peminjaman->buku->judul}\n" .
+                "📚 Buku: {$buku->judul}\n" .
+                "🔖 Kode: {$buku->kode_buku}\n" .
                 "✅ Status: DISETUJUI\n" .
                 "📅 Deadline Lama: " . Carbon::parse($perpanjangan->tanggal_deadline_lama)->translatedFormat('d F Y') . "\n" .
                 "📅 Deadline Baru: " . $tanggalDeadlineBaru->translatedFormat('d F Y') . "\n" .
@@ -145,7 +149,8 @@ class PerpanjanganController extends Controller
                     'perpanjangan_id' => $perpanjangan->id,
                     'peminjaman_id' => $peminjaman->id,
                     'deadline_baru' => $tanggalDeadlineBaru->format('Y-m-d'),
-                    'durasi_tambahan' => $durasiTambahanHari
+                    'durasi_tambahan' => $durasiTambahanHari,
+                    'petugas_nama' => $petugas->name
                 ],
                 route('mahasiswa.peminjaman.show', $peminjaman->id),
                 'normal',
@@ -154,10 +159,49 @@ class PerpanjanganController extends Controller
 
             Log::info('Notifikasi perpanjangan disetujui dikirim ke mahasiswa');
 
+            // ✅ 4. KIRIM NOTIFIKASI KE SEMUA ADMIN
+            $adminIds = User::where('role', 'admin')->pluck('id');
+            
+            foreach ($adminIds as $adminId) {
+                Notifikasi::kirim(
+                    $adminId,
+                    'perpanjangan_disetujui',
+                    "Perpanjangan Disetujui oleh {$petugas->name}",
+                    "Petugas {$petugas->name} telah menyetujui perpanjangan peminjaman.\n\n" .
+                    "👤 Peminjam: {$mahasiswa->name}\n" .
+                    "🆔 NIM/NIK: " . ($mahasiswa->nim ?? $mahasiswa->nik ?? '-') . "\n" .
+                    "📚 Buku: {$buku->judul}\n" .
+                    "🔖 Kode Buku: {$buku->kode_buku}\n" .
+                    "📅 Deadline Lama: " . Carbon::parse($perpanjangan->tanggal_deadline_lama)->translatedFormat('d F Y') . "\n" .
+                    "📅 Deadline Baru: " . $tanggalDeadlineBaru->translatedFormat('d F Y') . "\n" .
+                    "⏱️ Durasi Tambahan: {$durasiTambahanHari} hari\n" .
+                    "✅ Disetujui oleh: {$petugas->name}\n" .
+                    "🕐 Waktu: " . now()->translatedFormat('d F Y H:i'),
+                    [
+                        'perpanjangan_id' => $perpanjangan->id,
+                        'peminjaman_id' => $peminjaman->id,
+                        'mahasiswa_id' => $mahasiswa->id,
+                        'mahasiswa_nama' => $mahasiswa->name,
+                        'buku_judul' => $buku->judul,
+                        'kode_buku' => $buku->kode_buku,
+                        'petugas_id' => $petugasId,
+                        'petugas_nama' => $petugas->name,
+                        'deadline_baru' => $tanggalDeadlineBaru->format('Y-m-d')
+                    ],
+                    route('admin.perpanjangan.show', $perpanjangan->id),
+                    'normal',
+                    $petugasId
+                );
+            }
+
+            Log::info('Notifikasi perpanjangan disetujui dikirim ke semua admin', [
+                'jumlah_admin' => $adminIds->count()
+            ]);
+
             DB::commit();
 
-            $namaPeminjam = $peminjaman->mahasiswa->name;
-            $judulBuku = $peminjaman->buku->judul;
+            $namaPeminjam = $mahasiswa->name;
+            $judulBuku = $buku->judul;
 
             return redirect()->back()->with('success', 
                 "Perpanjangan disetujui! Peminjaman '{$judulBuku}' oleh {$namaPeminjam} diperpanjang hingga " . 
@@ -180,7 +224,7 @@ class PerpanjanganController extends Controller
      */
     public function reject(Request $request, $id)
     {
-        $perpanjangan = Perpanjangan::with('peminjaman.mahasiswa', 'peminjaman.buku')->findOrFail($id);
+        $perpanjangan = Perpanjangan::with('peminjaman.mahasiswa', 'peminjaman.buku.qrCode')->findOrFail($id);
 
         if ($perpanjangan->status !== 'menunggu') {
             return redirect()->back()->with('error', 'Perpanjangan sudah diproses sebelumnya');
@@ -196,6 +240,8 @@ class PerpanjanganController extends Controller
         DB::beginTransaction();
         try {
             $petugas = Auth::user();
+            $mahasiswa = $perpanjangan->peminjaman->mahasiswa;
+            $buku = $perpanjangan->peminjaman->buku;
             
             $perpanjangan->update([
                 'status' => 'ditolak',
@@ -203,13 +249,14 @@ class PerpanjanganController extends Controller
                 'diproses_oleh' => Auth::id(),
             ]);
 
-            // ✅ KIRIM NOTIFIKASI KE MAHASISWA
+            // ✅ 1. KIRIM NOTIFIKASI KE MAHASISWA
             Notifikasi::kirim(
-                $perpanjangan->peminjaman->mahasiswa_id,
+                $mahasiswa->id,
                 'perpanjangan_ditolak',
-                "Perpanjangan Ditolak: {$perpanjangan->peminjaman->buku->judul}",
+                "Perpanjangan Ditolak: {$buku->judul}",
                 "Maaf, pengajuan perpanjangan Anda ditolak.\n\n" .
-                "📚 Buku: {$perpanjangan->peminjaman->buku->judul}\n" .
+                "📚 Buku: {$buku->judul}\n" .
+                "🔖 Kode: {$buku->kode_buku}\n" .
                 "❌ Status: DITOLAK\n" .
                 "📝 Alasan Penolakan:\n{$request->catatan_petugas}\n\n" .
                 "👤 Ditolak oleh: {$petugas->name}\n" .
@@ -218,7 +265,8 @@ class PerpanjanganController extends Controller
                 [
                     'perpanjangan_id' => $perpanjangan->id,
                     'peminjaman_id' => $perpanjangan->peminjaman_id,
-                    'alasan_ditolak' => $request->catatan_petugas
+                    'alasan_ditolak' => $request->catatan_petugas,
+                    'petugas_nama' => $petugas->name
                 ],
                 route('mahasiswa.peminjaman.show', $perpanjangan->peminjaman_id),
                 'tinggi',
@@ -227,9 +275,47 @@ class PerpanjanganController extends Controller
 
             Log::info('Notifikasi perpanjangan ditolak dikirim ke mahasiswa');
 
+            // ✅ 2. KIRIM NOTIFIKASI KE SEMUA ADMIN
+            $adminIds = User::where('role', 'admin')->pluck('id');
+            
+            foreach ($adminIds as $adminId) {
+                Notifikasi::kirim(
+                    $adminId,
+                    'perpanjangan_ditolak',
+                    "Perpanjangan Ditolak oleh {$petugas->name}",
+                    "Petugas {$petugas->name} telah menolak perpanjangan peminjaman.\n\n" .
+                    "👤 Peminjam: {$mahasiswa->name}\n" .
+                    "🆔 NIM/NIK: " . ($mahasiswa->nim ?? $mahasiswa->nik ?? '-') . "\n" .
+                    "📚 Buku: {$buku->judul}\n" .
+                    "🔖 Kode Buku: {$buku->kode_buku}\n" .
+                    "❌ Status: DITOLAK\n" .
+                    "📝 Alasan Penolakan:\n{$request->catatan_petugas}\n\n" .
+                    "👤 Ditolak oleh: {$petugas->name}\n" .
+                    "🕐 Waktu: " . now()->translatedFormat('d F Y H:i'),
+                    [
+                        'perpanjangan_id' => $perpanjangan->id,
+                        'peminjaman_id' => $perpanjangan->peminjaman_id,
+                        'mahasiswa_id' => $mahasiswa->id,
+                        'mahasiswa_nama' => $mahasiswa->name,
+                        'buku_judul' => $buku->judul,
+                        'kode_buku' => $buku->kode_buku,
+                        'petugas_id' => Auth::id(),
+                        'petugas_nama' => $petugas->name,
+                        'alasan_ditolak' => $request->catatan_petugas
+                    ],
+                    route('admin.perpanjangan.show', $perpanjangan->id),
+                    'normal',
+                    Auth::id()
+                );
+            }
+
+            Log::info('Notifikasi perpanjangan ditolak dikirim ke semua admin', [
+                'jumlah_admin' => $adminIds->count()
+            ]);
+
             DB::commit();
 
-            $namaPeminjam = $perpanjangan->peminjaman->mahasiswa->name;
+            $namaPeminjam = $mahasiswa->name;
 
             return redirect()->back()->with('success', 
                 "Perpanjangan dari {$namaPeminjam} berhasil ditolak");
@@ -246,7 +332,7 @@ class PerpanjanganController extends Controller
     public function show($id)
     {
         $perpanjangan = Perpanjangan::with([
-            'peminjaman.buku',
+            'peminjaman.buku.qrCode',
             'peminjaman.mahasiswa',
             'peminjaman.petugas',
             'petugas'
@@ -260,7 +346,7 @@ class PerpanjanganController extends Controller
      */
     public function riwayat(Request $request)
     {
-        $query = Perpanjangan::with(['peminjaman.buku', 'peminjaman.mahasiswa', 'petugas'])
+        $query = Perpanjangan::with(['peminjaman.buku.qrCode', 'peminjaman.mahasiswa', 'petugas'])
             ->whereIn('status', ['disetujui', 'ditolak']);
 
         // Filter berdasarkan status

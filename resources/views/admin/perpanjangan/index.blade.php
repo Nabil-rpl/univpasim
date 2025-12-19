@@ -98,24 +98,26 @@
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
-    /* Table Styles */
+    /* Table Styles - COMPACT VERSION */
     .custom-table {
         margin: 0;
+        font-size: 0.875rem;
     }
 
     .custom-table thead th {
         background: #f8fafc;
         border-bottom: 2px solid #e2e8f0;
-        padding: 16px 20px;
+        padding: 12px 16px;
         font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 0.05em;
         text-transform: uppercase;
         color: #64748b;
+        white-space: nowrap;
     }
 
     .custom-table tbody td {
-        padding: 20px;
+        padding: 12px 16px;
         vertical-align: middle;
         border-bottom: 1px solid #f1f5f9;
     }
@@ -128,113 +130,141 @@
         background-color: #f8fafc;
     }
 
-    /* Avatar Circle */
-    .avatar-circle {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
+    /* Compact User Info */
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 180px;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        font-size: 1.25rem;
+        font-size: 1rem;
     }
 
-    /* User Info */
+    .user-details {
+        flex: 1;
+        min-width: 0;
+    }
+
     .user-name {
         font-weight: 600;
         color: #1e293b;
-        font-size: 0.95rem;
-        margin-bottom: 4px;
+        font-size: 0.875rem;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .user-meta {
-        font-size: 0.8rem;
-        color: #64748b;
-    }
-
-    .user-badge {
-        font-size: 0.7rem;
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-weight: 600;
-        margin-top: 4px;
-        display: inline-block;
-    }
-
-    /* Timeline Design */
-    .timeline-box {
-        background: #f8fafc;
-        border-radius: 12px;
-        padding: 16px;
-        text-align: center;
-    }
-
-    .timeline-date {
-        font-size: 0.8rem;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-weight: 600;
-        display: inline-block;
-        margin-bottom: 6px;
-    }
-
-    .timeline-label {
-        font-size: 0.7rem;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 600;
-    }
-
-    .timeline-arrow {
-        margin: 8px 0;
-        color: #94a3b8;
-        font-size: 1.2rem;
-    }
-
-    .duration-badge {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
         font-size: 0.75rem;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-weight: 700;
-        display: inline-block;
-        margin-top: 8px;
+        color: #64748b;
     }
 
-    /* Status Badge */
+    /* Compact Book Info */
+    .book-info {
+        min-width: 160px;
+    }
+
+    .book-title {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.875rem;
+        margin-bottom: 2px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .book-code {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        font-weight: 600;
+    }
+
+    /* Compact Timeline */
+    .timeline-compact {
+        min-width: 140px;
+    }
+
+    .date-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+        font-size: 0.75rem;
+    }
+
+    .date-icon {
+        font-size: 0.875rem;
+    }
+
+    .duration-text {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 12px;
+        display: inline-block;
+        margin-top: 4px;
+    }
+
+    /* Compact Status */
+    .status-compact {
+        min-width: 100px;
+    }
+
     .status-badge {
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 0.8rem;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 0.75rem;
         font-weight: 700;
         display: inline-block;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        white-space: nowrap;
     }
 
-    /* Petugas Info */
+    .status-date {
+        font-size: 0.7rem;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    /* Compact Petugas */
+    .petugas-compact {
+        min-width: 120px;
+    }
+
     .petugas-name {
         font-weight: 600;
         color: #1e293b;
-        font-size: 0.9rem;
-        margin-bottom: 4px;
+        font-size: 0.8rem;
+        margin-bottom: 2px;
     }
 
     .petugas-time {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: #64748b;
     }
 
     /* Button Styles */
     .btn-action {
-        padding: 8px 20px;
-        border-radius: 10px;
-        font-size: 0.85rem;
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 0.8rem;
         font-weight: 600;
         transition: all 0.2s;
         border: none;
+        white-space: nowrap;
     }
 
     .btn-action:hover {
@@ -318,13 +348,13 @@
         }
 
         .custom-table {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
-        .avatar-circle {
-            width: 40px;
-            height: 40px;
-            font-size: 1rem;
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 0.875rem;
         }
     }
 </style>
@@ -513,12 +543,12 @@
             <table class="table custom-table">
                 <thead>
                     <tr>
-                        <th style="width: 20%;">Peminjam</th>
-                        <th style="width: 22%;">Buku</th>
-                        <th class="text-center" style="width: 20%;">Timeline</th>
-                        <th class="text-center" style="width: 15%;">Status</th>
-                        <th style="width: 15%;">Petugas</th>
-                        <th class="text-center" style="width: 8%;">Aksi</th>
+                        <th>Peminjam</th>
+                        <th>Buku</th>
+                        <th>Timeline</th>
+                        <th class="text-center">Status</th>
+                        <th>Petugas</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -526,75 +556,58 @@
                     <tr>
                         <!-- Peminjam -->
                         <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="avatar-circle bg-primary bg-opacity-10 text-primary">
+                            <div class="user-info">
+                                <div class="user-avatar bg-primary bg-opacity-10 text-primary">
                                     <i class="bi bi-person-fill"></i>
                                 </div>
-                                <div>
-                                    <div class="user-name">
+                                <div class="user-details">
+                                    <div class="user-name" title="{{ $item->peminjaman->mahasiswa->name ?? '-' }}">
                                         {{ $item->peminjaman->mahasiswa->name ?? '-' }}
                                     </div>
                                     <div class="user-meta">
                                         {{ $item->peminjaman->mahasiswa->nim ?? $item->peminjaman->mahasiswa->nik ?? '-' }}
                                     </div>
-                                    <span class="user-badge bg-info bg-opacity-10 text-info">
-                                        {{ ucfirst(str_replace('_', ' ', $item->peminjaman->mahasiswa->role ?? 'N/A')) }}
-                                    </span>
                                 </div>
                             </div>
                         </td>
 
                         <!-- Buku -->
                         <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="avatar-circle bg-warning bg-opacity-10 text-warning">
-                                    <i class="bi bi-book-fill"></i>
+                            <div class="book-info">
+                                <div class="book-title" title="{{ $item->peminjaman->buku->judul ?? '-' }}">
+                                    {{ $item->peminjaman->buku->judul ?? '-' }}
                                 </div>
-                                <div>
-                                    <div class="user-name">
-                                        {{ Str::limit($item->peminjaman->buku->judul ?? '-', 35) }}
-                                    </div>
-                                    <span class="user-badge bg-dark bg-opacity-10 text-dark">
-                                        {{ $item->peminjaman->buku->kode_buku ?? '-' }}
-                                    </span>
-                                </div>
+                                <span class="book-code bg-dark bg-opacity-10 text-dark">
+                                    {{ $item->peminjaman->buku->kode_buku ?? '-' }}
+                                </span>
                             </div>
                         </td>
 
                         <!-- Timeline -->
                         <td>
-                            <div class="timeline-box">
-                                <div class="timeline-date bg-danger bg-opacity-10 text-danger">
-                                    <i class="bi bi-calendar-x me-1"></i>
-                                    {{ $item->tanggal_deadline_lama->format('d M Y') }}
+                            <div class="timeline-compact">
+                                <div class="date-item text-danger">
+                                    <i class="bi bi-calendar-x date-icon"></i>
+                                    <span>{{ $item->tanggal_deadline_lama->format('d M Y') }}</span>
                                 </div>
-                                <div class="timeline-label">Deadline Lama</div>
-                                
-                                <div class="timeline-arrow">
-                                    <i class="bi bi-arrow-down"></i>
+                                <div class="date-item text-success">
+                                    <i class="bi bi-calendar-check date-icon"></i>
+                                    <span>{{ $item->tanggal_deadline_baru->format('d M Y') }}</span>
                                 </div>
-                                
-                                <div class="timeline-date bg-success bg-opacity-10 text-success">
-                                    <i class="bi bi-calendar-check me-1"></i>
-                                    {{ $item->tanggal_deadline_baru->format('d M Y') }}
-                                </div>
-                                <div class="timeline-label">Deadline Baru</div>
-                                
-                                <div class="duration-badge">
-                                    <i class="bi bi-plus-lg me-1"></i>{{ $item->durasi_tambahan }} Hari
-                                </div>
+                                <span class="duration-text bg-primary text-white">
+                                    +{{ $item->durasi_tambahan }} Hari
+                                </span>
                             </div>
                         </td>
 
                         <!-- Status -->
                         <td class="text-center">
-                            <div>
+                            <div class="status-compact">
                                 <span class="status-badge bg-{{ $item->getStatusBadgeClass() }}">
                                     <i class="bi bi-{{ $item->getStatusIcon() }} me-1"></i>
                                     {{ $item->getStatusLabel() }}
                                 </span>
-                                <div class="petugas-time mt-2">
-                                    <i class="bi bi-clock me-1"></i>
+                                <div class="status-date">
                                     {{ $item->tanggal_perpanjangan->format('d M Y') }}
                                 </div>
                             </div>
@@ -603,14 +616,13 @@
                         <!-- Petugas -->
                         <td>
                             @if($item->petugas)
-                            <div>
+                            <div class="petugas-compact">
                                 <div class="petugas-name">
                                     <i class="bi bi-person-badge me-1 text-primary"></i>
                                     {{ $item->petugas->name }}
                                 </div>
                                 <div class="petugas-time">
-                                    <i class="bi bi-clock-history me-1"></i>
-                                    {{ $item->updated_at->format('d/m/Y H:i') }}
+                                    {{ $item->updated_at->format('d/m H:i') }}
                                 </div>
                             </div>
                             @else
@@ -624,7 +636,7 @@
                         <td class="text-center">
                             <a href="{{ route('admin.perpanjangan.show', $item->id) }}" 
                                class="btn btn-primary btn-action btn-sm">
-                                <i class="bi bi-eye me-1"></i>Detail
+                                <i class="bi bi-eye"></i>
                             </a>
                         </td>
                     </tr>

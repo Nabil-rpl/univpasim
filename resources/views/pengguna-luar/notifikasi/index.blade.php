@@ -196,24 +196,25 @@
                                         
                                         <!-- Actions -->
                                         <div class="btn-group btn-group-sm">
+                                            <!-- Tombol Show/Detail -->
+                                            <a href="{{ route('pengguna-luar.notifikasi.show', $notif->id) }}" 
+                                               class="btn btn-outline-info btn-sm"
+                                               title="Lihat Detail">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            
+                                            <!-- Tombol Link (jika ada URL) -->
                                             @if($notif->url)
-                                                <a href="{{ route('pengguna-luar.notifikasi.index', $notif->id) }}" 
+                                                <a href="{{ $notif->url }}" 
                                                    class="btn btn-outline-primary btn-sm"
-                                                   onclick="event.preventDefault(); document.getElementById('tandai-dibaca-{{ $notif->id }}').submit();">
+                                                   target="_blank"
+                                                   title="Buka Link"
+                                                   onclick="tandaiDibaca({{ $notif->id }})">
                                                     <i class="bi bi-box-arrow-up-right"></i>
-                                                </a>
-                                                <form id="tandai-dibaca-{{ $notif->id }}" 
-                                                      action="{{ route('pengguna-luar.notifikasi.index', $notif->id) }}" 
-                                                      method="POST" class="d-none">
-                                                    @csrf
-                                                </form>
-                                            @else
-                                                <a href="{{ route('pengguna-luar.notifikasi.show', $notif->id) }}" 
-                                                   class="btn btn-outline-primary btn-sm">
-                                                    <i class="bi bi-eye"></i>
                                                 </a>
                                             @endif
                                             
+                                            <!-- Tombol Tandai Belum Dibaca (jika sudah dibaca) -->
                                             @if($notif->dibaca)
                                                 <button type="button" 
                                                         class="btn btn-outline-secondary btn-sm"
@@ -223,6 +224,7 @@
                                                 </button>
                                             @endif
                                             
+                                            <!-- Tombol Hapus -->
                                             <button type="button" 
                                                     class="btn btn-outline-danger btn-sm"
                                                     onclick="hapusNotifikasi({{ $notif->id }})"
@@ -269,6 +271,11 @@
     </div>
 </div>
 
+<!-- Form untuk Tandai Dibaca -->
+<form id="form-tandai-dibaca" method="POST" class="d-none">
+    @csrf
+</form>
+
 <!-- Form untuk Tandai Tidak Dibaca -->
 <form id="form-tandai-tidak-dibaca" method="POST" class="d-none">
     @csrf
@@ -297,6 +304,12 @@
 
 @push('scripts')
 <script>
+function tandaiDibaca(id) {
+    const form = document.getElementById('form-tandai-dibaca');
+    form.action = '{{ url("pengguna-luar/notifikasi") }}/' + id + '/tandai-dibaca';
+    form.submit();
+}
+
 function tandaiTidakDibaca(id) {
     if (confirm('Tandai notifikasi ini sebagai belum dibaca?')) {
         const form = document.getElementById('form-tandai-tidak-dibaca');
@@ -348,6 +361,11 @@ setTimeout(function() {
 
 .notification-item:last-child {
     border-bottom: none !important;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
 }
 </style>
 @endpush
