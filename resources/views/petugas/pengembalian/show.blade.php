@@ -365,11 +365,7 @@
                       onsubmit="return confirm('Apakah Anda yakin ingin memproses pengembalian buku ini?{{ $hariTerlambat > 0 ? '\n\nDenda: Rp ' . number_format($denda, 0, ',', '.') : '' }}')">
                     @csrf
 
-                    <div class="mb-3">
-                        <label class="form-label">Catatan (Opsional)</label>
-                        <textarea name="catatan" class="form-control" rows="3" 
-                                  placeholder="Tambahkan catatan jika diperlukan (kondisi buku, dll)"></textarea>
-                    </div>
+    
 
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success confirm-button">

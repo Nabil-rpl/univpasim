@@ -74,55 +74,6 @@
         font-weight: 600;
     }
 
-    /* Filter Card */
-    .filter-card {
-        background: white;
-        border-radius: 20px;
-        padding: 28px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 30px;
-    }
-
-    .filter-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-        border-bottom: 2px solid #e2e8f0;
-    }
-
-    .filter-header i {
-        color: #667eea;
-        font-size: 1.25rem;
-    }
-
-    .filter-header h5 {
-        margin: 0;
-        font-weight: 700;
-        color: #1e293b;
-    }
-
-    .form-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #475569;
-        margin-bottom: 8px;
-    }
-
-    .form-control, .form-select {
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 12px 16px;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    }
-
     /* Notification Card */
     .notification-card {
         background: white;
@@ -202,11 +153,10 @@
     }
 
     .notification-text {
-        color: #1e293b;
+        color: #475569;
         font-size: 0.95rem;
         line-height: 1.7;
         margin-bottom: 16px;
-        font-weight: 500;
     }
 
     .notification-meta {
@@ -215,7 +165,7 @@
         flex-wrap: wrap;
         gap: 16px;
         font-size: 0.875rem;
-        color: #1e293b;
+        color: #64748b;
         font-weight: 600;
     }
 
@@ -247,12 +197,6 @@
     @keyframes pulse-glow {
         0%, 100% { box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4); }
         50% { box-shadow: 0 5px 18px rgba(102, 126, 234, 0.6); }
-    }
-
-    .badge-read {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
     }
 
     .type-badge {
@@ -293,16 +237,6 @@
     .btn-success.btn-action:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-    }
-
-    .btn-secondary.btn-action {
-        background: #e2e8f0;
-        color: #475569;
-    }
-
-    .btn-secondary.btn-action:hover {
-        background: #cbd5e1;
-        transform: translateY(-2px);
     }
 
     .dropdown-toggle {
@@ -403,7 +337,7 @@
     }
 
     .pagination .page-item.active .page-link {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #8253b1 100%);
         border-color: #667eea;
         color: white;
     }
@@ -511,14 +445,6 @@
         </div>
 
         <div class="stats-card">
-            <div class="stats-icon bg-gradient-success text-white">
-                <i class="bi bi-check-circle-fill"></i>
-            </div>
-            <div class="stats-number text-success">{{ $notifikasi->total() - $unreadCount }}</div>
-            <div class="stats-label">Sudah Dibaca</div>
-        </div>
-
-        <div class="stats-card">
             <div class="stats-icon bg-gradient-primary text-white">
                 <i class="bi bi-collection-fill"></i>
             </div>
@@ -527,94 +453,30 @@
         </div>
     </div>
 
-    <!-- Filter Card -->
-    <div class="filter-card">
-        <div class="filter-header">
-            <i class="bi bi-funnel-fill"></i>
-            <h5>Filter & Pencarian</h5>
-        </div>
-
-        <form method="GET" action="{{ route('admin.notifikasi.index') }}" class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label">
-                    <i class="bi bi-check-circle me-1"></i>Status
-                </label>
-                <select name="status" class="form-select">
-                    <option value="">Semua Status</option>
-                    <option value="unread" {{ request('status') == 'unread' ? 'selected' : '' }}>Belum Dibaca</option>
-                    <option value="read" {{ request('status') == 'read' ? 'selected' : '' }}>Sudah Dibaca</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label">
-                    <i class="bi bi-tag me-1"></i>Tipe
-                </label>
-                <select name="tipe" class="form-select">
-                    <option value="">Semua Tipe</option>
-                    <option value="peminjaman_baru" {{ request('tipe') == 'peminjaman_baru' ? 'selected' : '' }}>Peminjaman Baru</option>
-                    <option value="perpanjangan_baru" {{ request('tipe') == 'perpanjangan_baru' ? 'selected' : '' }}>Perpanjangan Baru</option>
-                    <option value="reminder_deadline" {{ request('tipe') == 'reminder_deadline' ? 'selected' : '' }}>Reminder Deadline</option>
-                    <option value="terlambat" {{ request('tipe') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
-                    <option value="user_baru" {{ request('tipe') == 'user_baru' ? 'selected' : '' }}>User Baru</option>
-                    <option value="buku_baru" {{ request('tipe') == 'buku_baru' ? 'selected' : '' }}>Buku Baru</option>
-                    <option value="laporan_baru" {{ request('tipe') == 'laporan_baru' ? 'selected' : '' }}>Laporan Baru</option>
-                    <option value="sistem" {{ request('tipe') == 'sistem' ? 'selected' : '' }}>Sistem</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">
-                    <i class="bi bi-search me-1"></i>Pencarian
-                </label>
-                <input type="text" name="search" class="form-control" 
-                       placeholder="Cari notifikasi..." 
-                       value="{{ request('search') }}">
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label d-none d-md-block">&nbsp;</label>
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary btn-action flex-grow-1">
-                        <i class="bi bi-search"></i>
-                    </button>
-                    @if(request()->anyFilled(['status', 'tipe', 'search']))
-                    <a href="{{ route('admin.notifikasi.index') }}" 
-                       class="btn btn-secondary btn-action"
-                       title="Reset">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                    </a>
-                    @endif
-                </div>
-            </div>
-
-            @if($unreadCount > 0)
-            <div class="col-12">
-                <button type="button" class="btn btn-success btn-action" onclick="markAllAsReadConfirm()">
-                    <i class="bi bi-check-all me-2"></i>Tandai Semua Dibaca ({{ $unreadCount }})
-                </button>
-            </div>
-            @endif
-        </form>
+    <!-- Mark All as Read Button -->
+    @if($unreadCount > 0)
+    <div class="mb-4">
+        <button type="button" class="btn btn-success btn-action" onclick="markAllAsReadConfirm()">
+            <i class="bi bi-check-all me-2"></i>Tandai Semua Dibaca ({{ $unreadCount }})
+        </button>
     </div>
+    @endif
 
     <!-- Notifications List -->
     @forelse($notifikasi as $n)
     <div class="notification-card {{ !$n->dibaca ? 'unread' : '' }}" id="notif-{{ $n->id }}">
         <div class="d-flex gap-4">
-            <div class="notification-icon-box bg-gradient-{{ $n->getBadgeColor() }}">
-                <i class="bi bi-{{ $n->getIcon() }}"></i>
-            </div>
-
             <div class="notification-content">
                 <div class="notification-header">
                     <div class="flex-grow-1">
                         <h5 class="notification-title">{{ $n->judul }}</h5>
                         <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                            <span class="notification-badge {{ !$n->dibaca ? 'badge-unread' : 'badge-read' }}" id="badge-{{ $n->id }}">
-                                <i class="bi bi-{{ !$n->dibaca ? 'circle-fill' : 'check-circle-fill' }}" id="icon-{{ $n->id }}"></i>
-                                <span id="text-{{ $n->id }}">{{ !$n->dibaca ? 'Belum Dibaca' : 'Sudah Dibaca' }}</span>
+                            @if(!$n->dibaca)
+                            <span class="notification-badge badge-unread" id="badge-{{ $n->id }}">
+                                <i class="bi bi-circle-fill" id="icon-{{ $n->id }}"></i>
+                                <span id="text-{{ $n->id }}">Belum Dibaca</span>
                             </span>
+                            @endif
                             <span class="type-badge">
                                 {{ ucwords(str_replace('_', ' ', $n->tipe)) }}
                             </span>
@@ -680,13 +542,7 @@
             <div class="empty-state">
                 <i class="bi bi-bell-slash"></i>
                 <h4>Tidak Ada Notifikasi</h4>
-                <p>
-                    @if(request()->anyFilled(['status', 'tipe', 'search']))
-                        Tidak ada notifikasi yang sesuai dengan filter pencarian
-                    @else
-                        Belum ada notifikasi yang tersedia saat ini
-                    @endif
-                </p>
+                <p>Belum ada notifikasi yang tersedia saat ini</p>
             </div>
         </div>
     </div>
@@ -695,7 +551,7 @@
     <!-- Pagination -->
     @if($notifikasi->hasPages())
     <div class="d-flex justify-content-center mt-4">
-        {{ $notifikasi->appends(request()->query())->links() }}
+        {{ $notifikasi->links() }}
     </div>
     @endif
 </div>
@@ -718,22 +574,14 @@ function markAsReadInline(id) {
             // Update card appearance
             const card = document.getElementById(`notif-${id}`);
             const badge = document.getElementById(`badge-${id}`);
-            const icon = document.getElementById(`icon-${id}`);
-            const text = document.getElementById(`text-${id}`);
             
             // Remove unread class
             card.classList.remove('unread');
             
-            // Update badge
-            badge.classList.remove('badge-unread');
-            badge.classList.add('badge-read');
-            
-            // Update icon
-            icon.classList.remove('bi-circle-fill');
-            icon.classList.add('bi-check-circle-fill');
-            
-            // Update text
-            text.textContent = 'Sudah Dibaca';
+            // Remove badge completely
+            if (badge) {
+                badge.remove();
+            }
             
             // Remove menu item "Tandai Dibaca"
             const menuItem = event.target.closest('li');
@@ -783,11 +631,18 @@ function markAllAsReadConfirm() {
 function updateStatsCounter() {
     const unreadCards = document.querySelectorAll('.notification-card.unread').length;
     const totalCards = document.querySelectorAll('.notification-card').length;
-    const readCards = totalCards - unreadCards;
     
     // Update stats numbers
     document.querySelectorAll('.stats-number')[0].textContent = unreadCards;
-    document.querySelectorAll('.stats-number')[1].textContent = readCards;
+    document.querySelectorAll('.stats-number')[1].textContent = totalCards;
+    
+    // Hide "Tandai Semua Dibaca" button if no unread
+    if (unreadCards === 0) {
+        const markAllBtn = document.querySelector('button[onclick="markAllAsReadConfirm()"]');
+        if (markAllBtn && markAllBtn.parentElement) {
+            markAllBtn.parentElement.remove();
+        }
+    }
 }
 
 // Auto hide alerts
