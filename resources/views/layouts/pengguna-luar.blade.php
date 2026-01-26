@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -201,8 +202,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
         }
 
         .notification-dropdown {
@@ -229,6 +237,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -448,20 +457,26 @@
                 width: 80px;
                 padding: 15px 10px;
             }
-            .sidebar h4, .sidebar a span {
+
+            .sidebar h4,
+            .sidebar a span {
                 display: none;
             }
+
             .sidebar a {
                 justify-content: center;
                 padding: 12px;
             }
+
             .sidebar a i {
                 margin-right: 0;
                 font-size: 22px;
             }
+
             .main-content {
                 margin-left: 80px;
             }
+
             .notification-dropdown {
                 width: 320px;
                 right: 10px;
@@ -475,15 +490,18 @@
                 position: relative;
                 padding: 15px;
             }
+
             .main-content {
                 margin-left: 0;
                 padding: 15px;
             }
+
             .navbar {
                 flex-direction: column;
                 text-align: center;
                 gap: 10px;
             }
+
             .notification-dropdown {
                 width: calc(100% - 30px);
                 right: 15px;
@@ -494,32 +512,38 @@
 
     @stack('styles')
 </head>
+
 <body>
     {{-- Sidebar --}}
     <div class="sidebar">
         <h4>Pengguna Luar</h4>
-        <a href="{{ route('pengguna-luar.dashboard') }}" class="{{ request()->routeIs('pengguna-luar.dashboard') ? 'active' : '' }}">
+        <a href="{{ route('pengguna-luar.dashboard') }}"
+            class="{{ request()->routeIs('pengguna-luar.dashboard') ? 'active' : '' }}">
             <i class="bi bi-speedometer2"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('pengguna-luar.peminjaman.riwayat') }}" class="{{ request()->routeIs('pengguna-luar.peminjaman.riwayat') ? 'active' : '' }}">
+        <a href="{{ route('pengguna-luar.peminjaman.riwayat') }}"
+            class="{{ request()->routeIs('pengguna-luar.peminjaman.riwayat') ? 'active' : '' }}">
             <i class="bi bi-clock-history"></i>
             <span>Riwayat</span>
         </a>
-        <a href="{{ route('pengguna-luar.buku.index') }}" class="{{ request()->routeIs('pengguna-luar.buku.index') ? 'active' : '' }}">
+        <a href="{{ route('pengguna-luar.buku.index') }}"
+            class="{{ request()->routeIs('pengguna-luar.buku.index') ? 'active' : '' }}">
             <i class="bi bi-book"></i>
             <span>Data Buku</span>
         </a>
-        <a href="{{ route('pengguna-luar.notifikasi.index') }}" class="{{ request()->routeIs('pengguna-luar.notifikasi.*') ? 'active' : '' }}">
+        <a href="{{ route('pengguna-luar.notifikasi.index') }}"
+            class="{{ request()->routeIs('pengguna-luar.notifikasi.*') ? 'active' : '' }}">
             <i class="bi bi-bell"></i>
             <span>Notifikasi</span>
         </a>
-        <a href="{{ route('pengguna-luar.pengaturan.index') }}" class="{{ request()->routeIs('pengguna-luar.pengaturan') ? 'active' : '' }}">
+        <a href="{{ route('pengguna-luar.pengaturan.index') }}"
+            class="{{ request()->routeIs('pengguna-luar.pengaturan') ? 'active' : '' }}">
             <i class="bi bi-person-circle"></i>
             <span>Profil</span>
         </a>
-        <a href="{{ route('logout') }}" 
-           onclick="event.preventDefault(); document.getElementById('logout-form-pengguna').submit();">
+        <a href="{{ route('logout') }}"
+            onclick="event.preventDefault(); document.getElementById('logout-form-pengguna').submit();">
             <i class="bi bi-box-arrow-right"></i>
             <span>Logout</span>
         </a>
@@ -542,8 +566,8 @@
                 </div>
 
                 <span>{{ auth()->user()->name ?? 'Pengguna' }}</span>
-                <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Pengguna') }}&background=60A5FA&color=fff&bold=true" 
-                     class="rounded-circle" width="40" height="40" alt="User">
+                <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Pengguna') }}&background=60A5FA&color=fff&bold=true"
+                    class="rounded-circle" width="40" height="40" alt="User">
             </div>
         </div>
 
@@ -587,6 +611,13 @@
         const notificationList = document.getElementById('notificationList');
         const markAllReadBtn = document.getElementById('markAllReadBtn');
 
+        // ✅ Set initial badge count dari server
+        @if (isset($unreadNotifCount) && $unreadNotifCount > 0)
+            updateBadge({{ $unreadNotifCount }});
+        @else
+            updateBadge(0);
+        @endif
+
         // Toggle dropdown
         notificationBell.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -603,170 +634,174 @@
             }
         });
 
-        // Load notifications
-        function loadNotifications() {
-            console.log('🔔 Loading notifications...');
+        // ✅ Load notifications
+    function loadNotifications() {
+        console.log('🔔 Loading notifications...');
+        
+        fetch('{{ route("pengguna-luar.notifikasi.latest") }}', {
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            console.log('📥 Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Data received:', data);
+            if (data.success) {
+                displayNotifications(data.notifikasi);
+                updateBadge(data.unread_count);
+            } else {
+                throw new Error(data.message || 'Gagal memuat');
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error loading notifications:', error);
+            notificationList.innerHTML = `
+                <div class="empty-notification">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <p class="mb-0">Gagal memuat notifikasi</p>
+                    <small class="text-muted d-block mt-1">${error.message}</small>
+                </div>
+            `;
+        });
+    }
+
+    // ✅ Display notifications (item TIDAK bisa diklik - hanya tampil)
+    function displayNotifications(notifikasi) {
+        console.log('📋 Displaying notifications:', notifikasi.length, 'items');
+        
+        if (!notifikasi || notifikasi.length === 0) {
+            notificationList.innerHTML = `
+                <div class="empty-notification">
+                    <i class="bi bi-bell-slash"></i>
+                    <p class="mb-0">Tidak ada notifikasi</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        notifikasi.forEach(notif => {
+            const unreadClass = !notif.dibaca ? 'unread' : '';
+            const iconClass = notif.tipe || 'default';
+            const icon = getNotificationIcon(notif.tipe);
             
-            fetch('{{ route("pengguna-luar.notifikasi.latest") }}', {
+            // ✅ Menggunakan div, BUKAN anchor tag (item tidak bisa diklik)
+            html += `
+                <div class="notification-item ${unreadClass}">
+                    <div class="notification-icon ${iconClass}">
+                        <i class="${icon}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${escapeHtml(notif.judul)}</div>
+                        <div class="notification-text">${escapeHtml(notif.isi)}</div>
+                        <div class="notification-time">
+                            <i class="bi bi-clock"></i> ${notif.waktu}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        notificationList.innerHTML = html;
+        console.log('✅ Notifications displayed successfully');
+    }
+
+    // Get notification icon
+    function getNotificationIcon(tipe) {
+        const icons = {
+            'terlambat': 'bi bi-exclamation-triangle-fill',
+            'reminder_deadline': 'bi bi-clock-fill',
+            'denda_belum_dibayar': 'bi bi-cash-coin',
+            'peminjaman_disetujui': 'bi bi-check-circle-fill',
+            'peminjaman_ditolak': 'bi bi-x-circle-fill',
+            'peminjaman_baru': 'bi bi-book-fill',
+            'perpanjangan_disetujui': 'bi bi-check2-circle',
+            'perpanjangan_ditolak': 'bi bi-x-octagon',
+            'perpanjangan_baru': 'bi bi-arrow-clockwise',
+            'pengembalian_sukses': 'bi bi-check-circle',
+            'buku_tersedia': 'bi bi-bell-fill',
+            'sistem': 'bi bi-info-circle-fill',
+            'default': 'bi bi-bell-fill'
+        };
+        return icons[tipe] || icons['default'];
+    }
+
+    // ✅ Update badge count
+    function updateBadge(count) {
+        console.log('🔔 Updating badge count:', count);
+        if (count > 0) {
+            notificationBadge.textContent = count > 99 ? '99+' : count;
+            notificationBadge.style.display = 'flex';
+        } else {
+            notificationBadge.style.display = 'none';
+        }
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ✅ Mark all as read - UPDATE BADGE SETELAH SUCCESS
+    markAllReadBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('🔔 Mark all as read clicked');
+        
+        if (confirm('Tandai semua notifikasi sebagai dibaca?')) {
+            fetch('{{ route("pengguna-luar.notifikasi.mark-all-read") }}', {
+                method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
                 }
             })
-            .then(response => {
-                console.log('📥 Response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('✅ Data received:', data);
+                console.log('✅ Mark all read response:', data);
                 if (data.success) {
-                    displayNotifications(data.notifikasi);
-                    updateBadge(data.unread_count);
-                } else {
-                    throw new Error(data.message || 'Gagal memuat');
+                    // ✅ PENTING: Reload notifications dan update badge
+                    loadNotifications();
+                    // ✅ Set badge ke 0
+                    updateBadge(0);
                 }
             })
-            .catch(error => {
-                console.error('❌ Error loading notifications:', error);
-                notificationList.innerHTML = `
-                    <div class="empty-notification">
-                        <i class="bi bi-exclamation-circle"></i>
-                        <p class="mb-0">Gagal memuat notifikasi</p>
-                        <small class="text-muted d-block mt-1">${error.message}</small>
-                    </div>
-                `;
-            });
+            .catch(error => console.error('❌ Error marking all as read:', error));
         }
+    });
 
-        // ✅ UPDATED: Display notifications (item TIDAK bisa diklik)
-        function displayNotifications(notifikasi) {
-            console.log('📋 Displaying notifications:', notifikasi.length, 'items');
-            
-            if (!notifikasi || notifikasi.length === 0) {
-                notificationList.innerHTML = `
-                    <div class="empty-notification">
-                        <i class="bi bi-bell-slash"></i>
-                        <p class="mb-0">Tidak ada notifikasi</p>
-                    </div>
-                `;
-                return;
-            }
+    // ✅ Load initial notification count
+    console.log('🚀 Initializing notifications...');
+    loadNotifications();
 
-            let html = '';
-            notifikasi.forEach(notif => {
-                const unreadClass = !notif.dibaca ? 'unread' : '';
-                const iconClass = notif.tipe || 'default';
-                const icon = getNotificationIcon(notif.tipe);
-                
-                // ✅ PENTING: Menggunakan div biasa, BUKAN anchor tag
-                // ✅ Item notifikasi tidak bisa diklik
-                html += `
-                    <div class="notification-item ${unreadClass}" data-id="${notif.id}">
-                        <div class="notification-icon ${iconClass}">
-                            <i class="${icon}"></i>
-                        </div>
-                        <div class="notification-content">
-                            <div class="notification-title">${escapeHtml(notif.judul)}</div>
-                            <div class="notification-text">${escapeHtml(notif.isi)}</div>
-                            <div class="notification-time">
-                                <i class="bi bi-clock"></i> ${notif.waktu}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            notificationList.innerHTML = html;
-            console.log('✅ Notifications displayed (items are NOT clickable)');
-        }
-
-        // Get notification icon
-        function getNotificationIcon(tipe) {
-            const icons = {
-                'terlambat': 'bi bi-exclamation-triangle-fill',
-                'reminder_deadline': 'bi bi-clock-fill',
-                'denda_belum_dibayar': 'bi bi-cash-coin',
-                'peminjaman_disetujui': 'bi bi-check-circle-fill',
-                'peminjaman_ditolak': 'bi bi-x-circle-fill',
-                'peminjaman_baru': 'bi bi-book-fill',
-                'perpanjangan_disetujui': 'bi bi-check2-circle',
-                'perpanjangan_ditolak': 'bi bi-x-octagon',
-                'perpanjangan_baru': 'bi bi-arrow-clockwise',
-                'pengembalian_sukses': 'bi bi-check-circle',
-                'buku_tersedia': 'bi bi-bell-fill',
-                'sistem': 'bi bi-info-circle-fill',
-                'default': 'bi bi-bell-fill'
-            };
-            return icons[tipe] || icons['default'];
-        }
-
-        // Update badge
-        function updateBadge(count) {
-            console.log('🔔 Updating badge count:', count);
-            if (count > 0) {
-                notificationBadge.textContent = count > 99 ? '99+' : count;
-                notificationBadge.style.display = 'flex';
-            } else {
-                notificationBadge.style.display = 'none';
-            }
-        }
-
-        // Escape HTML to prevent XSS
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Mark all as read
-        markAllReadBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            console.log('🔔 Mark all as read clicked');
-            
-            if (confirm('Tandai semua notifikasi sebagai dibaca?')) {
-                fetch('{{ route("pengguna-luar.notifikasi.mark-all-read") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('✅ Mark all read response:', data);
-                    if (data.success) {
-                        loadNotifications();
-                    }
-                })
-                .catch(error => console.error('❌ Error marking all as read:', error));
-            }
-        });
-
-        // Load initial notification count
-        console.log('🚀 Initializing notifications...');
+    // ✅ Auto refresh every 60 seconds
+    setInterval(function() {
+        console.log('🔄 Auto-refreshing notifications...');
         loadNotifications();
+    }, 60000);
 
-        // Auto refresh every 60 seconds
-        setInterval(function() {
-            console.log('🔄 Auto-refreshing notifications...');
-            loadNotifications();
-        }, 60000);
-
-        // Tooltip Bootstrap
-        document.addEventListener('DOMContentLoaded', function () {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
+    // Tooltip Bootstrap
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+    });
     </script>
 
     @stack('scripts')
 </body>
+
 </html>

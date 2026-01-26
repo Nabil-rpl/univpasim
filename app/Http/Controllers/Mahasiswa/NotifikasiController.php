@@ -18,7 +18,6 @@ class NotifikasiController extends Controller
             $query = Notifikasi::where('user_id', auth()->id())
                 ->orderBy('created_at', 'desc');
 
-            // Filter berdasarkan status (dibaca/belum dibaca)
             if ($request->filled('status')) {
                 if ($request->status === 'unread') {
                     $query->where('dibaca', false);
@@ -27,43 +26,45 @@ class NotifikasiController extends Controller
                 }
             }
 
-            // Filter berdasarkan tipe notifikasi
             if ($request->filled('tipe')) {
                 $query->where('tipe', $request->tipe);
             }
 
-            // Filter berdasarkan pencarian (judul atau isi)
             if ($request->filled('search')) {
                 $search = $request->search;
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('judul', 'like', "%{$search}%")
-                      ->orWhere('isi', 'like', "%{$search}%");
+                        ->orWhere('isi', 'like', "%{$search}%");
                 });
             }
 
-            // Pagination
             $notifikasi = $query->paginate(20)->withQueryString();
 
-            // Hitung notifikasi belum dibaca
             $unreadCount = Notifikasi::where('user_id', auth()->id())
                 ->where('dibaca', false)
+                ->count();
+
+            // ✅ TAMBAHKAN INI
+            $todayCount = Notifikasi::where('user_id', auth()->id())
+                ->where('created_at', '>=', now()->startOfDay())
                 ->count();
 
             Log::info('Index notifikasi mahasiswa', [
                 'user_id' => auth()->id(),
                 'total_notifikasi' => $notifikasi->total(),
                 'belum_dibaca' => $unreadCount,
+                'hari_ini' => $todayCount, // ✅ TAMBAHKAN INI
                 'filters' => $request->only(['status', 'tipe', 'search'])
             ]);
 
-            return view('mahasiswa.notifikasi.index', compact('notifikasi', 'unreadCount'));
-
+            // ✅ UBAH INI - tambahkan $todayCount
+            return view('mahasiswa.notifikasi.index', compact('notifikasi', 'unreadCount', 'todayCount'));
         } catch (\Exception $e) {
             Log::error('Error pada index notifikasi mahasiswa', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return redirect()->route('mahasiswa.dashboard')
                 ->with('error', 'Terjadi kesalahan saat memuat notifikasi');
         }
@@ -93,13 +94,12 @@ class NotifikasiController extends Controller
 
             // ✅ TAMPILKAN VIEW SHOW, bukan redirect
             return view('mahasiswa.notifikasi.show', compact('notifikasi'));
-
         } catch (\Exception $e) {
             Log::error('Error menampilkan detail notifikasi', [
                 'notifikasi_id' => $id,
                 'error' => $e->getMessage()
             ]);
-            
+
             return redirect()->route('mahasiswa.notifikasi.index')
                 ->with('error', 'Notifikasi tidak ditemukan');
         }
@@ -134,7 +134,6 @@ class NotifikasiController extends Controller
             }
 
             return redirect()->back()->with('success', 'Notifikasi ditandai sebagai dibaca');
-
         } catch (\Exception $e) {
             Log::error('Error mark as read', [
                 'notifikasi_id' => $id,
@@ -179,7 +178,6 @@ class NotifikasiController extends Controller
             }
 
             return redirect()->back()->with('success', "Berhasil menandai {$updated} notifikasi sebagai dibaca");
-
         } catch (\Exception $e) {
             Log::error('Error mark all as read', [
                 'error' => $e->getMessage()
@@ -223,7 +221,6 @@ class NotifikasiController extends Controller
 
             return redirect()->route('mahasiswa.notifikasi.index')
                 ->with('success', 'Notifikasi berhasil dihapus');
-
         } catch (\Exception $e) {
             Log::error('Error menghapus notifikasi', [
                 'notifikasi_id' => $id,
@@ -255,7 +252,6 @@ class NotifikasiController extends Controller
                 'success' => true,
                 'count' => $count
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error get unread count', [
                 'error' => $e->getMessage()
@@ -278,7 +274,7 @@ class NotifikasiController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->limit(10)
                 ->get()
-                ->map(function($n) {
+                ->map(function ($n) {
                     return [
                         'id' => $n->id,
                         'judul' => $n->judul,
@@ -302,7 +298,6 @@ class NotifikasiController extends Controller
                 'notifikasi' => $notifikasi,
                 'unread_count' => $unreadCount
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error get latest notifications', [
                 'error' => $e->getMessage(),
