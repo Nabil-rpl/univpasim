@@ -69,8 +69,9 @@ class PerpanjanganController extends Controller
 
     /**
      * Setujui perpanjangan
+     * ✅ SUDAH DIPERBAIKI - MENAMBAHKAN CATATAN PETUGAS
      */
-    public function approve($id)
+    public function approve(Request $request, $id)  // ✅ TAMBAHKAN Request $request
     {
         $perpanjangan = Perpanjangan::with('peminjaman.buku.qrCode', 'peminjaman.mahasiswa')
             ->findOrFail($id);
@@ -91,6 +92,13 @@ class PerpanjanganController extends Controller
                 'Tidak dapat menyetujui perpanjangan. Peminjaman sudah melewati deadline dan dikenakan denda. Harap proses pengembalian terlebih dahulu.');
         }
 
+        // ✅ VALIDASI CATATAN PETUGAS (OPSIONAL)
+        $request->validate([
+            'catatan_petugas' => 'nullable|string|max:500',
+        ], [
+            'catatan_petugas.max' => 'Catatan maksimal 500 karakter',
+        ]);
+
         DB::beginTransaction();
         try {
             Log::info('Memproses persetujuan perpanjangan', [
@@ -107,13 +115,16 @@ class PerpanjanganController extends Controller
             $mahasiswa = $peminjaman->mahasiswa;
             $buku = $peminjaman->buku;
 
-            // 1. Update status perpanjangan
+            // ✅ 1. Update status perpanjangan DENGAN CATATAN PETUGAS
+            $catatanPetugas = $request->catatan_petugas ?: 'Perpanjangan disetujui oleh ' . $petugas->name;
+            
             $perpanjangan->update([
                 'status' => 'disetujui',
+                'catatan_petugas' => $catatanPetugas,  // ✅ INI YANG DITAMBAHKAN
                 'diproses_oleh' => $petugasId,
             ]);
 
-            Log::info('Status perpanjangan berhasil diupdate');
+            Log::info('Status perpanjangan berhasil diupdate dengan catatan petugas');
 
             // 2. Update peminjaman (deadline & durasi)
             $durasiTotal = $peminjaman->durasi_hari + $durasiTambahanHari;
@@ -131,26 +142,35 @@ class PerpanjanganController extends Controller
                 'durasi_baru' => $durasiTotal
             ]);
 
-            // ✅ 3. KIRIM NOTIFIKASI KE MAHASISWA
-            Notifikasi::kirim(
-                $mahasiswa->id,
-                'perpanjangan_disetujui',
-                "Perpanjangan Disetujui: {$buku->judul}",
-                "Selamat! Pengajuan perpanjangan Anda telah disetujui.\n\n" .
+            // ✅ 3. KIRIM NOTIFIKASI KE MAHASISWA (dengan catatan petugas)
+            $pesanNotifikasi = "Selamat! Pengajuan perpanjangan Anda telah disetujui.\n\n" .
                 "📚 Buku: {$buku->judul}\n" .
                 "🔖 Kode: {$buku->kode_buku}\n" .
                 "✅ Status: DISETUJUI\n" .
                 "📅 Deadline Lama: " . Carbon::parse($perpanjangan->tanggal_deadline_lama)->translatedFormat('d F Y') . "\n" .
                 "📅 Deadline Baru: " . $tanggalDeadlineBaru->translatedFormat('d F Y') . "\n" .
                 "⏱️ Durasi Tambahan: {$durasiTambahanHari} hari\n" .
-                "👤 Disetujui oleh: {$petugas->name}\n\n" .
-                "⚠️ Harap kembalikan buku sebelum deadline baru untuk menghindari denda.",
+                "👤 Disetujui oleh: {$petugas->name}\n";
+            
+            // ✅ Tambahkan catatan petugas jika ada
+            if ($request->filled('catatan_petugas')) {
+                $pesanNotifikasi .= "\n📝 Catatan Petugas:\n{$request->catatan_petugas}\n";
+            }
+            
+            $pesanNotifikasi .= "\n⚠️ Harap kembalikan buku sebelum deadline baru untuk menghindari denda.";
+
+            Notifikasi::kirim(
+                $mahasiswa->id,
+                'perpanjangan_disetujui',
+                "Perpanjangan Disetujui: {$buku->judul}",
+                $pesanNotifikasi,
                 [
                     'perpanjangan_id' => $perpanjangan->id,
                     'peminjaman_id' => $peminjaman->id,
                     'deadline_baru' => $tanggalDeadlineBaru->format('Y-m-d'),
                     'durasi_tambahan' => $durasiTambahanHari,
-                    'petugas_nama' => $petugas->name
+                    'petugas_nama' => $petugas->name,
+                    'catatan_petugas' => $catatanPetugas  // ✅ TAMBAHKAN
                 ],
                 route('mahasiswa.peminjaman.show', $peminjaman->id),
                 'normal',
@@ -159,24 +179,32 @@ class PerpanjanganController extends Controller
 
             Log::info('Notifikasi perpanjangan disetujui dikirim ke mahasiswa');
 
-            // ✅ 4. KIRIM NOTIFIKASI KE SEMUA ADMIN
+            // ✅ 4. KIRIM NOTIFIKASI KE SEMUA ADMIN (dengan catatan petugas)
             $adminIds = User::where('role', 'admin')->pluck('id');
+            
+            $pesanAdmin = "Petugas {$petugas->name} telah menyetujui perpanjangan peminjaman.\n\n" .
+                "👤 Peminjam: {$mahasiswa->name}\n" .
+                "🆔 NIM/NIK: " . ($mahasiswa->nim ?? $mahasiswa->nik ?? '-') . "\n" .
+                "📚 Buku: {$buku->judul}\n" .
+                "🔖 Kode Buku: {$buku->kode_buku}\n" .
+                "📅 Deadline Lama: " . Carbon::parse($perpanjangan->tanggal_deadline_lama)->translatedFormat('d F Y') . "\n" .
+                "📅 Deadline Baru: " . $tanggalDeadlineBaru->translatedFormat('d F Y') . "\n" .
+                "⏱️ Durasi Tambahan: {$durasiTambahanHari} hari\n" .
+                "✅ Disetujui oleh: {$petugas->name}\n";
+            
+            // ✅ Tambahkan catatan petugas jika ada
+            if ($request->filled('catatan_petugas')) {
+                $pesanAdmin .= "\n📝 Catatan Petugas:\n{$request->catatan_petugas}\n";
+            }
+            
+            $pesanAdmin .= "\n🕐 Waktu: " . now()->translatedFormat('d F Y H:i');
             
             foreach ($adminIds as $adminId) {
                 Notifikasi::kirim(
                     $adminId,
                     'perpanjangan_disetujui',
                     "Perpanjangan Disetujui oleh {$petugas->name}",
-                    "Petugas {$petugas->name} telah menyetujui perpanjangan peminjaman.\n\n" .
-                    "👤 Peminjam: {$mahasiswa->name}\n" .
-                    "🆔 NIM/NIK: " . ($mahasiswa->nim ?? $mahasiswa->nik ?? '-') . "\n" .
-                    "📚 Buku: {$buku->judul}\n" .
-                    "🔖 Kode Buku: {$buku->kode_buku}\n" .
-                    "📅 Deadline Lama: " . Carbon::parse($perpanjangan->tanggal_deadline_lama)->translatedFormat('d F Y') . "\n" .
-                    "📅 Deadline Baru: " . $tanggalDeadlineBaru->translatedFormat('d F Y') . "\n" .
-                    "⏱️ Durasi Tambahan: {$durasiTambahanHari} hari\n" .
-                    "✅ Disetujui oleh: {$petugas->name}\n" .
-                    "🕐 Waktu: " . now()->translatedFormat('d F Y H:i'),
+                    $pesanAdmin,
                     [
                         'perpanjangan_id' => $perpanjangan->id,
                         'peminjaman_id' => $peminjaman->id,
@@ -186,7 +214,8 @@ class PerpanjanganController extends Controller
                         'kode_buku' => $buku->kode_buku,
                         'petugas_id' => $petugasId,
                         'petugas_nama' => $petugas->name,
-                        'deadline_baru' => $tanggalDeadlineBaru->format('Y-m-d')
+                        'deadline_baru' => $tanggalDeadlineBaru->format('Y-m-d'),
+                        'catatan_petugas' => $catatanPetugas  // ✅ TAMBAHKAN
                     ],
                     route('admin.perpanjangan.show', $perpanjangan->id),
                     'normal',

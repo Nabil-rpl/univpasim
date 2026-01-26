@@ -117,6 +117,48 @@
         color: #1E40AF;
         border-left: 4px solid #3B82F6;
     }
+
+    /* Style untuk form catatan petugas */
+    .catatan-form-section {
+        background: #F8FAFC;
+        border: 2px dashed #CBD5E1;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .catatan-form-section label {
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .catatan-form-section textarea {
+        border: 2px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+    }
+
+    .catatan-form-section textarea:focus {
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .info-note {
+        background: #EFF6FF;
+        border-left: 4px solid #3B82F6;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        color: #1E40AF;
+    }
 </style>
 <div class="perpanjangan-container">
     <div class="container">
@@ -165,22 +207,45 @@
                     @if($perpanjangan->status == 'menunggu')
                         <hr>
                         <p class="fw-bold text-muted mb-3">Tindakan Petugas:</p>
-                        <div class="d-flex gap-3">
-                            {{-- Form Setujui --}}
-                            <form action="{{ route('petugas.perpanjangan.approve', $perpanjangan->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn-custom btn-success-custom"
-                                    onclick="return confirm('Yakin menyetujui perpanjangan ini? Tanggal deadline peminjaman akan diperbarui.')">
-                                    <i class="bi bi-check-circle"></i> Setujui
+                        
+                        {{-- Form Setujui dengan Catatan Petugas --}}
+                        <form action="{{ route('petugas.perpanjangan.approve', $perpanjangan->id) }}" method="POST" id="approveForm">
+                            @csrf
+                            
+                            <div class="catatan-form-section">
+                                <label for="catatan_approve">
+                                    <i class="bi bi-pencil-square"></i>
+                                    Catatan Petugas <span class="text-muted">(Opsional)</span>
+                                </label>
+                                <textarea 
+                                    name="catatan_petugas" 
+                                    id="catatan_approve" 
+                                    class="form-control @error('catatan_petugas') is-invalid @enderror" 
+                                    rows="3"
+                                    placeholder="Contoh: Perpanjangan disetujui, harap kembalikan tepat waktu..."></textarea>
+                                
+                                @error('catatan_petugas')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+
+                                <div class="info-note">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Catatan ini akan dilihat oleh peminjam dan ditampilkan di riwayat perpanjangan.
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3 mt-3">
+                                <button type="submit" class="btn-custom btn-success-custom">
+                                    <i class="bi bi-check-circle"></i> Setujui Perpanjangan
                                 </button>
-                            </form>
-                            {{-- Tombol Tolak (Membuka Modal) --}}
-                            <button type="button" class="btn-custom btn-danger-custom"
-                                data-bs-toggle="modal"
-                                data-bs-target="#rejectModal">
-                                <i class="bi bi-x-circle"></i> Tolak
-                            </button>
-                        </div>
+                                
+                                <button type="button" class="btn-custom btn-danger-custom"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#rejectModal">
+                                    <i class="bi bi-x-circle"></i> Tolak Perpanjangan
+                                </button>
+                            </div>
+                        </form>
                     @else
                         <div class="alert-custom alert-info-custom mt-4">
                             <i class="bi bi-check-circle-fill" style="font-size: 1.5rem;"></i>
@@ -297,6 +362,7 @@
     </div>
 </div>
 
+{{-- Modal Tolak Perpanjangan --}}
 <div class="modal fade" id="rejectModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -306,21 +372,40 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('petugas.perpanjangan.reject', $perpanjangan->id) }}" method="POST">
+            <form action="{{ route('petugas.perpanjangan.reject', $perpanjangan->id) }}" method="POST" id="rejectForm">
                 @csrf
                 <div class="modal-body">
                     <div class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Perhatian!</strong> Anda akan menolak perpanjangan untuk buku **{{ $perpanjangan->peminjaman->buku->judul }}** oleh **{{ $perpanjangan->peminjaman->mahasiswa->name }}**.
+                        <strong>Perhatian!</strong> Anda akan menolak perpanjangan untuk buku <strong>{{ $perpanjangan->peminjaman->buku->judul }}</strong> oleh <strong>{{ $perpanjangan->peminjaman->mahasiswa->name }}</strong>.
                     </div>
                     <div class="mb-3">
-                        <label for="catatan_petugas" class="form-label fw-bold">Catatan Penolakan (Wajib)</label>
-                        <textarea name="catatan_petugas" id="catatan_petugas" rows="4" class="form-control"
-                            placeholder="Sebutkan alasan penolakan secara jelas. Contoh: Buku tersebut sudah dipesan peminjam lain."></textarea>
+                        <label for="catatan_petugas" class="form-label fw-bold">
+                            <i class="bi bi-pencil-square me-1"></i>
+                            Alasan Penolakan <span class="text-danger">*</span>
+                        </label>
+                        <textarea 
+                            name="catatan_petugas" 
+                            id="catatan_petugas" 
+                            rows="4" 
+                            class="form-control @error('catatan_petugas') is-invalid @enderror"
+                            required
+                            placeholder="Contoh: Buku tersebut sudah dipesan peminjam lain, Harus dikembalikan dulu, dll..."></textarea>
+                        
+                        @error('catatan_petugas')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Alasan penolakan akan dikirim ke peminjam via notifikasi.
+                        </small>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x me-1"></i>Batal
+                    </button>
                     <button type="submit" class="btn-custom btn-danger-custom">
                         <i class="bi bi-x-circle-fill"></i> Konfirmasi Tolak
                     </button>
@@ -329,4 +414,51 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const approveForm = document.getElementById('approveForm');
+    const rejectForm = document.getElementById('rejectForm');
+    
+    // Konfirmasi saat approve
+    if (approveForm) {
+        approveForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const catatan = document.getElementById('catatan_approve').value;
+            let message = 'Apakah Anda yakin ingin menyetujui perpanjangan ini?\n\n';
+            message += 'Deadline akan diperpanjang hingga {{ $perpanjangan->tanggal_deadline_baru->format("d F Y") }}';
+            
+            if (catatan.trim()) {
+                message += '\n\nCatatan Anda:\n"' + catatan + '"';
+            }
+            
+            if (confirm(message)) {
+                this.submit();
+            }
+        });
+    }
+
+    // Validasi form reject
+    if (rejectForm) {
+        rejectForm.addEventListener('submit', function(e) {
+            const catatan = document.getElementById('catatan_petugas').value;
+            
+            if (!catatan.trim()) {
+                e.preventDefault();
+                alert('Alasan penolakan wajib diisi!');
+                return false;
+            }
+            
+            if (catatan.trim().length < 10) {
+                e.preventDefault();
+                alert('Alasan penolakan minimal 10 karakter!');
+                return false;
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection

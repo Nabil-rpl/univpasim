@@ -64,7 +64,6 @@ class NotifikasiController extends Controller
                 'stats',
                 'tipeNotifikasi'
             ));
-
         } catch (\Exception $e) {
             Log::error('Error menampilkan notifikasi', [
                 'user_id' => Auth::id(),
@@ -98,7 +97,7 @@ class NotifikasiController extends Controller
                         'id' => $notif->id,
                         'tipe' => $notif->tipe,
                         'judul' => $notif->judul,
-                        'isi' => mb_substr($notif->isi, 0, 80),
+                        'isi' => mb_substr($notif->isi, 0, 80), // ✅ Batasi 80 karakter
                         'link' => $notif->url ?? route('pengguna-luar.notifikasi.show', $notif->id),
                         'dibaca' => (bool) $notif->dibaca,
                         'waktu' => $notif->created_at->locale('id')->diffForHumans(),
@@ -120,7 +119,6 @@ class NotifikasiController extends Controller
                 'notifikasi' => $notifikasi,
                 'unread_count' => $unreadCount
             ]);
-
         } catch (\Exception $e) {
             Log::error('=== ERROR NOTIFIKASI LATEST ===', [
                 'user_id' => Auth::id(),
@@ -165,7 +163,6 @@ class NotifikasiController extends Controller
             }
 
             return redirect()->back()->with('success', 'Notifikasi ditandai sebagai dibaca');
-
         } catch (\Exception $e) {
             Log::error('Error tandai notifikasi sebagai dibaca', [
                 'notifikasi_id' => $id,
@@ -198,7 +195,6 @@ class NotifikasiController extends Controller
             $notifikasi->tandaiTidakDibaca();
 
             return redirect()->back()->with('success', 'Notifikasi ditandai sebagai belum dibaca');
-
         } catch (\Exception $e) {
             Log::error('Error tandai notifikasi sebagai belum dibaca', [
                 'notifikasi_id' => $id,
@@ -238,7 +234,6 @@ class NotifikasiController extends Controller
             }
 
             return redirect()->back()->with('success', "Berhasil menandai $updated notifikasi sebagai dibaca");
-
         } catch (\Exception $e) {
             Log::error('Error tandai semua notifikasi sebagai dibaca', [
                 'user_id' => Auth::id(),
@@ -274,7 +269,6 @@ class NotifikasiController extends Controller
             ]);
 
             return redirect()->back()->with('success', 'Notifikasi berhasil dihapus');
-
         } catch (\Exception $e) {
             Log::error('Error hapus notifikasi', [
                 'notifikasi_id' => $id,
@@ -303,7 +297,6 @@ class NotifikasiController extends Controller
             ]);
 
             return redirect()->back()->with('success', "Berhasil menghapus $deleted notifikasi yang sudah dibaca");
-
         } catch (\Exception $e) {
             Log::error('Error hapus notifikasi yang sudah dibaca', [
                 'user_id' => Auth::id(),
@@ -330,7 +323,6 @@ class NotifikasiController extends Controller
             }
 
             return view('pengguna-luar.notifikasi.show', compact('notifikasi'));
-
         } catch (\Exception $e) {
             Log::error('Error menampilkan detail notifikasi', [
                 'notifikasi_id' => $id,

@@ -163,25 +163,14 @@
         border: none;
     }
 
-    .btn-success-custom {
-        background: linear-gradient(135deg, #34D399, #10B981);
+    .btn-detail-custom {
+        background: linear-gradient(135deg, #60A5FA, #3B82F6);
         color: white;
     }
 
-    .btn-success-custom:hover {
+    .btn-detail-custom:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        color: white;
-    }
-
-    .btn-danger-custom {
-        background: linear-gradient(135deg, #F87171, #EF4444);
-        color: white;
-    }
-
-    .btn-danger-custom:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         color: white;
     }
 
@@ -354,14 +343,14 @@
                         <thead>
                             <tr>
                                 <th width="5%">No</th>
-                                <th width="22%">Peminjam & Buku</th>
+                                <th width="25%">Peminjam & Buku</th>
                                 <th width="10%">Deadline Lama</th>
                                 <th width="10%">Deadline Baru</th>
                                 <th width="8%">Durasi</th>
                                 <th width="15%">Alasan</th>
                                 <th width="10%">Status</th>
                                 <th width="10%">Diajukan</th>
-                                <th width="10%" class="text-center">Aksi</th>
+                                <th width="7%" class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -439,13 +428,8 @@
                                             <span class="badge bg-danger">
                                                 <i class="bi bi-x-circle-fill"></i> Ditolak
                                             </span>
-                                            @if($p->catatan_petugas)
-                                                <br>
-                                                <button class="btn btn-sm btn-link p-0 text-danger" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#catatanModal{{ $p->id }}">
-                                                    Lihat catatan
-                                                </button>
+                                            @if($p->petugas)
+                                                <br><small class="text-muted">{{ $p->petugas->name }}</small>
                                             @endif
                                         @endif
                                     </td>
@@ -454,27 +438,11 @@
                                         <br><small class="text-muted">{{ $p->created_at->format('H:i') }}</small>
                                     </td>
                                     <td class="text-center">
-                                        @if($p->status == 'menunggu')
-                                            <div class="d-flex flex-column gap-2">
-                                                <form action="{{ route('petugas.perpanjangan.approve', $p->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn-custom btn-success-custom w-100" 
-                                                            onclick="return confirm('Yakin menyetujui perpanjangan ini?')"
-                                                            title="Setujui">
-                                                        <i class="bi bi-check-circle"></i> Setujui
-                                                    </button>
-                                                </form>
-                                                
-                                                <button type="button" class="btn-custom btn-danger-custom w-100" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#rejectModal{{ $p->id }}"
-                                                        title="Tolak">
-                                                    <i class="bi bi-x-circle"></i> Tolak
-                                                </button>
-                                            </div>
-                                        @else
-                                            <span class="badge bg-secondary">Sudah Diproses</span>
-                                        @endif
+                                        <a href="{{ route('petugas.perpanjangan.show', $p->id) }}" 
+                                           class="btn-custom btn-detail-custom"
+                                           title="Lihat Detail">
+                                            <i class="bi bi-eye-fill"></i> Detail
+                                        </a>
                                     </td>
                                 </tr>
 
@@ -498,75 +466,6 @@
                                                     <p class="mt-2">{{ $p->alasan }}</p>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Modal Catatan Petugas -->
-                                @if($p->catatan_petugas)
-                                <div class="modal fade" id="catatanModal{{ $p->id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Catatan Penolakan</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>{{ $p->catatan_petugas }}</p>
-                                                @if($p->petugas)
-                                                    <hr>
-                                                    <small class="text-muted">Ditolak oleh: <strong>{{ $p->petugas->name }}</strong></small>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endif
-
-                                <!-- Modal Reject -->
-                                <div class="modal fade" id="rejectModal{{ $p->id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-danger text-white">
-                                                <h5 class="modal-title">
-                                                    <i class="bi bi-x-circle me-2"></i>Tolak Perpanjangan
-                                                </h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <form action="{{ route('petugas.perpanjangan.reject', $p->id) }}" method="POST">
-                                                @csrf
-                                                <div class="modal-body">
-                                                    <div class="alert alert-warning">
-                                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                                        <strong>Perhatian!</strong> Anda akan menolak perpanjangan dari 
-                                                        <strong>{{ $p->peminjaman->mahasiswa->name }}</strong>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <strong>Alasan Mahasiswa:</strong>
-                                                        <p class="text-muted mt-2 p-3" style="background: #f8fafc; border-radius: 8px;">
-                                                            {{ $p->alasan }}
-                                                        </p>
-                                                    </div>
-                                                    
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">
-                                                            Catatan Penolakan <span class="text-danger">*</span>
-                                                        </label>
-                                                        <textarea name="catatan_petugas" class="form-control" rows="4" 
-                                                                  placeholder="Jelaskan alasan penolakan dengan jelas..." required></textarea>
-                                                        <small class="text-muted">Catatan ini akan dilihat oleh mahasiswa</small>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                        <i class="bi bi-x-lg me-1"></i>Batal
-                                                    </button>
-                                                    <button type="submit" class="btn btn-danger">
-                                                        <i class="bi bi-x-circle me-1"></i>Tolak Perpanjangan
-                                                    </button>
-                                                </div>
-                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -615,29 +514,6 @@
                 alert.style.opacity = '0';
                 setTimeout(() => alert.remove(), 300);
             }, 5000);
-        });
-    });
-
-    // Confirm before submit
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            if (submitBtn && !submitBtn.classList.contains('btn-secondary')) {
-                const originalContent = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
-                submitBtn.disabled = true;
-                
-                // Reset badge perpanjangan setelah approve/reject
-                if (typeof resetPerpanjanganBadge === 'function') {
-                    resetPerpanjanganBadge();
-                }
-                
-                // Reset if form submission fails
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalContent;
-                    submitBtn.disabled = false;
-                }, 10000);
-            }
         });
     });
 </script>
