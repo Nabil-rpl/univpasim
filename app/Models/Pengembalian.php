@@ -16,10 +16,15 @@ class Pengembalian extends Model
         'petugas_id',
         'tanggal_pengembalian',
         'denda',
+        'denda_dibayar',
+        'denda_dibayar_pada',
+        'catatan_pembayaran',
     ];
 
     protected $casts = [
         'tanggal_pengembalian' => 'date',
+        'denda_dibayar' => 'boolean',
+        'denda_dibayar_pada' => 'datetime',
     ];
 
     public function peminjaman()

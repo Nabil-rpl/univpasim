@@ -120,12 +120,53 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .denda-box {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        border-left: 4px solid #dc2626;
-        padding: 15px;
-        border-radius: 10px;
-        margin-top: 20px;
+    .riwayat-denda-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .denda-stat-box {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s;
+    }
+
+    .denda-stat-box:hover {
+        transform: translateY(-5px);
+    }
+
+    .denda-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 1.5rem;
+    }
+
+    .denda-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 10px 0 5px;
+    }
+
+    .denda-label {
+        font-size: 0.875rem;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .denda-count {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 5px;
     }
 </style>
 
@@ -196,6 +237,79 @@
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+
+            <!-- Ringkasan Riwayat Denda Buku Ini -->
+            @php
+                // Cek apakah peminjaman ini sudah ada data pengembalian
+                $pengembalianBukuIni = \App\Models\Pengembalian::where('peminjaman_id', $peminjaman->id)->first();
+                
+                $dendaBukuIni = 0;
+                $statusDenda = null;
+                
+                if($pengembalianBukuIni && $pengembalianBukuIni->denda > 0) {
+                    $dendaBukuIni = $pengembalianBukuIni->denda;
+                    $statusDenda = $pengembalianBukuIni->denda_dibayar ? 'lunas' : 'belum_bayar';
+                }
+            @endphp
+
+            @if($dendaBukuIni > 0)
+            <div class="riwayat-denda-card">
+                <h5 class="text-white mb-4">
+                    <i class="bi bi-wallet2 me-2"></i>Informasi Denda Peminjaman Buku Ini
+                </h5>
+                <div class="row g-3">
+                    <!-- Info Denda -->
+                    <div class="col-md-6">
+                        <div class="denda-stat-box">
+                            <div class="denda-icon" style="background: linear-gradient(135deg, {{ $statusDenda == 'lunas' ? '#d1fae5, #a7f3d0' : '#fef3c7, #fde68a' }});">
+                                <i class="bi bi-{{ $statusDenda == 'lunas' ? 'check-circle-fill text-success' : 'exclamation-triangle-fill text-warning' }}"></i>
+                            </div>
+                            <div class="denda-label">Total Denda</div>
+                            <div class="denda-amount {{ $statusDenda == 'lunas' ? 'text-success' : 'text-warning' }}">
+                                Rp {{ number_format($dendaBukuIni, 0, ',', '.') }}
+                            </div>
+                            <div class="denda-count">
+                                @if($statusDenda == 'lunas')
+                                    <span class="badge bg-success">Sudah Dibayar</span>
+                                @else
+                                    <span class="badge bg-warning text-dark">Belum Dibayar</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info Tanggal -->
+                    <div class="col-md-6">
+                        <div class="denda-stat-box">
+                            <div class="denda-icon" style="background: linear-gradient(135deg, #ddd6fe, #c4b5fd);">
+                                <i class="bi bi-calendar-event text-primary"></i>
+                            </div>
+                            <div class="denda-label">
+                                @if($statusDenda == 'lunas')
+                                    Dibayar Pada
+                                @else
+                                    Tanggal Pengembalian
+                                @endif
+                            </div>
+                            <div class="denda-amount text-primary" style="font-size: 1.2rem;">
+                                @if($statusDenda == 'lunas' && $pengembalianBukuIni->denda_dibayar_pada)
+                                    {{ \Carbon\Carbon::parse($pengembalianBukuIni->denda_dibayar_pada)->format('d M Y') }}
+                                @else
+                                    {{ $pengembalianBukuIni->tanggal_pengembalian->format('d M Y') }}
+                                @endif
+                            </div>
+                            <div class="denda-count">
+                                @if($statusDenda == 'lunas' && $pengembalianBukuIni->catatan_pembayaran)
+                                    {{ Str::limit($pengembalianBukuIni->catatan_pembayaran, 30) }}
+                                @else
+                                    Hari keterlambatan: {{ $pengembalianBukuIni->peminjaman->getHariTerlambat() ?? 0 }} hari
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             @endif
 
@@ -339,7 +453,7 @@
                         </p>
                     </div>
                     <div class="text-end">
-                        <small class="d-block text-muted">Total Denda</small>
+                        <small class="d-block text-muted">Denda Peminjaman Ini</small>
                         <h4 class="text-danger mb-0">
                             Rp {{ number_format($peminjaman->hitungDenda(), 0, ',', '.') }}
                         </h4>

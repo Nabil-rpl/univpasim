@@ -838,7 +838,7 @@
                         <div class="btn-action-group">
                             <a href="{{ route('petugas.peminjaman.show', $item->id) }}" 
                                class="btn-action btn-info" 
-                               title="Detail">
+                               title="Detail Peminjaman">
                                 <i class="bi bi-eye-fill"></i>
                             </a>
                             
@@ -846,7 +846,7 @@
                             <a href="{{ route('petugas.pengembalian.show', $item->id) }}" 
                                class="btn-action btn-success" 
                                title="Proses Pengembalian">
-                                <i class="bi bi-box-arrow-in-down-fill"></i>
+                                <i class="bi bi-arrow-return-left"></i>
                             </a>
                             @endif
                             
@@ -855,7 +855,7 @@
                                   onsubmit="return confirm('Yakin ingin menghapus data peminjaman ini?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn-action btn-danger" title="Hapus">
+                                <button type="submit" class="btn-action btn-danger" title="Hapus Data">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </form>

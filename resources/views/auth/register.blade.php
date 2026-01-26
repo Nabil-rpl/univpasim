@@ -135,6 +135,19 @@
             margin-bottom: 25px;
         }
 
+        .university-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1e40af;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .brand-logo {
             width: 70px;
             height: 70px;
@@ -153,6 +166,20 @@
         .brand-logo:hover {
             transform: translateY(-5px) scale(1.05);
             box-shadow: 0 15px 35px rgba(30, 64, 175, 0.35);
+        }
+
+        .user-type-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
 
         .form-title {
@@ -297,66 +324,6 @@
             font-size: 12px;
             font-weight: 400;
             margin-top: 6px;
-        }
-
-        .role-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .role-option {
-            flex: 1;
-            position: relative;
-        }
-
-        .role-option input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-        }
-
-        .role-label {
-            display: block;
-            padding: 14px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f8fafc;
-        }
-
-        .role-option input[type="radio"]:checked + .role-label {
-            border-color: #3b82f6;
-            background: #eff6ff;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
-        }
-
-        .role-label i {
-            font-size: 26px;
-            color: #3b82f6;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .role-label span {
-            font-size: 13px;
-            font-weight: 600;
-            color: #334155;
-        }
-
-        .conditional-fields {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .conditional-fields.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         textarea.form-control {
@@ -536,8 +503,12 @@
             <div class="login-form-side">
                 <div class="form-wrapper">
                     <div class="brand-header">
+                        <div class="university-name">UNIVERSITAS NASIONAL PASIM</div>
                         <div class="brand-logo">
-                            <i class="bi bi-journal-bookmark-fill"></i>
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div class="user-type-badge">
+                            <i class="bi bi-people-fill me-1"></i> UMUM
                         </div>
                         <h2 class="form-title">Daftar Akun</h2>
                         <p class="form-subtitle">Buat akun untuk mengakses sistem perpustakaan</p>
@@ -565,25 +536,8 @@
                     <form method="POST" action="{{ route('register') }}" class="login-form">
                         @csrf
 
-                        <!-- Role Selector -->
-                        <div class="role-selector">
-                            <div class="role-option">
-                                <input type="radio" name="role_type" id="role_mahasiswa" value="mahasiswa" 
-                                       {{ old('role_type', 'mahasiswa') == 'mahasiswa' ? 'checked' : '' }}>
-                                <label for="role_mahasiswa" class="role-label">
-                                    <i class="bi bi-mortarboard-fill"></i>
-                                    <span>Mahasiswa</span>
-                                </label>
-                            </div>
-                            <div class="role-option">
-                                <input type="radio" name="role_type" id="role_pengguna_luar" value="pengguna_luar"
-                                       {{ old('role_type') == 'pengguna_luar' ? 'checked' : '' }}>
-                                <label for="role_pengguna_luar" class="role-label">
-                                    <i class="bi bi-person-fill"></i>
-                                    <span>Umum</span>
-                                </label>
-                            </div>
-                        </div>
+                        <!-- Hidden field untuk role type -->
+                        <input type="hidden" name="role_type" value="pengguna_luar">
 
                         <!-- Common Fields -->
                         <div class="form-group">
@@ -616,76 +570,35 @@
                             </div>
                         </div>
 
-                        <!-- Mahasiswa Fields -->
-                        <div id="mahasiswa-fields" class="conditional-fields {{ old('role_type', 'mahasiswa') == 'mahasiswa' ? 'active' : '' }}">
-                            <div class="form-group">
-                                <label for="nim" class="form-label">
-                                    <i class="bi bi-card-text"></i>NIM <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    <input type="text" class="form-control @error('nim') is-invalid @enderror" 
-                                           id="nim" name="nim" value="{{ old('nim') }}" 
-                                           placeholder="Masukkan NIM">
-                                    <i class="bi bi-123 input-icon"></i>
-                                    @error('nim')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="jurusan" class="form-label">
-                                    <i class="bi bi-book-fill"></i>Jurusan <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    <select class="form-select @error('jurusan') is-invalid @enderror" 
-                                            id="jurusan" name="jurusan">
-                                        <option value="">Pilih Jurusan</option>
-                                        <option value="Teknik Informatika" {{ old('jurusan') == 'Teknik Informatika' ? 'selected' : '' }}>Teknik Informatika</option>
-                                        <option value="Sistem Informasi" {{ old('jurusan') == 'Sistem Informasi' ? 'selected' : '' }}>Sistem Informasi</option>
-                                        <option value="Teknik Elektro" {{ old('jurusan') == 'Teknik Elektro' ? 'selected' : '' }}>Teknik Elektro</option>
-                                        <option value="Manajemen" {{ old('jurusan') == 'Manajemen' ? 'selected' : '' }}>Manajemen</option>
-                                        <option value="Akuntansi" {{ old('jurusan') == 'Akuntansi' ? 'selected' : '' }}>Akuntansi</option>
-                                    </select>
-                                    <i class="bi bi-mortarboard input-icon"></i>
-                                    @error('jurusan')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                        <!-- Pengguna Luar Fields -->
+                        <div class="form-group">
+                            <label for="no_hp" class="form-label">
+                                <i class="bi bi-telephone-fill"></i>No. HP <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" class="form-control @error('no_hp') is-invalid @enderror" 
+                                       id="no_hp" name="no_hp" value="{{ old('no_hp') }}" 
+                                       placeholder="08xxxxxxxxxx" required>
+                                <i class="bi bi-phone input-icon"></i>
+                                @error('no_hp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
 
-                        <!-- Pengguna Luar Fields -->
-                        <div id="pengguna-luar-fields" class="conditional-fields {{ old('role_type') == 'pengguna_luar' ? 'active' : '' }}">
-                            <div class="form-group">
-                                <label for="no_hp" class="form-label">
-                                    <i class="bi bi-telephone-fill"></i>No. HP <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    <input type="text" class="form-control @error('no_hp') is-invalid @enderror" 
-                                           id="no_hp" name="no_hp" value="{{ old('no_hp') }}" 
-                                           placeholder="08xxxxxxxxxx">
-                                    <i class="bi bi-phone input-icon"></i>
-                                    @error('no_hp')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="alamat" class="form-label">
-                                    <i class="bi bi-geo-alt-fill"></i>Alamat <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    <textarea class="form-control @error('alamat') is-invalid @enderror" 
-                                              id="alamat" name="alamat" rows="2" 
-                                              placeholder="Masukkan alamat lengkap" 
-                                              style="padding-left: 45px;">{{ old('alamat') }}</textarea>
-                                    <i class="bi bi-house input-icon"></i>
-                                    @error('alamat')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                        <div class="form-group">
+                            <label for="alamat" class="form-label">
+                                <i class="bi bi-geo-alt-fill"></i>Alamat <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                <textarea class="form-control @error('alamat') is-invalid @enderror" 
+                                          id="alamat" name="alamat" rows="2" 
+                                          placeholder="Masukkan alamat lengkap" 
+                                          style="padding-left: 45px;" required>{{ old('alamat') }}</textarea>
+                                <i class="bi bi-house input-icon"></i>
+                                @error('alamat')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
 
@@ -748,32 +661,6 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const roleMahasiswa = document.getElementById('role_mahasiswa');
-            const rolePenggunaLuar = document.getElementById('role_pengguna_luar');
-            const mahasiswaFields = document.getElementById('mahasiswa-fields');
-            const penggunaLuarFields = document.getElementById('pengguna-luar-fields');
-
-            function toggleFields() {
-                if (roleMahasiswa.checked) {
-                    mahasiswaFields.classList.add('active');
-                    penggunaLuarFields.classList.remove('active');
-                    document.getElementById('nim').required = true;
-                    document.getElementById('jurusan').required = true;
-                    document.getElementById('no_hp').required = false;
-                    document.getElementById('alamat').required = false;
-                } else {
-                    mahasiswaFields.classList.remove('active');
-                    penggunaLuarFields.classList.add('active');
-                    document.getElementById('nim').required = false;
-                    document.getElementById('jurusan').required = false;
-                    document.getElementById('no_hp').required = true;
-                    document.getElementById('alamat').required = true;
-                }
-            }
-
-            roleMahasiswa.addEventListener('change', toggleFields);
-            rolePenggunaLuar.addEventListener('change', toggleFields);
-
             const togglePassword = document.getElementById('togglePassword');
             const password = document.getElementById('password');
             const eyeIcon = document.getElementById('eyeIcon');

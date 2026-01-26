@@ -150,6 +150,7 @@ class Notifikasi extends Model
             'terlambat' => 'exclamation-triangle-fill',
             'buku_tersedia' => 'bell-fill',
             'denda_belum_dibayar' => 'cash-coin',
+            'denda_lunas' => 'check-circle-fill',
             'laporan_baru' => 'file-earmark-text',
             'stok_menipis' => 'exclamation-circle',
             'sistem' => 'info-circle-fill',
@@ -158,7 +159,7 @@ class Notifikasi extends Model
     }
 
     /**
-     * Get warna badge berdasarkan tipe notifikasi
+     * ✅ FIXED: Get warna badge berdasarkan tipe notifikasi
      */
     public function getBadgeColor()
     {
@@ -170,11 +171,12 @@ class Notifikasi extends Model
             'perpanjangan_disetujui' => 'success',
             'perpanjangan_ditolak' => 'danger',
             'pengembalian_baru' => 'warning',
-            'pengembalian_sukses' => 'success',
+            'pengembalian_sukses' => 'success', // ✅ Untuk denda lunas juga
             'reminder_deadline' => 'warning',
             'terlambat' => 'danger',
             'buku_tersedia' => 'info',
             'denda_belum_dibayar' => 'warning',
+            'denda_lunas' => 'success', // ✅ Tetap ada untuk backward compatibility
             'laporan_baru' => 'info',
             'stok_menipis' => 'warning',
             'sistem' => 'secondary',
@@ -214,11 +216,34 @@ class Notifikasi extends Model
     }
 
     /**
-     * Static method untuk membuat notifikasi baru
+     * ✅ FIXED: Static method untuk membuat notifikasi baru dengan logging detail
      */
     public static function kirim($userId, $tipe, $judul, $isi, $data = null, $url = null, $prioritas = 'normal', $dibuatOleh = null)
     {
         try {
+            Log::info('========== MULAI KIRIM NOTIFIKASI ==========', [
+                'user_id' => $userId,
+                'tipe' => $tipe,
+                'judul' => $judul,
+                'prioritas' => $prioritas
+            ]);
+
+            // ✅ Validasi user ada
+            $user = User::find($userId);
+            if (!$user) {
+                Log::error('❌ User tidak ditemukan', [
+                    'user_id' => $userId
+                ]);
+                return false;
+            }
+
+            Log::info('✅ User ditemukan', [
+                'user_id' => $userId,
+                'user_name' => $user->name,
+                'user_role' => $user->role
+            ]);
+
+            // ✅ Create notifikasi
             $notif = self::create([
                 'user_id' => $userId,
                 'tipe' => $tipe,
@@ -228,20 +253,34 @@ class Notifikasi extends Model
                 'url' => $url,
                 'prioritas' => $prioritas,
                 'dibuat_oleh' => $dibuatOleh,
+                'dibaca' => false,
             ]);
 
-            Log::info('Notifikasi berhasil dibuat', [
+            Log::info('✅ Notifikasi berhasil dibuat', [
                 'notifikasi_id' => $notif->id,
                 'user_id' => $userId,
-                'tipe' => $tipe
+                'tipe' => $tipe,
+                'created_at' => $notif->created_at->format('Y-m-d H:i:s')
             ]);
 
+            // ✅ Verifikasi notifikasi tersimpan di database
+            $verified = self::find($notif->id);
+            if ($verified) {
+                Log::info('✅ Notifikasi terverifikasi tersimpan di database', [
+                    'notifikasi_id' => $verified->id
+                ]);
+            } else {
+                Log::error('❌ Notifikasi tidak ditemukan setelah create');
+            }
+
             return $notif;
+
         } catch (\Exception $e) {
-            Log::error('Error membuat notifikasi', [
+            Log::error('❌ ERROR MEMBUAT NOTIFIKASI', [
                 'error' => $e->getMessage(),
                 'user_id' => $userId,
-                'tipe' => $tipe
+                'tipe' => $tipe,
+                'trace' => $e->getTraceAsString()
             ]);
             return false;
         }

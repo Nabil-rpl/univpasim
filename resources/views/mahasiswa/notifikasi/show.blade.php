@@ -1,9 +1,25 @@
-@extends('layouts.pengguna-luar')
+@extends('layouts.mahasiswa')
 
+@section('title', 'Detail Notifikasi')
 @section('page-title', 'Detail Notifikasi')
 
 @push('styles')
 <style>
+    :root {
+        --primary: #0d6efd;
+        --primary-dark: #0a58ca;
+        --secondary: #6c757d;
+        --success: #28a745;
+        --danger: #dc3545;
+        --warning: #ffc107;
+        --info: #17a2b8;
+    }
+
+    body {
+        background-color: #f5f6fa;
+        min-height: 100vh;
+    }
+
     .detail-container {
         max-width: 900px;
         margin: 0 auto;
@@ -13,72 +29,55 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        color: #64748b;
+        color: #6c757d;
         text-decoration: none;
         font-size: 14px;
         margin-bottom: 20px;
         transition: all 0.3s ease;
+        padding: 10px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .back-button:hover {
-        color: #3B82F6;
+        color: #0d6efd;
         transform: translateX(-4px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
     }
 
     .detail-card {
         background: white;
         border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         overflow: hidden;
     }
 
     .detail-header {
-        background: linear-gradient(135deg, #60A5FA, #3B82F6);
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
         color: white;
-        padding: 40px 30px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .detail-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: pulse 15s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 0.3; }
-        50% { transform: scale(1.1); opacity: 0.5; }
-    }
-
-    .detail-header-content {
-        position: relative;
-        z-index: 1;
+        padding: 35px 30px;
     }
 
     .detail-icon {
-        width: 80px;
-        height: 80px;
-        border-radius: 20px;
+        width: 70px;
+        height: 70px;
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 40px;
+        font-size: 2rem;
         margin: 0 auto 20px;
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
     }
 
     .detail-title {
-        font-size: 24px;
+        font-size: 1.8rem;
         font-weight: 700;
         margin-bottom: 16px;
         text-align: center;
+        line-height: 1.3;
     }
 
     .detail-badges {
@@ -92,20 +91,20 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 8px 16px;
-        border-radius: 12px;
-        font-size: 13px;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.8rem;
         font-weight: 600;
-        background: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
     }
 
     .detail-body {
-        padding: 40px 30px;
+        padding: 35px 30px;
     }
 
     .content-section {
-        margin-bottom: 40px;
+        margin-bottom: 30px;
     }
 
     .content-section:last-child {
@@ -113,61 +112,71 @@
     }
 
     .section-title {
-        font-size: 14px;
-        font-weight: 600;
-        color: #94a3b8;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #6c757d;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 16px;
+        margin-bottom: 15px;
         display: flex;
         align-items: center;
         gap: 8px;
     }
 
     .section-title i {
-        color: #3B82F6;
+        color: #0d6efd;
+        font-size: 1.1rem;
     }
 
     .content-box {
-        background: #f8fafc;
+        background: #f8f9fa;
         border-radius: 12px;
-        padding: 24px;
-        border: 1px solid #e2e8f0;
-        line-height: 1.8;
-        color: #334155;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        line-height: 1.7;
+        color: #333;
+        font-size: 0.95rem;
     }
 
     .info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+        gap: 15px;
     }
 
     .info-item {
-        padding: 16px;
-        background: #f8fafc;
+        padding: 18px;
+        background: #f8f9fa;
         border-radius: 12px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s;
+    }
+
+    .info-item:hover {
+        border-color: #0d6efd;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1);
     }
 
     .info-label {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 13px;
-        color: #64748b;
+        font-size: 0.8rem;
+        color: #6c757d;
         margin-bottom: 8px;
+        font-weight: 600;
     }
 
     .info-label i {
-        color: #3B82F6;
-        font-size: 16px;
+        color: #0d6efd;
+        font-size: 0.95rem;
     }
 
     .info-value {
         font-weight: 600;
-        color: #1e293b;
-        font-size: 15px;
+        color: #343a40;
+        font-size: 0.95rem;
     }
 
     .priority-badge {
@@ -176,83 +185,58 @@
         gap: 6px;
         padding: 6px 12px;
         border-radius: 8px;
-        font-size: 13px;
+        font-size: 0.8rem;
         font-weight: 600;
     }
 
     .priority-mendesak {
-        background: #fee2e2;
-        color: #dc2626;
+        background: #fed7d7;
+        color: #c53030;
     }
 
     .priority-tinggi {
-        background: #fef3c7;
-        color: #f59e0b;
+        background: #feebc8;
+        color: #c05621;
     }
 
     .priority-normal {
-        background: #dbeafe;
-        color: #3B82F6;
+        background: #d1ecf1;
+        color: #0c5460;
     }
 
     .priority-rendah {
-        background: #f1f5f9;
-        color: #64748b;
+        background: #e2e8f0;
+        color: #718096;
     }
 
     .type-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 8px 16px;
-        border-radius: 10px;
-        font-size: 13px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
         font-weight: 600;
     }
 
-    .type-terlambat {
-        background: linear-gradient(135deg, #fee2e2, #fca5a5);
-        color: #dc2626;
-    }
-
-    .type-reminder_deadline {
-        background: linear-gradient(135deg, #fef3c7, #fcd34d);
-        color: #f59e0b;
-    }
-
-    .type-denda_belum_dibayar {
-        background: linear-gradient(135deg, #fce7f3, #f9a8d4);
-        color: #ec4899;
-    }
-
-    .type-peminjaman_disetujui {
-        background: linear-gradient(135deg, #dcfce7, #86efac);
-        color: #16a34a;
-    }
-
-    .type-peminjaman_ditolak {
-        background: linear-gradient(135deg, #fee2e2, #fca5a5);
-        color: #dc2626;
-    }
-
-    .type-default {
-        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
-        color: #6366f1;
+    .type-badge i {
+        font-size: 0.95rem;
     }
 
     .additional-data {
-        background: #eff6ff;
+        background: #f8f9fa;
         border-radius: 12px;
         padding: 20px;
-        border: 1px solid #bfdbfe;
+        border: 1px solid #e9ecef;
     }
 
     .additional-data-item {
-        padding: 12px 0;
-        border-bottom: 1px solid #dbeafe;
+        padding: 14px 0;
+        border-bottom: 1px solid #e9ecef;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 15px;
     }
 
     .additional-data-item:last-child {
@@ -260,66 +244,59 @@
     }
 
     .additional-data-label {
-        font-weight: 500;
-        color: #475569;
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.85rem;
     }
 
     .additional-data-value {
-        font-weight: 600;
-        color: #1e293b;
+        font-weight: 700;
+        color: #343a40;
+        font-size: 0.9rem;
+        text-align: right;
     }
 
     .action-buttons {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         justify-content: center;
-        padding-top: 30px;
-        border-top: 2px solid #f1f5f9;
+        padding-top: 25px;
+        border-top: 2px solid #f1f3f5;
         flex-wrap: wrap;
     }
 
     .btn-action {
-        padding: 12px 28px;
-        border-radius: 12px;
+        padding: 12px 24px;
+        border-radius: 8px;
         font-weight: 600;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        font-size: 14px;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
     }
 
     .btn-action.btn-primary {
-        background: linear-gradient(135deg, #60A5FA, #3B82F6);
-        border: none;
+        background: #0d6efd;
         color: white;
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
     }
 
     .btn-action.btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-    }
-
-    .btn-action.btn-success {
-        background: white;
-        border: 2px solid #10b981;
-        color: #10b981;
-    }
-
-    .btn-action.btn-success:hover {
-        background: #10b981;
+        background: #0a58ca;
         color: white;
     }
 
     .btn-action.btn-danger {
-        background: white;
-        border: 2px solid #ef4444;
-        color: #ef4444;
+        background: #f5f5f5;
+        border: 1px solid #dc3545;
+        color: #dc3545;
     }
 
     .btn-action.btn-danger:hover {
-        background: #ef4444;
+        background: #dc3545;
         color: white;
     }
 
@@ -327,35 +304,48 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 6px 14px;
-        border-radius: 10px;
-        font-size: 13px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
         font-weight: 600;
     }
 
     .status-unread {
-        background: linear-gradient(135deg, #f093fb, #f5576c);
-        color: white;
-        box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+        background: #fff3cd;
+        color: #856404;
     }
 
     .status-read {
-        background: #dcfce7;
-        color: #16a34a;
+        background: #d4edda;
+        color: #155724;
     }
+
+    /* Gradient backgrounds */
+    .bg-gradient-primary { background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); }
+    .bg-gradient-success { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+    .bg-gradient-danger { background: linear-gradient(135deg, #dc3545 0%, #e55353 100%); }
+    .bg-gradient-info { background: linear-gradient(135deg, #17a2b8 0%, #3ab0c3 100%); }
+    .bg-gradient-warning { background: linear-gradient(135deg, #ffc107 0%, #ffcd39 100%); }
+    .bg-gradient-secondary { background: linear-gradient(135deg, #6c757d 0%, #8a9199 100%); }
 
     /* Responsive */
     @media (max-width: 768px) {
         .detail-header {
-            padding: 30px 20px;
+            padding: 25px 20px;
         }
 
         .detail-body {
-            padding: 30px 20px;
+            padding: 25px 20px;
         }
 
         .detail-title {
-            font-size: 20px;
+            font-size: 1.4rem;
+        }
+
+        .detail-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.8rem;
         }
 
         .info-grid {
@@ -370,23 +360,48 @@
             width: 100%;
             justify-content: center;
         }
+
+        .additional-data-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .additional-data-value {
+            text-align: left;
+        }
     }
 </style>
 @endpush
 
 @section('content')
-<div class="detail-container">
-    {{-- Back Button --}}
-    <a href="{{ route('pengguna-luar.notifikasi.index') }}" class="back-button">
-        <i class="bi bi-arrow-left"></i>
-        <span>Kembali ke Daftar Notifikasi</span>
-    </a>
+<div class="container-fluid py-4">
+    <div class="detail-container">
+        {{-- Back Button --}}
+        <a href="{{ route('mahasiswa.notifikasi.index') }}" class="back-button">
+            <i class="bi bi-arrow-left"></i>
+            <span>Kembali ke Daftar Notifikasi</span>
+        </a>
 
-    {{-- Detail Card --}}
-    <div class="detail-card">
-        {{-- Header --}}
-        <div class="detail-header">
-            <div class="detail-header-content">
+        {{-- Alert Messages --}}
+        @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-x-circle me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        {{-- Detail Card --}}
+        <div class="detail-card">
+            {{-- Header --}}
+            <div class="detail-header">
                 <div class="detail-icon">
                     <i class="bi bi-{{ $notifikasi->getIcon() }}"></i>
                 </div>
@@ -402,150 +417,140 @@
                     </span>
                 </div>
             </div>
-        </div>
 
-        {{-- Body --}}
-        <div class="detail-body">
-            {{-- Content Section --}}
-            <div class="content-section">
-                <div class="section-title">
-                    <i class="bi bi-file-text"></i>
-                    <span>Isi Notifikasi</span>
-                </div>
-                <div class="content-box">
-                    {{ $notifikasi->isi }}
-                </div>
-            </div>
-
-            {{-- Info Section --}}
-            <div class="content-section">
-                <div class="section-title">
-                    <i class="bi bi-info-circle"></i>
-                    <span>Informasi Detail</span>
-                </div>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">
-                            <i class="bi bi-tag"></i>
-                            <span>Tipe Notifikasi</span>
-                        </div>
-                        <div class="info-value">
-                            <span class="type-badge type-{{ $notifikasi->tipe ?: 'default' }}">
-                                <i class="bi bi-{{ $notifikasi->getIcon() }}"></i>
-                                {{ ucwords(str_replace('_', ' ', $notifikasi->tipe)) }}
-                            </span>
-                        </div>
+            {{-- Body --}}
+            <div class="detail-body">
+                {{-- Content Section --}}
+                <div class="content-section">
+                    <div class="section-title">
+                        <i class="bi bi-file-text"></i>
+                        <span>Isi Notifikasi</span>
                     </div>
-
-                    <div class="info-item">
-                        <div class="info-label">
-                            <i class="bi bi-flag"></i>
-                            <span>Prioritas</span>
-                        </div>
-                        <div class="info-value">
-                            <span class="priority-badge priority-{{ $notifikasi->prioritas }}">
-                                <i class="bi bi-{{ $notifikasi->prioritas === 'mendesak' || $notifikasi->prioritas === 'tinggi' ? 'exclamation-triangle-fill' : 'flag-fill' }}"></i>
-                                {{ ucfirst($notifikasi->prioritas) }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-label">
-                            <i class="bi bi-calendar-event"></i>
-                            <span>Tanggal Diterima</span>
-                        </div>
-                        <div class="info-value">
-                            {{ $notifikasi->created_at->format('d M Y, H:i') }}
-                        </div>
-                    </div>
-
-                    @if($notifikasi->dibaca && $notifikasi->dibaca_pada)
-                    <div class="info-item">
-                        <div class="info-label">
-                            <i class="bi bi-check-circle"></i>
-                            <span>Dibaca Pada</span>
-                        </div>
-                        <div class="info-value">
-                            {{ $notifikasi->dibaca_pada->format('d M Y, H:i') }}
-                        </div>
-                    </div>
-                    @endif
-
-                    @if($notifikasi->pembuat)
-                    <div class="info-item">
-                        <div class="info-label">
-                            <i class="bi bi-person"></i>
-                            <span>Dikirim Oleh</span>
-                        </div>
-                        <div class="info-value">
-                            {{ $notifikasi->pembuat->name }}
-                        </div>
-                    </div>
-                    @endif
-
-                    <div class="info-item">
-                        <div class="info-label">
-                            <i class="bi bi-hash"></i>
-                            <span>ID Notifikasi</span>
-                        </div>
-                        <div class="info-value">
-                            #{{ $notifikasi->id }}
-                        </div>
+                    <div class="content-box">
+                        {{ $notifikasi->isi }}
                     </div>
                 </div>
-            </div>
 
-            {{-- Additional Data Section --}}
-            @if($notifikasi->data && is_array($notifikasi->data) && count($notifikasi->data) > 0)
-            <div class="content-section">
-                <div class="section-title">
-                    <i class="bi bi-info-square"></i>
-                    <span>Informasi Tambahan</span>
-                </div>
-                <div class="additional-data">
-                    @foreach($notifikasi->data as $key => $value)
-                    <div class="additional-data-item">
-                        <span class="additional-data-label">{{ ucwords(str_replace('_', ' ', $key)) }}</span>
-                        <span class="additional-data-value">{{ $value }}</span>
+                {{-- Info Section --}}
+                <div class="content-section">
+                    <div class="section-title">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Informasi Detail</span>
                     </div>
-                    @endforeach
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="bi bi-tag"></i>
+                                <span>Tipe Notifikasi</span>
+                            </div>
+                            <div class="info-value">
+                                <span class="type-badge bg-gradient-{{ $notifikasi->getBadgeColor() }}" style="color: white;">
+                                    <i class="bi bi-{{ $notifikasi->getIcon() }}"></i>
+                                    {{ ucwords(str_replace('_', ' ', $notifikasi->tipe)) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="bi bi-flag"></i>
+                                <span>Prioritas</span>
+                            </div>
+                            <div class="info-value">
+                                <span class="priority-badge priority-{{ $notifikasi->prioritas ?? 'normal' }}">
+                                    <i class="bi bi-{{ ($notifikasi->prioritas === 'mendesak' || $notifikasi->prioritas === 'tinggi') ? 'exclamation-triangle-fill' : 'flag-fill' }}"></i>
+                                    {{ ucfirst($notifikasi->prioritas ?? 'Normal') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="bi bi-calendar-event"></i>
+                                <span>Tanggal Diterima</span>
+                            </div>
+                            <div class="info-value">
+                                {{ $notifikasi->created_at->format('d M Y, H:i') }}
+                            </div>
+                        </div>
+
+                        @if($notifikasi->dibaca && $notifikasi->dibaca_pada)
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="bi bi-check-circle"></i>
+                                <span>Dibaca Pada</span>
+                            </div>
+                            <div class="info-value">
+                                {{ $notifikasi->dibaca_pada->format('d M Y, H:i') }}
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($notifikasi->pembuat)
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="bi bi-person"></i>
+                                <span>Dikirim Oleh</span>
+                            </div>
+                            <div class="info-value">
+                                {{ $notifikasi->pembuat->name }}
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="bi bi-hash"></i>
+                                <span>ID Notifikasi</span>
+                            </div>
+                            <div class="info-value">
+                                #{{ $notifikasi->id }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            @endif
 
-            {{-- Action Buttons --}}
-            <div class="action-buttons">
-                <a href="{{ route('pengguna-luar.notifikasi.index') }}" class="btn btn-action btn-primary">
-                    <i class="bi bi-arrow-left"></i>
-                    Kembali ke Daftar
-                </a>
-
-                @if(!$notifikasi->dibaca)
-                <form action="{{ route('pengguna-luar.notifikasi.mark-as-read', $notifikasi->id) }}" method="POST" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="btn btn-action btn-success">
-                        <i class="bi bi-check-circle"></i>
-                        Tandai Dibaca
-                    </button>
-                </form>
+                {{-- Additional Data Section --}}
+                @if($notifikasi->data && is_array($notifikasi->data) && count($notifikasi->data) > 0)
+                <div class="content-section">
+                    <div class="section-title">
+                        <i class="bi bi-info-square"></i>
+                        <span>Informasi Tambahan</span>
+                    </div>
+                    <div class="additional-data">
+                        @foreach($notifikasi->data as $key => $value)
+                        <div class="additional-data-item">
+                            <span class="additional-data-label">{{ ucwords(str_replace('_', ' ', $key)) }}</span>
+                            <span class="additional-data-value">{{ $value }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
                 @endif
 
-                @if($notifikasi->url)
-                <a href="{{ $notifikasi->url }}" class="btn btn-action btn-primary">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    Lihat Detail
-                </a>
-                @endif
+                {{-- Action Buttons --}}
+                <div class="action-buttons">
+                    <a href="{{ route('mahasiswa.notifikasi.index') }}" class="btn btn-action btn-primary">
+                        <i class="bi bi-arrow-left"></i>
+                        Kembali ke Daftar
+                    </a>
 
-                <form action="{{ route('pengguna-luar.notifikasi.destroy', $notifikasi->id) }}" method="POST" style="display: inline;" class="delete-form">
-                    @csrf
-                    @method('DELETE')
-                    <button type="button" class="btn btn-action btn-danger delete-btn">
-                        <i class="bi bi-trash"></i>
-                        Hapus Notifikasi
-                    </button>
-                </form>
+                    @if($notifikasi->url)
+                    <a href="{{ $notifikasi->url }}" class="btn btn-action btn-primary">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                        Lihat Detail Terkait
+                    </a>
+                    @endif
+
+                    <form action="{{ route('mahasiswa.notifikasi.destroy', $notifikasi->id) }}" method="POST" style="display: inline;" class="delete-form">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-action btn-danger delete-btn">
+                            <i class="bi bi-trash"></i>
+                            Hapus Notifikasi
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

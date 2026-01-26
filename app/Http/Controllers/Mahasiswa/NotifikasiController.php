@@ -70,7 +70,7 @@ class NotifikasiController extends Controller
     }
 
     /**
-     * Display the specified notification (redirect to index with highlight)
+     * Display the specified notification
      */
     public function show(string $id)
     {
@@ -91,9 +91,8 @@ class NotifikasiController extends Controller
                 ]);
             }
 
-            // ✅ Redirect ke index dengan parameter untuk highlight notifikasi ini
-            return redirect()->route('mahasiswa.notifikasi.index', ['highlight' => $id])
-                ->with('notif_opened', $id);
+            // ✅ TAMPILKAN VIEW SHOW, bukan redirect
+            return view('mahasiswa.notifikasi.show', compact('notifikasi'));
 
         } catch (\Exception $e) {
             Log::error('Error menampilkan detail notifikasi', [

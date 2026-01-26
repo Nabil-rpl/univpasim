@@ -148,13 +148,100 @@
         border: 3px solid #2563eb;
         background: white;
     }
+
+    /* Payment Section Styles */
+    .payment-section {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .payment-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #343a40;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .payment-title i {
+        color: #28a745;
+        font-size: 1.2rem;
+    }
+
+    .payment-options {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .payment-option {
+        flex: 1;
+        position: relative;
+    }
+
+    .payment-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .payment-option label {
+        display: block;
+        padding: 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .payment-option input[type="radio"]:checked + label {
+        background: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+
+    .payment-option label:hover {
+        border-color: #28a745;
+    }
+
+    .payment-note {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    .payment-note textarea {
+        width: 100%;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 10px;
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .payment-info {
+        background: #e7f3ff;
+        border-left: 4px solid #0d6efd;
+        padding: 12px 15px;
+        border-radius: 6px;
+        margin-top: 15px;
+        font-size: 0.9rem;
+    }
 </style>
 
 <div class="container-fluid">
     <!-- Back Button -->
     <div class="mb-3">
-        <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-2"></i>Kembali ke Daftar Peminjaman
+        <a href="{{ route('petugas.pengembalian.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Kembali ke Daftar Pengembalian
         </a>
     </div>
 
@@ -231,17 +318,25 @@
                 
                 <div class="info-section">
                     <div class="info-item">
-                        <span class="info-label">Nama Mahasiswa</span>
+                        <span class="info-label">Nama {{ $peminjaman->mahasiswa->role == 'mahasiswa' ? 'Mahasiswa' : 'Peminjam' }}</span>
                         <span class="info-value"><strong>{{ $peminjaman->mahasiswa->name }}</strong></span>
                     </div>
+                    @if($peminjaman->mahasiswa->role == 'mahasiswa')
                     <div class="info-item">
                         <span class="info-label">NIM</span>
                         <span class="info-value">{{ $peminjaman->mahasiswa->nim ?? '-' }}</span>
                     </div>
+                    @endif
                     <div class="info-item">
                         <span class="info-label">Email</span>
                         <span class="info-value">{{ $peminjaman->mahasiswa->email }}</span>
                     </div>
+                    @if($peminjaman->mahasiswa->no_hp)
+                    <div class="info-item">
+                        <span class="info-label">No HP</span>
+                        <span class="info-value">{{ $peminjaman->mahasiswa->no_hp }}</span>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -353,26 +448,71 @@
                     <i class="bi bi-shield-check text-success me-2"></i>Konfirmasi Pengembalian
                 </h5>
 
-                @if($hariTerlambat > 0)
-                <div class="alert-warning-custom mb-3">
-                    <strong><i class="bi bi-exclamation-triangle me-2"></i>Perhatian!</strong><br>
-                    <small>Mahasiswa harus membayar denda sebesar <strong>Rp {{ number_format($denda, 0, ',', '.') }}</strong></small>
-                </div>
-                @endif
-
                 <form action="{{ route('petugas.pengembalian.store', $peminjaman->id) }}" 
                       method="POST" 
-                      onsubmit="return confirm('Apakah Anda yakin ingin memproses pengembalian buku ini?{{ $hariTerlambat > 0 ? '\n\nDenda: Rp ' . number_format($denda, 0, ',', '.') : '' }}')">
+                      id="pengembalianForm">
                     @csrf
 
-    
+                    @if($hariTerlambat > 0)
+                    <div class="alert-warning-custom mb-3">
+                        <strong><i class="bi bi-exclamation-triangle me-2"></i>Perhatian!</strong><br>
+                        <small>Peminjam memiliki denda sebesar <strong>Rp {{ number_format($denda, 0, ',', '.') }}</strong></small>
+                    </div>
 
-                    <div class="d-grid gap-2">
+                    <!-- Payment Section - Hanya tampil jika ada denda -->
+                    <div class="payment-section">
+                        <div class="payment-title">
+                            <i class="bi bi-cash-coin"></i>
+                            <span>Status Pembayaran Denda</span>
+                        </div>
+
+                        <div class="payment-options">
+                            <div class="payment-option">
+                                <input type="radio" 
+                                       id="belum_bayar" 
+                                       name="denda_dibayar" 
+                                       value="0" 
+                                       checked>
+                                <label for="belum_bayar">
+                                    <i class="bi bi-x-circle me-2"></i>
+                                    Belum Dibayar
+                                </label>
+                            </div>
+                            <div class="payment-option">
+                                <input type="radio" 
+                                       id="sudah_bayar" 
+                                       name="denda_dibayar" 
+                                       value="1">
+                                <label for="sudah_bayar">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    Sudah Dibayar
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="payment-note" id="catatanSection" style="display: none;">
+                            <label class="form-label mb-2">
+                                <i class="bi bi-pencil me-1"></i>
+                                <strong>Catatan Pembayaran (Opsional)</strong>
+                            </label>
+                            <textarea name="catatan_pembayaran" 
+                                      class="form-control" 
+                                      placeholder="Contoh: Dibayar tunai, Dibayar via transfer, dll..."></textarea>
+                        </div>
+
+                        <div class="payment-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Info:</strong> Jika peminjam sudah membayar denda, pilih "Sudah Dibayar". Jika belum, notifikasi akan dikirim untuk mengingatkan pembayaran.
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="d-grid gap-2 mt-3">
                         <button type="submit" class="btn btn-success confirm-button">
                             <i class="bi bi-check-circle me-2"></i>
                             Konfirmasi Pengembalian
                         </button>
-                        <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-outline-secondary">
+                        <a href="{{ route('petugas.pengembalian.index') }}" class="btn btn-outline-secondary">
                             <i class="bi bi-x-circle me-2"></i>Batal
                         </a>
                     </div>
@@ -381,4 +521,55 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('pengembalianForm');
+    const radioBelumBayar = document.getElementById('belum_bayar');
+    const radioSudahBayar = document.getElementById('sudah_bayar');
+    const catatanSection = document.getElementById('catatanSection');
+
+    // Toggle catatan section
+    if (radioSudahBayar) {
+        radioSudahBayar.addEventListener('change', function() {
+            if (this.checked) {
+                catatanSection.style.display = 'block';
+            }
+        });
+    }
+
+    if (radioBelumBayar) {
+        radioBelumBayar.addEventListener('change', function() {
+            if (this.checked) {
+                catatanSection.style.display = 'none';
+            }
+        });
+    }
+
+    // Form submission confirmation
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let confirmMessage = 'Apakah Anda yakin ingin memproses pengembalian buku ini?';
+        
+        @if($hariTerlambat > 0)
+        const isDendaDibayar = radioSudahBayar && radioSudahBayar.checked;
+        
+        if (isDendaDibayar) {
+            confirmMessage += '\n\n✅ Status: Denda SUDAH DIBAYAR (Rp {{ number_format($denda, 0, ',', '.') }})';
+            confirmMessage += '\n\nMahasiswa akan menerima notifikasi bahwa denda telah lunas.';
+        } else {
+            confirmMessage += '\n\n⚠️ Status: Denda BELUM DIBAYAR (Rp {{ number_format($denda, 0, ',', '.') }})';
+            confirmMessage += '\n\nMahasiswa akan menerima notifikasi untuk segera membayar denda.';
+        }
+        @endif
+        
+        if (confirm(confirmMessage)) {
+            form.submit();
+        }
+    });
+});
+</script>
+@endpush
 @endsection

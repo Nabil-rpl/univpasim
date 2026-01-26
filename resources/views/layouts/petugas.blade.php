@@ -625,93 +625,97 @@
                 <p>Sistem Manajemen</p>
             </div>
         </div>
+<!-- Tambahkan menu Denda setelah menu Pengembalian -->
+<!-- Ganti bagian sidebar menu dengan yang ini: -->
 
-        <ul class="sidebar-menu">
-            <div class="menu-section-title">Menu Utama</div>
-            <li>
-                <a href="{{ route('petugas.dashboard') }}"
-                    class="{{ request()->routeIs('petugas.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-1x2-fill"></i> <span>Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('petugas.buku.index') }}"
-                    class="{{ request()->routeIs('petugas.buku.*') ? 'active' : '' }}">
-                    <i class="bi bi-book-fill"></i> <span>Manajemen Buku</span>
-                </a>
-            </li>
-            <li>
-    <a href="{{ route('petugas.peminjaman.index') }}"
-        class="{{ request()->routeIs('petugas.peminjaman.*') ? 'active' : '' }}"
-        id="peminjamanLink">
-        <i class="bi bi-journal-bookmark-fill"></i>
-        <span>Peminjaman</span>
-        @php
-            $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
-        @endphp
-        @if ($peminjamanAktif > 0)
-            <span class="badge" id="peminjamanBadge">{{ $peminjamanAktif }}</span>
-        @endif
-    </a>
-</li>
-            <li>
-                <a href="{{ route('petugas.pengembalian.index') }}"
-                    class="{{ request()->routeIs('petugas.pengembalian.*') ? 'active' : '' }}">
-                    <i class="bi bi-arrow-return-left"></i> <span>Pengembalian</span>
-                </a>
-            </li>
-            
-            <li>
-    <a href="{{ route('petugas.perpanjangan.index') }}"
-        class="{{ request()->routeIs('petugas.perpanjangan.*') ? 'active' : '' }}"
-        id="perpanjanganLink">
-        <i class="bi bi-arrow-clockwise"></i>
-        <span>Perpanjangan</span>
-        @php
-            $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
-        @endphp
-        @if ($perpanjanganMenunggu > 0)
-            <span class="badge" id="perpanjanganBadge">{{ $perpanjanganMenunggu }}</span>
-        @endif
-    </a>
-</li>
+<ul class="sidebar-menu">
+    <div class="menu-section-title">Menu Utama</div>
+    <li>
+        <a href="{{ route('petugas.dashboard') }}"
+            class="{{ request()->routeIs('petugas.dashboard') ? 'active' : '' }}">
+            <i class="bi bi-grid-1x2-fill"></i> <span>Dashboard</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ route('petugas.buku.index') }}"
+            class="{{ request()->routeIs('petugas.buku.*') ? 'active' : '' }}">
+            <i class="bi bi-book-fill"></i> <span>Manajemen Buku</span>
+        </a>
+    </li>
+    <li>
+        <a href="{{ route('petugas.peminjaman.index') }}"
+            class="{{ request()->routeIs('petugas.peminjaman.*') ? 'active' : '' }}"
+            id="peminjamanLink">
+            <i class="bi bi-journal-bookmark-fill"></i>
+            <span>Peminjaman</span>
+            @php
+                $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
+            @endphp
+            @if ($peminjamanAktif > 0)
+                <span class="badge" id="peminjamanBadge">{{ $peminjamanAktif }}</span>
+            @endif
+        </a>
+    </li>
+    <li>
+        <a href="{{ route('petugas.pengembalian.index') }}"
+            class="{{ request()->routeIs('petugas.pengembalian.*') ? 'active' : '' }}">
+            <i class="bi bi-arrow-return-left"></i> <span>Pengembalian</span>
+        </a>
+    </li>
+    
+    <!-- MENU DENDA - BARU DITAMBAHKAN -->
+    
+    <li>
+        <a href="{{ route('petugas.perpanjangan.index') }}"
+            class="{{ request()->routeIs('petugas.perpanjangan.*') ? 'active' : '' }}"
+            id="perpanjanganLink">
+            <i class="bi bi-arrow-clockwise"></i>
+            <span>Perpanjangan</span>
+            @php
+                $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
+            @endphp
+            @if ($perpanjanganMenunggu > 0)
+                <span class="badge" id="perpanjanganBadge">{{ $perpanjanganMenunggu }}</span>
+            @endif
+        </a>
+    </li>
 
-            <li>
-    <a href="{{ route('petugas.notifikasi.index') }}"
-        class="{{ request()->routeIs('petugas.notifikasi.*') ? 'active' : '' }}"
-        id="notifikasiLink">
-        <i class="bi bi-bell"></i>
-        <span>Notifikasi</span>
-        @php
-            $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
-                ->where('dibaca', false)
-                ->count();
-        @endphp
-        @if ($unreadNotifCount > 0)
-            <span class="badge" id="notifikasiBadge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
-        @endif
-    </a>
-</li>
+    <li>
+        <a href="{{ route('petugas.notifikasi.index') }}"
+            class="{{ request()->routeIs('petugas.notifikasi.*') ? 'active' : '' }}"
+            id="notifikasiLink">
+            <i class="bi bi-bell"></i>
+            <span>Notifikasi</span>
+            @php
+                $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
+                    ->where('dibaca', false)
+                    ->count();
+            @endphp
+            @if ($unreadNotifCount > 0)
+                <span class="badge" id="notifikasiBadge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
+            @endif
+        </a>
+    </li>
 
-            <div class="menu-section-title">Lainnya</div>
-            <li>
-                <a href="{{ route('petugas.laporan.index') }}"
-                    class="{{ request()->routeIs('petugas.laporan.*') ? 'active' : '' }}">
-                    <i class="bi bi-file-text-fill"></i> <span>Laporan</span>
-                </a>
-            </li>
-        
-            <li>
-                <a href="{{ route('logout') }}" class="text-danger"
-                    onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
-                    <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
-                </a>
+    <div class="menu-section-title">Lainnya</div>
+    <li>
+        <a href="{{ route('petugas.laporan.index') }}"
+            class="{{ request()->routeIs('petugas.laporan.*') ? 'active' : '' }}">
+            <i class="bi bi-file-text-fill"></i> <span>Laporan</span>
+        </a>
+    </li>
 
-                <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST" class="d-none">
-                    @csrf
-                </form>
-            </li>
-        </ul>
+    <li>
+        <a href="{{ route('logout') }}" class="text-danger"
+            onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
+            <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+        </a>
+
+        <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST" class="d-none">
+            @csrf
+        </form>
+    </li>
+</ul>
     </aside>
 
     <!-- Main Content -->

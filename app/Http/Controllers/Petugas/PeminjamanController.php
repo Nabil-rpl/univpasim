@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use App\Models\Buku; 
 use App\Models\User;
-use App\Models\Notifikasi; // ✅ TAMBAHAN
+use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PeminjamanController extends Controller
 {
@@ -87,7 +88,6 @@ class PeminjamanController extends Controller
      */
     public function create()
     {
-        // Ambil semua user yang role-nya mahasiswa atau pengguna_luar
         $peminjams = User::whereIn('role', ['mahasiswa', 'pengguna_luar'])
             ->orderBy('name')
             ->get();
@@ -147,14 +147,11 @@ class PeminjamanController extends Controller
             // Kurangi stok
             $buku->decrement('stok');
 
-            // ✅ KIRIM NOTIFIKASI KE MAHASISWA
-            $roleLabel = $mahasiswa->role === 'mahasiswa' ? 'Mahasiswa' : 'Pengguna Luar';
-            $identitas = $mahasiswa->nim ? "NIM: {$mahasiswa->nim}" : "No HP: {$mahasiswa->no_hp}";
-            
+            // Kirim notifikasi peminjaman disetujui
             Notifikasi::kirim(
                 $mahasiswa->id,
                 'peminjaman_disetujui',
-                "Peminjaman Disetujui: {$buku->judul}",
+                "✅ Peminjaman Disetujui: {$buku->judul}",
                 "Peminjaman buku Anda telah disetujui oleh petugas.\n\n" .
                 "📚 Buku: {$buku->judul}\n" .
                 "✍️ Penulis: {$buku->penulis}\n" .
@@ -178,6 +175,13 @@ class PeminjamanController extends Controller
                 Auth::id()
             );
 
+            Log::info('Peminjaman baru dibuat', [
+                'peminjaman_id' => $peminjaman->id,
+                'mahasiswa' => $mahasiswa->name,
+                'buku' => $buku->judul,
+                'deadline' => $tanggalDeadline->format('Y-m-d H:i:s')
+            ]);
+
             DB::commit();
             
             return redirect()->route('petugas.peminjaman.index')
@@ -185,6 +189,10 @@ class PeminjamanController extends Controller
                 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error create peminjaman', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
@@ -195,7 +203,17 @@ class PeminjamanController extends Controller
     public function show($id)
     {
         $peminjaman = Peminjaman::with(['mahasiswa', 'buku', 'petugas'])->findOrFail($id);
-        return view('petugas.peminjaman.show', compact('peminjaman'));
+        
+        // Hitung status keterlambatan jika masih dipinjam
+        $hariTerlambat = 0;
+        $denda = 0;
+        
+        if ($peminjaman->status === 'dipinjam' && $peminjaman->tanggal_deadline < now()) {
+            $hariTerlambat = now()->diffInDays($peminjaman->tanggal_deadline);
+            $denda = $hariTerlambat * 5000;
+        }
+        
+        return view('petugas.peminjaman.show', compact('peminjaman', 'hariTerlambat', 'denda'));
     }
 
     /**
@@ -205,10 +223,21 @@ class PeminjamanController extends Controller
     {
         DB::beginTransaction();
         try {
-            $peminjaman = Peminjaman::findOrFail($id);
+            $peminjaman = Peminjaman::with(['mahasiswa', 'buku'])->findOrFail($id);
 
             if ($peminjaman->status == 'dikembalikan') {
                 return redirect()->back()->with('error', 'Buku sudah dikembalikan.');
+            }
+
+            // Hitung keterlambatan dan denda
+            $hariTerlambat = 0;
+            $denda = 0;
+            $statusKeterlambatan = 'tepat_waktu';
+
+            if ($peminjaman->tanggal_deadline < now()) {
+                $hariTerlambat = now()->diffInDays($peminjaman->tanggal_deadline);
+                $denda = $hariTerlambat * 5000;
+                $statusKeterlambatan = 'terlambat';
             }
 
             // Update status peminjaman
@@ -221,11 +250,125 @@ class PeminjamanController extends Controller
             // Tambah stok buku
             $peminjaman->buku->increment('stok');
 
+            // Kirim notifikasi pengembalian
+            $pesanNotifikasi = "Buku yang Anda pinjam telah berhasil dikembalikan.\n\n" .
+                "📚 Buku: {$peminjaman->buku->judul}\n" .
+                "📅 Tanggal Pinjam: " . $peminjaman->tanggal_pinjam->translatedFormat('d F Y') . "\n" .
+                "📅 Tanggal Kembali: " . now()->translatedFormat('d F Y, H:i') . " WIB\n" .
+                "⏰ Deadline: " . $peminjaman->tanggal_deadline->translatedFormat('d F Y, H:i') . " WIB\n";
+
+            if ($statusKeterlambatan === 'terlambat') {
+                $pesanNotifikasi .= "\n⚠️ KETERLAMBATAN:\n" .
+                    "• Terlambat: {$hariTerlambat} hari\n" .
+                    "• Denda: Rp " . number_format($denda, 0, ',', '.') . "\n" .
+                    "• Harap lunasi denda ke petugas perpustakaan";
+            } else {
+                $pesanNotifikasi .= "\n✅ Dikembalikan tepat waktu\n" .
+                    "• Tidak ada denda\n" .
+                    "• Terima kasih telah mengembalikan tepat waktu!";
+            }
+
+            Notifikasi::kirim(
+                $peminjaman->mahasiswa_id,
+                'peminjaman_dikembalikan',
+                "📖 Buku Dikembalikan: {$peminjaman->buku->judul}",
+                $pesanNotifikasi,
+                [
+                    'peminjaman_id' => $peminjaman->id,
+                    'buku_id' => $peminjaman->buku_id,
+                    'status_keterlambatan' => $statusKeterlambatan,
+                    'hari_terlambat' => $hariTerlambat,
+                    'denda' => $denda
+                ],
+                route('mahasiswa.peminjaman.show', $peminjaman->id),
+                $statusKeterlambatan === 'terlambat' ? 'urgent' : 'normal',
+                Auth::id()
+            );
+
+            Log::info('Buku dikembalikan', [
+                'peminjaman_id' => $peminjaman->id,
+                'mahasiswa' => $peminjaman->mahasiswa->name,
+                'buku' => $peminjaman->buku->judul,
+                'status_keterlambatan' => $statusKeterlambatan,
+                'hari_terlambat' => $hariTerlambat,
+                'denda' => $denda
+            ]);
+
             DB::commit();
+            
+            $message = 'Buku berhasil dikembalikan.';
+            if ($statusKeterlambatan === 'terlambat') {
+                $message .= " Terlambat {$hariTerlambat} hari. Denda: Rp " . number_format($denda, 0, ',', '.');
+            }
+            
             return redirect()->route('petugas.peminjaman.index')
-                ->with('success', 'Buku berhasil dikembalikan.');
+                ->with('success', $message);
+                
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error kembalikan buku', [
+                'peminjaman_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * ✅ Kirim notifikasi reminder manual ke peminjaman terlambat
+     */
+    public function kirimReminderTerlambat($id)
+    {
+        try {
+            $peminjaman = Peminjaman::with(['mahasiswa', 'buku'])->findOrFail($id);
+
+            if ($peminjaman->status !== 'dipinjam') {
+                return redirect()->back()->with('error', 'Buku sudah dikembalikan.');
+            }
+
+            if ($peminjaman->tanggal_deadline >= now()) {
+                return redirect()->back()->with('error', 'Peminjaman belum melewati deadline.');
+            }
+
+            $hariTerlambat = now()->diffInDays($peminjaman->tanggal_deadline);
+            $denda = $hariTerlambat * 5000;
+
+            Notifikasi::kirim(
+                $peminjaman->mahasiswa_id,
+                'terlambat',
+                "⚠️ Reminder: Buku Terlambat - {$peminjaman->buku->judul}",
+                "PERINGATAN! Buku yang Anda pinjam telah melewati batas waktu pengembalian.\n\n" .
+                "📚 Buku: {$peminjaman->buku->judul}\n" .
+                "⏰ Deadline: " . $peminjaman->tanggal_deadline->translatedFormat('d F Y, H:i') . " WIB\n" .
+                "⏱️ Terlambat: {$hariTerlambat} hari\n" .
+                "💰 Denda Sementara: Rp " . number_format($denda, 0, ',', '.') . "\n\n" .
+                "⚠️ SEGERA KEMBALIKAN BUKU!\n" .
+                "• Denda bertambah Rp 5.000 per hari\n" .
+                "• Hubungi petugas jika ada kendala",
+                [
+                    'peminjaman_id' => $peminjaman->id,
+                    'buku_id' => $peminjaman->buku_id,
+                    'hari_terlambat' => $hariTerlambat,
+                    'denda' => $denda
+                ],
+                route('mahasiswa.peminjaman.show', $peminjaman->id),
+                'mendesak',
+                Auth::id()
+            );
+
+            Log::info('Reminder manual dikirim', [
+                'peminjaman_id' => $peminjaman->id,
+                'mahasiswa' => $peminjaman->mahasiswa->name,
+                'dikirim_oleh' => Auth::user()->name
+            ]);
+
+            return redirect()->back()->with('success', "Notifikasi reminder berhasil dikirim ke {$peminjaman->mahasiswa->name}.");
+
+        } catch (\Exception $e) {
+            Log::error('Error kirim reminder manual', [
+                'peminjaman_id' => $id,
+                'error' => $e->getMessage()
+            ]);
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }

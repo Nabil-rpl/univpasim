@@ -25,6 +25,207 @@
             background: #f8fafc;
         }
 
+        /* Loading Overlay - Animasi setelah login berhasil */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+            animation: overlayFadeIn 0.5s ease;
+        }
+
+        @keyframes overlayFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 2;
+        }
+
+        .loading-logo {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: logoScale 1.5s ease-in-out infinite;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .loading-logo::before {
+            content: '';
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 35px;
+            animation: logoRotate 3s linear infinite;
+        }
+
+        .loading-logo i {
+            font-size: 60px;
+            color: white;
+            animation: logoRotate 2s ease-in-out infinite;
+        }
+
+        @keyframes logoScale {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes logoRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            animation: textPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .loading-subtext {
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        /* Animated Progress Bar */
+        .loading-progress {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ffffff, #60a5fa, #ffffff);
+            background-size: 200% 100%;
+            border-radius: 10px;
+            animation: progressMove 1.5s ease-in-out infinite;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes progressMove {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        /* Book Loading Animation */
+        .loading-books {
+            margin-top: 40px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .loading-book {
+            width: 8px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            animation: bookJump 1s ease-in-out infinite;
+        }
+
+        .loading-book:nth-child(1) { animation-delay: 0s; }
+        .loading-book:nth-child(2) { animation-delay: 0.1s; }
+        .loading-book:nth-child(3) { animation-delay: 0.2s; }
+        .loading-book:nth-child(4) { animation-delay: 0.3s; }
+        .loading-book:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes bookJump {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Floating Particles in Loading */
+        .loading-particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat linear infinite;
+        }
+
+        /* Success Checkmark */
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: none;
+            position: relative;
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .success-checkmark.active {
+            display: block;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3;
+            stroke: #10b981;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark-check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke: #10b981;
+            stroke-width: 3;
+            fill: none;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
         .login-wrapper {
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
             min-height: 100vh;
@@ -413,7 +614,7 @@
         }
 
         .form-control {
-            border: 2px solid #ffffff;
+            border: 2px solid #e2e8f0;
             padding: 12px 18px 12px 45px;
             font-size: 14px;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -421,12 +622,11 @@
             border-radius: 12px;
             width: 100%;
             font-weight: 500;
-            box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
         }
 
         .form-control:focus {
-            border-color: #ffffff;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), 0 6px 15px rgba(59, 130, 246, 0.15), 0 0 10px rgba(255, 255, 255, 0.7);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
             background: white;
             outline: none;
             transform: translateY(-2px);
@@ -579,42 +779,6 @@
             transform: translateY(-2px) scale(0.98);
         }
 
-        .btn-login.loading {
-            pointer-events: none;
-            opacity: 0.9;
-            position: relative;
-        }
-
-        .btn-login.loading .btn-text {
-            opacity: 0;
-        }
-
-        .btn-login.loading::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 4px;
-            background: #ffffff;
-            animation: loadingBar 1.5s linear infinite;
-        }
-
-        @keyframes loadingBar {
-            0% {
-                width: 0;
-                left: 0;
-            }
-            50% {
-                width: 100%;
-                left: 0;
-            }
-            100% {
-                width: 0;
-                left: 100%;
-            }
-        }
-
         .divider {
             text-align: center;
             margin: 28px 0;
@@ -690,22 +854,6 @@
             transform: translateX(8px);
         }
 
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.6);
-            transform: scale(0);
-            animation: rippleEffect 0.6s ease-out;
-            pointer-events: none;
-        }
-
-        @keyframes rippleEffect {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
         @media (max-width: 991px) {
             .login-illustration {
                 display: none;
@@ -744,10 +892,49 @@
                 right: 12px;
                 font-size: 16px;
             }
+
+            .loading-progress {
+                width: 250px;
+            }
+
+            .loading-text {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="bi bi-journal-bookmark-fill"></i>
+            </div>
+            
+            <div class="success-checkmark" id="successCheckmark">
+                <svg width="80" height="80" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </div>
+
+            <h3 class="loading-text" id="loadingText">Memproses Login...</h3>
+            <p class="loading-subtext" id="loadingSubtext">Mohon tunggu sebentar</p>
+            
+            <div class="loading-progress">
+                <div class="loading-progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="loading-books">
+                <div class="loading-book"></div>
+                <div class="loading-book"></div>
+                <div class="loading-book"></div>
+                <div class="loading-book"></div>
+                <div class="loading-book"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="login-wrapper">
         <div class="geometric-shape shape-1"></div>
         <div class="geometric-shape shape-2"></div>
@@ -800,7 +987,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('login') }}" class="login-form">
+                    <form method="POST" action="{{ route('login') }}" class="login-form" id="loginForm">
                         @csrf
 
                         <div class="form-group">
@@ -860,9 +1047,7 @@
                         </div>
 
                         <button type="submit" class="btn-login">
-                            <span class="btn-text">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>MASUK SEKARANG
-                            </span>
+                            <i class="bi bi-box-arrow-in-right me-2"></i>MASUK SEKARANG
                         </button>
 
                         <div class="divider">
@@ -884,8 +1069,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        // Create floating particles
         function createParticles() {
             const wrapper = document.querySelector('.login-wrapper');
+            const overlay = document.getElementById('loadingOverlay');
+            
             for (let i = 0; i < 10; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
@@ -897,6 +1085,19 @@
                 particle.style.animationDelay = Math.random() * 8 + 's';
                 wrapper.appendChild(particle);
             }
+
+            // Particles for loading overlay
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'loading-particle';
+                const size = Math.random() * 6 + 3;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                overlay.appendChild(particle);
+            }
         }
         createParticles();
 
@@ -904,7 +1105,14 @@
             const togglePassword = document.getElementById('togglePassword');
             const password = document.getElementById('password');
             const eyeIcon = document.getElementById('eyeIcon');
+            const loginForm = document.getElementById('loginForm');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const progressBar = document.getElementById('progressBar');
+            const loadingText = document.getElementById('loadingText');
+            const loadingSubtext = document.getElementById('loadingSubtext');
+            const successCheckmark = document.getElementById('successCheckmark');
 
+            // Password toggle
             if (togglePassword) {
                 togglePassword.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -915,6 +1123,7 @@
                 });
             }
 
+            // Auto hide alerts
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
                 alerts.forEach(function(alert) {
@@ -923,32 +1132,50 @@
                 });
             }, 5000);
 
-            const loginForm = document.querySelector('.login-form');
-            const loginBtn = document.querySelector('.btn-login');
-            
+            // Form submission with loading animation
             if (loginForm) {
-                loginForm.addEventListener('submit', function() {
-                    loginBtn.classList.add('loading');
+                loginForm.addEventListener('submit', function(e) {
+                    // Jika ada error validation, jangan tampilkan loading
+                    const hasErrors = document.querySelector('.is-invalid');
+                    if (hasErrors) {
+                        return;
+                    }
+
+                    // Tampilkan loading overlay
+                    loadingOverlay.classList.add('active');
+                    
+                    // Animate progress bar
+                    let progress = 0;
+                    const progressInterval = setInterval(function() {
+                        progress += Math.random() * 15;
+                        if (progress > 90) {
+                            progress = 90;
+                        }
+                        progressBar.style.width = progress + '%';
+                    }, 200);
+
+                    // Simulate loading stages
+                    setTimeout(function() {
+                        loadingText.textContent = 'Memverifikasi Akun...';
+                        loadingSubtext.textContent = 'Memeriksa kredensial Anda';
+                    }, 1000);
+
+                    setTimeout(function() {
+                        loadingText.textContent = 'Menyiapkan Dashboard...';
+                        loadingSubtext.textContent = 'Hampir selesai';
+                        progressBar.style.width = '100%';
+                    }, 2000);
+
+                    // Show success checkmark
+                    setTimeout(function() {
+                        successCheckmark.classList.add('active');
+                        loadingText.textContent = 'Berhasil!';
+                        loadingSubtext.textContent = 'Mengalihkan ke dashboard...';
+                    }, 2500);
                 });
             }
 
-            loginBtn.addEventListener('click', function(e) {
-                const ripple = document.createElement('span');
-                ripple.className = 'ripple';
-                this.appendChild(ripple);
-                
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-                
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-                
-                setTimeout(() => ripple.remove(), 600);
-            });
-
+            // Input focus animations
             const inputs = document.querySelectorAll('.form-control');
             inputs.forEach(input => {
                 input.addEventListener('focus', function() {
@@ -968,4 +1195,4 @@
         });
     </script>
 </body>
-</html>
+</html> 
