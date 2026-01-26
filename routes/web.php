@@ -26,6 +26,7 @@ use App\Http\Controllers\Petugas\PeminjamanController as PetugasPeminjamanContro
 use App\Http\Controllers\Petugas\PengembalianController;
 use App\Http\Controllers\Petugas\PerpanjanganController;
 use App\Http\Controllers\Petugas\NotifikasiController as PetugasNotifikasiController;
+use App\Http\Controllers\Petugas\DendaController;
 
 // Mahasiswa
 use App\Http\Controllers\Mahasiswa\MahasiswaController as MahasiswaUserController;
@@ -168,23 +169,37 @@ Route::middleware(['auth', 'role:petugas'])
         Route::post('buku/{buku}/regenerate-qr', [PetugasBukuController::class, 'regenerateQR'])
             ->name('buku.regenerateQR');
 
-        // Peminjaman
+        // ✅ Peminjaman - UPDATED dengan route kirim reminder
         Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
             Route::get('/', [PetugasPeminjamanController::class, 'index'])->name('index');
             Route::get('/create', [PetugasPeminjamanController::class, 'create'])->name('create');
             Route::post('/', [PetugasPeminjamanController::class, 'store'])->name('store');
             Route::get('/{id}', [PetugasPeminjamanController::class, 'show'])->name('show');
             Route::put('/{id}/kembalikan', [PetugasPeminjamanController::class, 'kembalikan'])->name('kembalikan');
+            
+            // ✅ Route untuk kirim reminder manual ke peminjaman terlambat (BARU)
+            Route::post('/{id}/kirim-reminder', [PetugasPeminjamanController::class, 'kirimReminderTerlambat'])->name('kirim-reminder');
+            
             Route::delete('/{id}', [PetugasPeminjamanController::class, 'destroy'])->name('destroy');
         });
 
-        // Pengembalian Routes
+        // ✅ Pengembalian Routes - UPDATED dengan route edit pembayaran denda
         Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
             Route::get('/', [PengembalianController::class, 'index'])->name('index');
+            Route::get('/export-pdf', [PengembalianController::class, 'exportPdf'])->name('export-pdf');
             Route::get('/search', [PengembalianController::class, 'search'])->name('search');
             Route::get('/riwayat', [PengembalianController::class, 'riwayat'])->name('riwayat');
+            
+            // ✅ ROUTE BARU - Edit & Update Pembayaran Denda (HARUS DI ATAS {peminjaman_id})
+            Route::get('/{id}/edit-denda', [PengembalianController::class, 'editDenda'])->name('edit-denda');
+            Route::put('/{id}/update-denda', [PengembalianController::class, 'updatePembayaranDenda'])->name('update-denda');
+            
+            // Route dengan parameter dinamis di bawah
             Route::get('/{peminjaman_id}', [PengembalianController::class, 'show'])->name('show');
             Route::post('/{peminjaman_id}', [PengembalianController::class, 'store'])->name('store');
+            
+            // Route bayar denda (untuk backward compatibility)
+            Route::post('/{id}/bayar-denda', [PengembalianController::class, 'updatePembayaranDenda'])->name('bayar-denda');
         });
 
         // Perpanjangan Routes (Petugas)
@@ -194,6 +209,17 @@ Route::middleware(['auth', 'role:petugas'])
             Route::get('/{id}', [PerpanjanganController::class, 'show'])->name('show');
             Route::post('/{id}/approve', [PerpanjanganController::class, 'approve'])->name('approve');
             Route::post('/{id}/reject', [PerpanjanganController::class, 'reject'])->name('reject');
+        });
+
+        // ✅ DENDA ROUTES - UPDATED DENGAN EXPORT PDF
+        Route::prefix('denda')->name('denda.')->group(function () {
+            Route::get('/', [DendaController::class, 'index'])->name('index');
+            Route::get('/export-pdf', [DendaController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/export', [DendaController::class, 'export'])->name('export');
+            Route::get('/user/{userId}', [DendaController::class, 'show'])->name('show');
+            Route::post('/{id}/bayar', [DendaController::class, 'bayar'])->name('bayar');
+            Route::post('/{id}/batal-bayar', [DendaController::class, 'batalBayar'])->name('batal-bayar');
+            Route::post('/{id}/reminder', [DendaController::class, 'kirimReminder'])->name('reminder');
         });
 
         // Profile Petugas

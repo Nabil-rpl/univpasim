@@ -1,6 +1,6 @@
 @extends('layouts.pengguna-luar')
 
-@section('page-title', 'Dashboard Pengguna')
+@section('page-title', 'Dashboard Pengguna Luar')
 
 @section('content')
     <div class="container-fluid dashboard-container">

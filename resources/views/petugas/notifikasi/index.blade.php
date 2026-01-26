@@ -243,16 +243,6 @@
         color: #2563eb;
     }
 
-    .btn-success {
-        background: #10b981;
-        color: white;
-    }
-
-    .btn-success:hover {
-        background: #059669;
-        transform: translateY(-2px);
-    }
-
     /* Notification Card */
     .notification-card {
         background: white;
@@ -280,19 +270,6 @@
         display: flex;
         gap: 20px;
         align-items: flex-start;
-    }
-
-    .notification-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-        color: white;
-        flex-shrink: 0;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
     .notification-content {
@@ -326,11 +303,6 @@
     @keyframes pulse-badge {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.05); }
-    }
-
-    .badge-read {
-        background: #e2e8f0;
-        color: #64748b;
     }
 
     .notification-text {
@@ -390,17 +362,6 @@
         box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
     }
 
-    .btn-mark {
-        background: white;
-        color: #10b981;
-        border: 2px solid #10b981;
-    }
-
-    .btn-mark:hover {
-        background: #10b981;
-        color: white;
-    }
-
     .btn-delete {
         background: white;
         color: #ef4444;
@@ -444,14 +405,6 @@
         margin-bottom: 25px;
     }
 
-    /* Gradient backgrounds for icons */
-    .bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .bg-gradient-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-    .bg-gradient-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
-    .bg-gradient-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-    .bg-gradient-warning { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-    .bg-gradient-secondary { background: linear-gradient(135deg, #a8caba 0%, #5d4e6d 100%); }
-
     @media (max-width: 768px) {
         .welcome-card .card-title {
             font-size: 1.4rem;
@@ -463,12 +416,6 @@
 
         .notification-header {
             flex-direction: column;
-        }
-
-        .notification-icon {
-            width: 50px;
-            height: 50px;
-            font-size: 1.5rem;
         }
 
         .notification-actions {
@@ -597,18 +544,12 @@
             <div class="col-12">
                 <button type="submit" class="btn-filter btn-primary">
                     <i class="bi bi-search"></i>
-                    Terapkan Filter
+                    Cari
                 </button>
                 <a href="{{ route('petugas.notifikasi.index') }}" class="btn-filter btn-secondary">
                     <i class="bi bi-arrow-clockwise"></i>
                     Reset
                 </a>
-                @if($belumDibaca > 0)
-                <button type="button" class="btn-filter btn-success" onclick="markAllAsReadConfirm()">
-                    <i class="bi bi-check-all"></i>
-                    Tandai Semua Dibaca
-                </button>
-                @endif
             </div>
         </form>
     </div>
@@ -618,17 +559,15 @@
         @foreach($notifikasi as $n)
         <div class="notification-card {{ !$n->dibaca ? 'unread' : '' }}">
             <div class="notification-header">
-                <div class="notification-icon bg-gradient-{{ $n->getBadgeColor() }}">
-                    <i class="bi bi-{{ $n->getIcon() }}"></i>
-                </div>
-
                 <div class="notification-content">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
                             <h5 class="notification-title">{{ $n->judul }}</h5>
-                            <span class="notification-badge {{ !$n->dibaca ? 'badge-unread' : 'badge-read' }}">
-                                {{ !$n->dibaca ? '● Belum Dibaca' : '✓ Sudah Dibaca' }}
+                            @if(!$n->dibaca)
+                            <span class="notification-badge badge-unread">
+                                ● Belum Dibaca
                             </span>
+                            @endif
                         </div>
                     </div>
 
@@ -654,13 +593,6 @@
                             <i class="bi bi-eye"></i>
                             Lihat Detail
                         </a>
-                        
-                        @if(!$n->dibaca)
-                        <button type="button" class="btn-action btn-mark" onclick="markAsRead({{ $n->id }})">
-                            <i class="bi bi-check-circle"></i>
-                            Tandai Dibaca
-                        </button>
-                        @endif
 
                         <form action="{{ route('petugas.notifikasi.destroy', $n->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus notifikasi ini?')">
                             @csrf
@@ -698,60 +630,6 @@
 
 @push('scripts')
 <script>
-// Mark single notification as read
-function markAsRead(id) {
-    fetch(`/petugas/notifikasi/${id}/baca`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Reset badge notifikasi
-            if (typeof resetNotifikasiBadge === 'function') {
-                resetNotifikasiBadge();
-            } else {
-                location.reload();
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan. Silakan coba lagi.');
-    });
-}
-
-// Mark all notifications as read
-function markAllAsReadConfirm() {
-    if (confirm('Tandai semua notifikasi sebagai dibaca?')) {
-        fetch('/petugas/notifikasi/baca-semua', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Reset badge notifikasi
-                if (typeof resetNotifikasiBadge === 'function') {
-                    resetNotifikasiBadge();
-                } else {
-                    location.reload();
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan. Silakan coba lagi.');
-        });
-    }
-}
-
 // Auto dismiss alerts after 5 seconds
 setTimeout(function() {
     const alerts = document.querySelectorAll('.alert');

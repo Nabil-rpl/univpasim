@@ -180,7 +180,7 @@
     </div>
 </div>
 
-<!-- Tabs -->
+<!-- Tabs dengan Tombol Export PDF -->
 <div class="mb-3">
     <ul class="nav nav-tabs border-0">
         <li class="nav-item">
@@ -206,6 +206,19 @@
                href="{{ route('petugas.pengembalian.index', ['filter' => 'hari_ini']) }}">
                 <i class="bi bi-calendar-event me-2"></i>Deadline Hari Ini
             </a>
+        </li>
+        
+        <!-- Tombol Export PDF -->
+        <li class="nav-item ms-2">
+            <form method="GET" action="{{ route('petugas.pengembalian.export-pdf') }}" class="d-inline">
+                <input type="hidden" name="search" value="{{ request('search') }}">
+                <input type="hidden" name="role" value="{{ request('role') }}">
+                <input type="hidden" name="filter" value="{{ request('filter') }}">
+                <input type="hidden" name="sort" value="{{ request('sort') }}">
+                <button type="submit" class="btn btn-danger btn-sm" style="margin-top: 8px;">
+                    <i class="bi bi-file-pdf-fill me-1"></i>Export PDF
+                </button>
+            </form>
         </li>
     </ul>
 </div>
@@ -248,13 +261,22 @@
                     <option value="denda_desc" {{ request('sort') == 'denda_desc' ? 'selected' : '' }}>Denda (Tertinggi)</option>
                 </select>
             </div>
-            <div class="col-md-2 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-funnel me-2"></i>Filter
-                </button>
-                <a href="{{ route('petugas.pengembalian.index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </a>
+            
+            <!-- ✅ PERBAIKAN: Tombol dengan Layout Baru -->
+            <div class="col-md-12 mt-2">
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel me-2"></i>Filter
+                    </button>
+                    <a href="{{ route('petugas.pengembalian.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </a>
+                    
+                    <!-- ✅ TOMBOL RIWAYAT PENGEMBALIAN -->
+                    <a href="{{ route('petugas.pengembalian.riwayat') }}" class="btn btn-info">
+                        <i class="bi bi-clock-history"></i> Lihat Riwayat
+                    </a>
+                </div>
             </div>
         </div>
     </form>
@@ -277,12 +299,9 @@
 
 <!-- Table -->
 <div class="table-card">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">
-            <i class="bi bi-list-check me-2"></i>Daftar Buku yang Perlu Dikembalikan
-        </h5>
-    
-    </div>
+    <h5 class="mb-3">
+        <i class="bi bi-list-check me-2"></i>Daftar Buku yang Perlu Dikembalikan
+    </h5>
 
     <div class="table-responsive">
         <table class="table table-hover align-middle">
@@ -405,11 +424,6 @@
                                title="Proses Pengembalian">
                                 <i class="bi bi-box-arrow-in-down me-1"></i>
                                 Proses
-                            </a>
-                            <a href="{{ route('petugas.peminjaman.show', $item->id) }}" 
-                               class="btn btn-sm btn-info btn-action" 
-                               title="Detail">
-                                <i class="bi bi-eye"></i>
                             </a>
                         </div>
                     </td>

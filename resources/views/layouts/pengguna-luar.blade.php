@@ -288,11 +288,13 @@
             background: #94a3b8;
         }
 
+        /* ✅ UPDATED: Item notifikasi tidak bisa diklik */
         .notification-item {
             padding: 16px 20px;
             border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            cursor: default !important;
+            pointer-events: none !important;
+            transition: none;
             display: flex;
             gap: 12px;
             text-decoration: none;
@@ -300,15 +302,11 @@
         }
 
         .notification-item:hover {
-            background: #f8fafc;
+            background: transparent !important;
         }
 
         .notification-item.unread {
             background: #eff6ff;
-        }
-
-        .notification-item.unread:hover {
-            background: #dbeafe;
         }
 
         .notification-icon {
@@ -402,10 +400,12 @@
             color: #94a3b8;
         }
 
+        /* ✅ Footer tetap bisa diklik */
         .notification-footer {
             padding: 12px 20px;
             border-top: 1px solid #e2e8f0;
             text-align: center;
+            pointer-events: auto !important;
         }
 
         .notification-footer a {
@@ -414,6 +414,8 @@
             font-size: 14px;
             font-weight: 500;
             transition: color 0.3s ease;
+            cursor: pointer !important;
+            pointer-events: auto !important;
         }
 
         .notification-footer a:hover {
@@ -639,7 +641,7 @@
             });
         }
 
-        // Display notifications
+        // ✅ UPDATED: Display notifications (item TIDAK bisa diklik)
         function displayNotifications(notifikasi) {
             console.log('📋 Displaying notifications:', notifikasi.length, 'items');
             
@@ -659,16 +661,10 @@
                 const iconClass = notif.tipe || 'default';
                 const icon = getNotificationIcon(notif.tipe);
                 
-                console.log('📝 Notif item:', {
-                    id: notif.id,
-                    judul: notif.judul,
-                    tipe: notif.tipe,
-                    dibaca: notif.dibaca,
-                    link: notif.link
-                });
-                
+                // ✅ PENTING: Menggunakan div biasa, BUKAN anchor tag
+                // ✅ Item notifikasi tidak bisa diklik
                 html += `
-                    <a href="${notif.link || '#'}" class="notification-item ${unreadClass}" data-id="${notif.id}" onclick="handleNotificationClick(event, ${notif.id}, '${notif.link || ''}')">
+                    <div class="notification-item ${unreadClass}" data-id="${notif.id}">
                         <div class="notification-icon ${iconClass}">
                             <i class="${icon}"></i>
                         </div>
@@ -679,48 +675,12 @@
                                 <i class="bi bi-clock"></i> ${notif.waktu}
                             </div>
                         </div>
-                    </a>
+                    </div>
                 `;
             });
 
             notificationList.innerHTML = html;
-            console.log('✅ Notifications displayed successfully');
-        }
-
-        // Handle notification click
-        function handleNotificationClick(event, notifId, link) {
-            event.preventDefault();
-            console.log('🔔 Notification clicked:', notifId);
-            
-            // Mark as read first
-            fetch(`/pengguna-luar/notifikasi/${notifId}/mark-as-read`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('✅ Marked as read:', data);
-                if (data.success) {
-                    // Reload notifications to update badge
-                    loadNotifications();
-                    
-                    // Redirect to link
-                    if (link && link !== '#' && link !== '') {
-                        window.location.href = link;
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('❌ Error marking as read:', error);
-                // Still redirect even if marking fails
-                if (link && link !== '#' && link !== '') {
-                    window.location.href = link;
-                }
-            });
+            console.log('✅ Notifications displayed (items are NOT clickable)');
         }
 
         // Get notification icon

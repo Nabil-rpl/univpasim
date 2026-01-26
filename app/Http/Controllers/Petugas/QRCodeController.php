@@ -38,25 +38,27 @@ class QRCodeController extends Controller
 
             $kode_unik = 'BOOK-' . $item->id . '-' . strtoupper(uniqid());
 
-            // ✅ SOLUSI 1: Gunakan SVG format (tidak perlu imagick)
-            $qrSvg = QrCodeGenerator::format('svg')
-                ->size(300)
-                ->errorCorrection('H')
-                ->generate($kode_unik);
+            try {
+                // ✅ SYNTAX PALING BASIC - TANPA METHOD APAPUN
+                $qrSvg = QrCodeGenerator::generate($kode_unik);
 
-            // Simpan sebagai SVG
-            $filename = 'qr_codes/qr-' . $item->id . '-' . time() . '.svg';
-            Storage::disk('public')->put($filename, $qrSvg);
+                // Simpan sebagai SVG
+                $filename = 'qr_codes/qr-' . $item->id . '-' . time() . '.svg';
+                Storage::disk('public')->put($filename, $qrSvg);
 
-            // Simpan ke database
-            QRCode::create([
-                'kode_unik' => $kode_unik,
-                'gambar_qr' => $filename,
-                'dibuat_oleh' => Auth::id(),
-                'buku_id' => $item->id,
-            ]);
+                // Simpan ke database
+                QRCode::create([
+                    'kode_unik' => $kode_unik,
+                    'gambar_qr' => $filename,
+                    'dibuat_oleh' => Auth::id(),
+                    'buku_id' => $item->id,
+                ]);
 
-            return back()->with('success', 'QR Code berhasil dibuat untuk buku "' . $item->judul . '".');
+                return back()->with('success', 'QR Code berhasil dibuat untuk buku "' . $item->judul . '".');
+                
+            } catch (\Exception $e) {
+                return back()->with('error', 'Gagal membuat QR Code: ' . $e->getMessage());
+            }
         }
 
         return back()->with('error', 'Tipe QR tidak dikenal.');
