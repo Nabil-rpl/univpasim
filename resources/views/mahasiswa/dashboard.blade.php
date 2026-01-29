@@ -228,7 +228,7 @@
                             </div>
                             <h6 class="empty-title">Belum Ada Riwayat</h6>
                             <p class="empty-text">Anda belum melakukan peminjaman buku</p>
-                            <a href="{{ route('mahasiswa.peminjaman.index') }}" class="btn-primary-custom mt-3">
+                            <a href="{{ route('mahasiswa.buku.index') }}" class="btn-primary-custom mt-3">
                                 <i class="bi bi-book"></i>
                                 <span>Pinjam Buku Sekarang</span>
                             </a>

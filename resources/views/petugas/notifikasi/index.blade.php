@@ -55,6 +55,35 @@
         font-size: 1.05rem;
     }
 
+    /* Action Bar */
+    .action-bar {
+        background: white;
+        border-radius: 16px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        border: 2px solid #f1f5f9;
+    }
+
+    .action-bar-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .action-bar-title i {
+        color: #2563eb;
+        font-size: 1.3rem;
+    }
+
     /* Stats Cards */
     .stat-card {
         border: none;
@@ -350,6 +379,7 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        text-decoration: none;
     }
 
     .btn-view {
@@ -360,6 +390,7 @@
     .btn-view:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        color: white;
     }
 
     .btn-delete {
@@ -405,6 +436,22 @@
         margin-bottom: 25px;
     }
 
+    /* Alerts */
+    .alert {
+        border-radius: 12px;
+        border: none;
+        padding: 16px 20px;
+        font-weight: 600;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .alert i {
+        font-size: 1.2rem;
+    }
+
     @media (max-width: 768px) {
         .welcome-card .card-title {
             font-size: 1.4rem;
@@ -412,6 +459,10 @@
         
         .stat-card h5 {
             font-size: 1.8rem;
+        }
+
+        .action-bar {
+            padding: 20px;
         }
 
         .notification-header {
@@ -447,14 +498,16 @@
     <!-- Alert Messages -->
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+        <i class="bi bi-check-circle-fill"></i>
+        <span>{{ session('success') }}</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     @endif
 
     @if(session('error'))
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-x-circle me-2"></i>{{ session('error') }}
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>{{ session('error') }}</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     @endif
@@ -510,6 +563,20 @@
         </div>
     </div>
 
+    <!-- Action Bar -->
+    @if($belumDibaca > 0)
+    <div class="action-bar">
+        <div class="action-bar-title">
+            <i class="bi bi-check-all"></i>
+            <span>{{ $belumDibaca }} notifikasi belum dibaca</span>
+        </div>
+        <button type="button" class="btn-filter btn-primary" onclick="markAllAsRead()">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Tandai Semua Dibaca</span>
+        </button>
+    </div>
+    @endif
+
     <!-- Filter Section -->
     <div class="filter-card">
         <div class="filter-header">
@@ -557,14 +624,14 @@
     <!-- Notifications List -->
     @if($notifikasi->count() > 0)
         @foreach($notifikasi as $n)
-        <div class="notification-card {{ !$n->dibaca ? 'unread' : '' }}">
+        <div class="notification-card {{ !$n->dibaca ? 'unread' : '' }}" id="notif-{{ $n->id }}">
             <div class="notification-header">
                 <div class="notification-content">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
                             <h5 class="notification-title">{{ $n->judul }}</h5>
                             @if(!$n->dibaca)
-                            <span class="notification-badge badge-unread">
+                            <span class="notification-badge badge-unread" id="badge-{{ $n->id }}">
                                 ● Belum Dibaca
                             </span>
                             @endif
@@ -631,12 +698,133 @@
 @push('scripts')
 <script>
 // Auto dismiss alerts after 5 seconds
-setTimeout(function() {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(function(alert) {
-        const bsAlert = new bootstrap.Alert(alert);
-        bsAlert.close();
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+});
+
+// Get base URL and CSRF token
+const getBaseUrl = () => {
+    return document.querySelector('meta[name="base-url"]')?.content || '';
+};
+
+const getCsrfToken = () => {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+};
+
+// Mark all notifications as read
+function markAllAsRead() {
+    if(!confirm('Tandai semua notifikasi sebagai sudah dibaca?')) return;
+    
+    const baseUrl = getBaseUrl();
+    const csrfToken = getCsrfToken();
+    
+    console.log('🔵 Marking all notifications as read');
+    console.log('🔵 URL:', `${baseUrl}/petugas/notifikasi/baca-semua`);
+    
+    const button = event.target.closest('button');
+    if(button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> <span>Memproses...</span>';
+    }
+    
+    fetch(`${baseUrl}/petugas/notifikasi/baca-semua`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('🔵 Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ Response data:', data);
+        if(data.success) {
+            showAlert('success', 'Semua notifikasi berhasil ditandai sebagai sudah dibaca');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            if(button) {
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-check-circle-fill"></i> <span>Tandai Semua Dibaca</span>';
+            }
+            showAlert('danger', data.message || 'Gagal menandai notifikasi');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error:', error);
+        if(button) {
+            button.disabled = false;
+            button.innerHTML = '<i class="bi bi-check-circle-fill"></i> <span>Tandai Semua Dibaca</span>';
+        }
+        showAlert('danger', 'Terjadi kesalahan: ' + error.message);
     });
-}, 5000);
+}
+
+// Show alert message with animation
+function showAlert(type, message) {
+    document.querySelectorAll('.alert-custom-js').forEach(alert => alert.remove());
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-custom-js`;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 30px;
+        z-index: 9999;
+        min-width: 350px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        animation: slideInRight 0.4s ease;
+    `;
+    alertDiv.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'}"></i>
+        <span>${message}</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    if (!document.querySelector('#alertAnimation')) {
+        const style = document.createElement('style');
+        style.id = 'alertAnimation';
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.style.animation = 'slideOutRight 0.4s ease';
+        setTimeout(() => {
+            const bsAlert = bootstrap.Alert.getInstance(alertDiv);
+            if (bsAlert) {
+                bsAlert.close();
+            } else {
+                alertDiv.remove();
+            }
+        }, 400);
+    }, 5000);
+}
+
+console.log('✅ Petugas notification page scripts loaded');
 </script>
 @endpush
