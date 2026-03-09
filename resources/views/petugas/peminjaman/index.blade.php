@@ -718,7 +718,7 @@
             <tbody>
                 @forelse($peminjamans as $index => $item)
                 <tr>
-                    <td><strong>{{ $peminjamans->firstItem() + $index }}</strong></td>
+                    <td><strong>{{ (($peminjamans->currentPage() - 1) * $peminjamans->perPage()) + $loop->iteration }}</strong></td>
                     <td>
                         <div class="user-card">
                             <div class="user-avatar">
@@ -887,9 +887,8 @@
     <div class="d-flex justify-content-between align-items-center mt-4 pt-3" style="border-top: 1px solid var(--gray-200);">
         <div class="text-muted">
             <i class="bi bi-file-earmark-text me-2"></i>
-            Menampilkan <strong>{{ $peminjamans->firstItem() ?? 0 }}</strong> - 
-            <strong>{{ $peminjamans->lastItem() ?? 0 }}</strong> 
-            dari <strong>{{ $peminjamans->total() }}</strong> data
+            Halaman <strong>{{ $peminjamans->currentPage() }}</strong> 
+            ({{ $peminjamans->perPage() }} data per halaman)
         </div>
         <div>
             {{ $peminjamans->links() }}

@@ -79,12 +79,8 @@
     }
 
     @keyframes pulse-glow {
-        0%, 100% {
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
-        }
-        50% {
-            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.5);
-        }
+        0%, 100% { box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3); }
+        50% { box-shadow: 0 4px 16px rgba(139, 92, 246, 0.5); }
     }
 
     .extension-count {
@@ -156,7 +152,6 @@
         color: white;
     }
 
-    /* Table styling improvements */
     .table > :not(caption) > * > * {
         padding: 1rem 0.75rem;
         vertical-align: middle;
@@ -167,12 +162,6 @@
         color: #475569;
         border-bottom: 2px solid #e2e8f0;
         white-space: nowrap;
-    }
-
-    .info-row {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
     }
 
     .user-info-container {
@@ -288,6 +277,60 @@
         font-size: 0.75rem;
         color: #64748b;
     }
+
+    /* ===== PAGINATION FIX ===== */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .pagination-wrapper .pagination {
+        margin-bottom: 0;
+        gap: 4px;
+    }
+
+    .pagination-wrapper .page-item .page-link {
+        border-radius: 8px !important;
+        border: 1px solid #e2e8f0;
+        color: #667eea;
+        font-weight: 500;
+        font-size: 0.875rem;
+        padding: 6px 12px;
+        min-width: 36px;
+        text-align: center;
+        transition: all 0.2s;
+        background: white;
+        line-height: 1.5;
+    }
+
+    .pagination-wrapper .page-item .page-link:hover {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .pagination-wrapper .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 3px 8px rgba(102, 126, 234, 0.4);
+    }
+
+    .pagination-wrapper .page-item.disabled .page-link {
+        color: #cbd5e1;
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .pagination-wrapper .page-item:first-child .page-link,
+    .pagination-wrapper .page-item:last-child .page-link {
+        border-radius: 8px !important;
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -324,7 +367,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-lg col-md-6 mb-3">
             <div class="stats-card warning">
                 <div class="d-flex justify-content-between align-items-center">
@@ -339,7 +381,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-lg col-md-6 mb-3">
             <div class="stats-card success">
                 <div class="d-flex justify-content-between align-items-center">
@@ -354,7 +395,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-lg col-md-6 mb-3">
             <div class="stats-card purple">
                 <div class="d-flex justify-content-between align-items-center">
@@ -369,7 +409,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-lg col-md-6 mb-3">
             <div class="stats-card danger">
                 <div class="d-flex justify-content-between align-items-center">
@@ -415,7 +454,6 @@
                         <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
                     </select>
                 </div>
-
                 <div class="col-lg-2 col-md-6">
                     <label class="form-label small fw-semibold mb-2">Tipe Peminjam</label>
                     <select name="tipe_peminjam" class="form-select">
@@ -424,7 +462,6 @@
                         <option value="pengguna_luar" {{ request('tipe_peminjam') == 'pengguna_luar' ? 'selected' : '' }}>Pengguna Luar</option>
                     </select>
                 </div>
-
                 <div class="col-lg-2 col-md-6">
                     <label class="form-label small fw-semibold mb-2">Perpanjangan</label>
                     <select name="diperpanjang" class="form-select">
@@ -433,22 +470,20 @@
                         <option value="tidak" {{ request('diperpanjang') == 'tidak' ? 'selected' : '' }}>❌ Tidak Ada</option>
                     </select>
                 </div>
-
                 <div class="col-lg-4 col-md-6">
                     <label class="form-label small fw-semibold mb-2">Pencarian</label>
-                    <input type="text" name="search" class="form-control" 
-                           placeholder="Cari nama, NIM, atau judul buku..." 
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Cari nama, NIM, atau judul buku..."
                            value="{{ request('search') }}">
                 </div>
-
                 <div class="col-lg-2 col-md-12">
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary flex-fill">
                             <i class="bi bi-search me-2"></i>Filter
                         </button>
                         @if(request()->anyFilled(['status', 'tipe_peminjam', 'diperpanjang', 'search']))
-                            <a href="{{ route('admin.peminjaman.index') }}" 
-                               class="btn btn-outline-secondary" 
+                            <a href="{{ route('admin.peminjaman.index') }}"
+                               class="btn btn-outline-secondary"
                                title="Reset Filter">
                                 <i class="bi bi-arrow-counterclockwise"></i>
                             </a>
@@ -491,7 +526,7 @@
                         <td class="text-center">
                             <span class="fw-bold text-muted">{{ $peminjamans->firstItem() + $index }}</span>
                         </td>
-                        
+
                         <!-- Peminjam -->
                         <td>
                             <div class="user-info-container">
@@ -544,8 +579,6 @@
                                 <div class="book-details">
                                     <div class="book-title">{{ Str::limit($item->buku->judul, 40) }}</div>
                                     <div class="book-author">{{ $item->buku->penulis }}</div>
-                                    
-                                    <!-- Extension Badge -->
                                     @if($item->perpanjangan->isNotEmpty())
                                         <div class="mt-2">
                                             <span class="extension-badge">
@@ -657,7 +690,7 @@
 
                         <!-- Aksi -->
                         <td class="text-center">
-                            <a href="{{ route('admin.peminjaman.show', $item->id) }}" 
+                            <a href="{{ route('admin.peminjaman.show', $item->id) }}"
                                class="btn btn-detail btn-sm"
                                title="Lihat Detail">
                                 <i class="bi bi-eye me-1"></i>Detail
@@ -680,19 +713,15 @@
         <!-- Pagination -->
         @if($peminjamans->hasPages())
         <div class="mt-4 pt-3 border-top">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="d-flex align-items-center text-muted">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <span>
-                            Menampilkan <strong>{{ $peminjamans->firstItem() }}</strong> hingga 
-                            <strong>{{ $peminjamans->lastItem() }}</strong> dari 
-                            <strong>{{ $peminjamans->total() }}</strong> total peminjaman
-                        </span>
-                    </div>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center text-muted small">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Menampilkan <strong class="mx-1">{{ $peminjamans->firstItem() }}</strong> &ndash;
+                    <strong class="mx-1">{{ $peminjamans->lastItem() }}</strong> dari
+                    <strong class="mx-1">{{ $peminjamans->total() }}</strong> total peminjaman
                 </div>
-                <div class="col-md-6">
-                    {{ $peminjamans->links() }}
+                <div class="pagination-wrapper">
+                    {{ $peminjamans->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>
@@ -701,7 +730,6 @@
 </div>
 
 <script>
-// Auto hide alerts after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(alert => {
