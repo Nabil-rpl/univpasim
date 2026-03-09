@@ -69,7 +69,7 @@
 
     <!-- Stats Cards -->
     <div class="row mb-4 g-4">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="stat-card">
                 <div class="stat-decoration stat-decoration-1"></div>
                 <div class="stat-icon-wrapper">
@@ -86,24 +86,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-decoration stat-decoration-2"></div>
-                <div class="stat-icon-wrapper">
-                    <div class="stat-icon stat-icon-2">
-                        <i class="bi bi-check-circle"></i>
-                    </div>
-                </div>
-                <div class="stat-details">
-                    <h3 class="stat-number">{{ $bukuTersedia }}</h3>
-                    <p class="stat-label">Buku Siap Dipinjam</p>
-                </div>
-                <div class="stat-bg-icon">
-                    <i class="bi bi-check-circle"></i>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="stat-card">
                 <div class="stat-decoration stat-decoration-3"></div>
                 <div class="stat-icon-wrapper">
@@ -406,12 +389,6 @@
     right: -50px;
 }
 
-.stat-decoration-2 {
-    background: var(--dark-blue);
-    top: -30px;
-    right: -30px;
-}
-
 .stat-decoration-3 {
     background: var(--primary-blue);
     bottom: -40px;
@@ -436,10 +413,6 @@
 
 .stat-icon-1 {
     background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
-}
-
-.stat-icon-2 {
-    background: linear-gradient(135deg, #93C5FD, var(--primary-blue));
 }
 
 .stat-icon-3 {
