@@ -37,7 +37,7 @@ class QRScannerController extends Controller
             // Validasi input
             $validated = $request->validate([
                 'qr_code' => 'required|string',
-                'durasi_hari' => 'required|integer|min:1|max:5'
+                'durasi_hari' => 'required|integer|min:1|max:7' // ✅ Diubah dari max:5 → max:7
             ]);
 
             $kodeQR = $validated['qr_code'];

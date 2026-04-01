@@ -25,7 +25,7 @@
             background: #f8fafc;
         }
 
-        /* Loading Overlay - Animasi setelah login berhasil */
+        /* Loading Overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -117,7 +117,6 @@
             margin-bottom: 30px;
         }
 
-        /* Animated Progress Bar */
         .loading-progress {
             width: 300px;
             height: 6px;
@@ -143,7 +142,6 @@
             100% { background-position: 200% 0%; }
         }
 
-        /* Book Loading Animation */
         .loading-books {
             margin-top: 40px;
             display: flex;
@@ -170,7 +168,6 @@
             50% { transform: translateY(-20px); }
         }
 
-        /* Floating Particles in Loading */
         .loading-particle {
             position: absolute;
             background: rgba(255, 255, 255, 0.3);
@@ -179,7 +176,6 @@
             animation: particleFloat linear infinite;
         }
 
-        /* Success Checkmark */
         .success-checkmark {
             width: 80px;
             height: 80px;
@@ -221,9 +217,7 @@
         }
 
         @keyframes stroke {
-            100% {
-                stroke-dashoffset: 0;
-            }
+            100% { stroke-dashoffset: 0; }
         }
 
         .login-wrapper {
@@ -262,20 +256,10 @@
         }
 
         @keyframes particleFloat {
-            0% {
-                transform: translateY(100vh) scale(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.6;
-            }
-            90% {
-                opacity: 0.6;
-            }
-            100% {
-                transform: translateY(-100vh) scale(1);
-                opacity: 0;
-            }
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
         }
 
         .geometric-shape {
@@ -286,33 +270,25 @@
         }
 
         .shape-1 {
-            width: 250px;
-            height: 250px;
-            background: white;
-            border-radius: 50%;
-            top: -100px;
-            right: 10%;
+            width: 250px; height: 250px;
+            background: white; border-radius: 50%;
+            top: -100px; right: 10%;
             animation: float1 18s infinite ease-in-out;
         }
 
         .shape-2 {
-            width: 180px;
-            height: 180px;
+            width: 180px; height: 180px;
             background: white;
             border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-            bottom: 10%;
-            left: 5%;
+            bottom: 10%; left: 5%;
             animation: float2 22s infinite ease-in-out;
         }
 
         .shape-3 {
-            width: 150px;
-            height: 150px;
-            background: white;
-            border-radius: 15px;
+            width: 150px; height: 150px;
+            background: white; border-radius: 15px;
             transform: rotate(45deg);
-            top: 30%;
-            left: 15%;
+            top: 30%; left: 15%;
             animation: float3 20s infinite ease-in-out;
         }
 
@@ -346,14 +322,8 @@
         }
 
         @keyframes containerSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            from { opacity: 0; transform: translateY(50px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .login-illustration {
@@ -379,10 +349,8 @@
 
         .photo-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: linear-gradient(135deg, rgba(30, 64, 175, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
             z-index: 1;
             pointer-events: none;
@@ -390,31 +358,13 @@
 
         .deco-dots {
             position: absolute;
-            width: 100px;
-            height: 100px;
+            width: 100px; height: 100px;
             z-index: 2;
             pointer-events: none;
         }
 
-        .deco-dots::before,
-        .deco-dots::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-        }
-
-        .deco-top {
-            top: 30px;
-            right: 40px;
-        }
-
-        .deco-bottom {
-            bottom: 40px;
-            left: 40px;
-        }
+        .deco-top { top: 30px; right: 40px; }
+        .deco-bottom { bottom: 40px; left: 40px; }
 
         .login-form-side {
             flex: 1;
@@ -433,14 +383,8 @@
         }
 
         @keyframes formFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .brand-header {
@@ -449,8 +393,7 @@
         }
 
         .brand-logo {
-            width: 70px;
-            height: 70px;
+            width: 70px; height: 70px;
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             border-radius: 18px;
             display: inline-flex;
@@ -473,8 +416,7 @@
         .brand-logo::before {
             content: '';
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             border-radius: 18px;
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             filter: blur(15px);
@@ -499,36 +441,44 @@
             font-size: 26px;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
-            animation: titleSlide 0.8s ease-out 0.5s both;
-        }
-
-        @keyframes titleSlide {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
         }
 
         .form-subtitle {
             color: #64748b;
             font-size: 14px;
             font-weight: 400;
-            animation: subtitleSlide 0.8s ease-out 0.6s both;
         }
 
-        @keyframes subtitleSlide {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        /* Login hint badge */
+        .login-hint {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: #eff6ff;
+            border-radius: 10px;
+            padding: 10px 14px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .login-hint-item {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .login-hint-item span {
+            display: block;
+            color: #94a3b8;
+            font-weight: 400;
+            margin-top: 2px;
+            font-size: 11px;
+        }
+
+        .login-hint-divider {
+            width: 1px;
+            background: #bfdbfe;
         }
 
         .custom-alert {
@@ -542,27 +492,12 @@
         }
 
         @keyframes alertSlideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .alert-danger {
-            background: #fee2e2;
-            border-left-color: #ef4444;
-            color: #991b1b;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            border-left-color: #10b981;
-            color: #065f46;
-        }
+        .alert-danger { background: #fee2e2; border-left-color: #ef4444; color: #991b1b; }
+        .alert-success { background: #d1fae5; border-left-color: #10b981; color: #065f46; }
 
         .form-group {
             margin-bottom: 20px;
@@ -573,14 +508,8 @@
         .form-group:nth-child(2) { animation-delay: 0.8s; }
 
         @keyframes inputSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .form-label {
@@ -632,14 +561,7 @@
             transform: translateY(-2px);
         }
 
-        .form-control:focus + .input-icon {
-            color: #3b82f6;
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
+        .password-wrapper { position: relative; }
 
         .password-toggle {
             position: absolute;
@@ -671,14 +593,10 @@
             animation: inputSlideUp 0.6s ease-out 0.9s both;
         }
 
-        .form-check {
-            display: flex;
-            align-items: center;
-        }
+        .form-check { display: flex; align-items: center; }
 
         .form-check-input {
-            width: 18px;
-            height: 18px;
+            width: 18px; height: 18px;
             margin-right: 8px;
             border: 2px solid #cbd5e1;
             cursor: pointer;
@@ -695,10 +613,6 @@
             0% { transform: scale(0.8); }
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
-        }
-
-        .form-check-input:focus {
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         .form-check-label {
@@ -721,21 +635,14 @@
         .forgot-link::after {
             content: '';
             position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
+            width: 0; height: 2px;
+            bottom: -2px; left: 0;
             background: #3b82f6;
             transition: width 0.4s ease;
         }
 
-        .forgot-link:hover {
-            color: #1e40af;
-        }
-
-        .forgot-link:hover::after {
-            width: 100%;
-        }
+        .forgot-link:hover { color: #1e40af; }
+        .forgot-link:hover::after { width: 100%; }
 
         .btn-login {
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
@@ -758,26 +665,15 @@
         .btn-login::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
             transition: left 0.7s ease;
         }
 
-        .btn-login:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 35px rgba(30, 64, 175, 0.4);
-        }
-
-        .btn-login:hover::before {
-            left: 100%;
-        }
-
-        .btn-login:active {
-            transform: translateY(-2px) scale(0.98);
-        }
+        .btn-login:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(30, 64, 175, 0.4); }
+        .btn-login:hover::before { left: 100%; }
+        .btn-login:active { transform: translateY(-2px) scale(0.98); }
 
         .divider {
             text-align: center;
@@ -789,9 +685,7 @@
         .divider::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
+            top: 50%; left: 0; right: 0;
             height: 1px;
             background: linear-gradient(to right, transparent, #e2e8f0 20%, #e2e8f0 80%, transparent);
         }
@@ -824,12 +718,7 @@
             border-color: #cbd5e1;
         }
 
-        .register-text {
-            color: #64748b;
-            font-size: 14px;
-            font-weight: 500;
-            margin: 0;
-        }
+        .register-text { color: #64748b; font-size: 14px; font-weight: 500; margin: 0; }
 
         .register-link {
             color: #3b82f6;
@@ -846,60 +735,23 @@
             transition: transform 0.4s ease;
         }
 
-        .register-link:hover {
-            color: #1e40af;
-        }
-
-        .register-link:hover::after {
-            transform: translateX(8px);
-        }
+        .register-link:hover { color: #1e40af; }
+        .register-link:hover::after { transform: translateX(8px); }
 
         @media (max-width: 991px) {
-            .login-illustration {
-                display: none;
-            }
-            
-            .login-container {
-                max-width: 450px;
-            }
+            .login-illustration { display: none; }
+            .login-container { max-width: 450px; }
         }
 
         @media (max-width: 576px) {
-            .login-form-side {
-                padding: 40px 25px;
-            }
-            
-            .form-title {
-                font-size: 24px;
-            }
-            
-            .brand-logo {
-                width: 60px;
-                height: 60px;
-                font-size: 32px;
-            }
-
-            .form-control {
-                padding: 10px 16px 10px 40px;
-            }
-
-            .input-icon {
-                left: 12px;
-                font-size: 16px;
-            }
-
-            .password-toggle {
-                right: 12px;
-                font-size: 16px;
-            }
-
-            .loading-progress {
-                width: 250px;
-            }
-
-            .loading-text {
-                font-size: 20px;
-            }
+            .login-form-side { padding: 40px 25px; }
+            .form-title { font-size: 24px; }
+            .brand-logo { width: 60px; height: 60px; font-size: 32px; }
+            .form-control { padding: 10px 16px 10px 40px; }
+            .input-icon { left: 12px; font-size: 16px; }
+            .password-toggle { right: 12px; font-size: 16px; }
+            .loading-progress { width: 250px; }
+            .loading-text { font-size: 20px; }
         }
     </style>
 </head>
@@ -946,7 +798,6 @@
                     <img src="{{ asset('images/pasim1.jpg') }}" alt="Library Background">
                     <div class="photo-overlay"></div>
                 </div>
-                
                 <div class="deco-dots deco-top"></div>
                 <div class="deco-dots deco-bottom"></div>
             </div>
@@ -958,7 +809,21 @@
                             <i class="bi bi-journal-bookmark-fill"></i>
                         </div>
                         <h2 class="form-title">Selamat Datang!</h2>
-                        <p class="form-subtitle">Silakan masuk ke akun Anda</p>
+                        <p class="form-subtitle">Masuk dengan Email atau NIM</p>
+                    </div>
+
+
+                    {{-- Info login --}}
+                    <div class="login-hint">
+                        <div class="login-hint-item">
+                            <i class="bi bi-envelope-fill"></i> Email
+                            <span>Admin &amp; Petugas  &amp; Pengguna Luar</span>
+                        </div>
+                        <div class="login-hint-divider"></div>
+                        <div class="login-hint-item">
+                            <i class="bi bi-person-badge-fill"></i> NIM
+                            <span>Mahasiswa</span>
+                        </div>
                     </div>
 
                     @if(session('error'))
@@ -991,20 +856,20 @@
                         @csrf
 
                         <div class="form-group">
-                            <label for="email" class="form-label">
-                                <i class="bi bi-envelope-fill"></i>Alamat Email
+                            <label for="login_id" class="form-label">
+                                <i class="bi bi-person-fill"></i>Email / NIM
                             </label>
                             <div class="input-wrapper">
-                                <input type="email" 
-                                       class="form-control @error('email') is-invalid @enderror" 
-                                       id="email" 
-                                       name="email" 
-                                       value="{{ old('email') }}" 
-                                       placeholder="nama@email.com"
+                                <input type="text"
+                                       class="form-control @error('login_id') is-invalid @enderror"
+                                       id="login_id"
+                                       name="login_id"
+                                       value="{{ old('login_id') }}"
+                                       placeholder="Email (@gmail.com) atau NIM"
                                        required
-                                       autocomplete="email">
-                                <i class="bi bi-person-circle input-icon"></i>
-                                @error('email')
+                                       autocomplete="username">
+                                <i class="bi bi-person-circle input-icon" id="loginIdIcon"></i>
+                                @error('login_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -1015,10 +880,10 @@
                                 <i class="bi bi-lock-fill"></i>Password
                             </label>
                             <div class="input-wrapper password-wrapper">
-                                <input type="password" 
-                                       class="form-control @error('password') is-invalid @enderror" 
-                                       id="password" 
-                                       name="password" 
+                                <input type="password"
+                                       class="form-control @error('password') is-invalid @enderror"
+                                       id="password"
+                                       name="password"
                                        placeholder="Masukkan password Anda"
                                        required
                                        autocomplete="current-password">
@@ -1032,20 +897,6 @@
                             </div>
                         </div>
 
-                        <div class="options-row">
-                            <div class="form-check">
-                                <input type="checkbox" 
-                                       class="form-check-input" 
-                                       id="remember" 
-                                       name="remember"
-                                       {{ old('remember') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="remember">
-                                    Ingat Saya
-                                </label>
-                            </div>
-                            <a href="#" class="forgot-link">Lupa Password?</a>
-                        </div>
-
                         <button type="submit" class="btn-login">
                             <i class="bi bi-box-arrow-in-right me-2"></i>MASUK SEKARANG
                         </button>
@@ -1056,7 +907,7 @@
 
                         <div class="register-box">
                             <p class="register-text">
-                                Belum punya akun? 
+                                Belum punya akun?
                                 <a href="{{ route('register') }}" class="register-link">Daftar Sekarang</a>
                             </p>
                         </div>
@@ -1069,52 +920,63 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Create floating particles
+        // Floating particles
         function createParticles() {
             const wrapper = document.querySelector('.login-wrapper');
             const overlay = document.getElementById('loadingOverlay');
             
             for (let i = 0; i < 10; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
+                const p = document.createElement('div');
+                p.className = 'particle';
                 const size = Math.random() * 4 + 2;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (Math.random() * 15 + 15) + 's';
-                particle.style.animationDelay = Math.random() * 8 + 's';
-                wrapper.appendChild(particle);
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (Math.random() * 15 + 15) + 's';
+                p.style.animationDelay = Math.random() * 8 + 's';
+                wrapper.appendChild(p);
             }
 
-            // Particles for loading overlay
             for (let i = 0; i < 15; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'loading-particle';
+                const p = document.createElement('div');
+                p.className = 'loading-particle';
                 const size = Math.random() * 6 + 3;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                particle.style.animationDelay = Math.random() * 5 + 's';
-                overlay.appendChild(particle);
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                p.style.animationDelay = Math.random() * 5 + 's';
+                overlay.appendChild(p);
             }
         }
         createParticles();
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const togglePassword = document.getElementById('togglePassword');
-            const password = document.getElementById('password');
-            const eyeIcon = document.getElementById('eyeIcon');
-            const loginForm = document.getElementById('loginForm');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            const progressBar = document.getElementById('progressBar');
-            const loadingText = document.getElementById('loadingText');
-            const loadingSubtext = document.getElementById('loadingSubtext');
-            const successCheckmark = document.getElementById('successCheckmark');
+            const password       = document.getElementById('password');
+            const eyeIcon        = document.getElementById('eyeIcon');
+            const loginForm         = document.getElementById('loginForm');
+            const loadingOverlay    = document.getElementById('loadingOverlay');
+            const progressBar       = document.getElementById('progressBar');
+            const loadingText       = document.getElementById('loadingText');
+            const loadingSubtext    = document.getElementById('loadingSubtext');
+            const successCheckmark  = document.getElementById('successCheckmark');
+
+            // Ikon dinamis: email vs NIM
+            const loginIdInput = document.getElementById('login_id');
+            const loginIdIcon  = document.getElementById('loginIdIcon');
+            if (loginIdInput) {
+                loginIdInput.addEventListener('input', function () {
+                    const isEmail = this.value.includes('@');
+                    loginIdIcon.className = isEmail
+                        ? 'bi bi-envelope-fill input-icon'
+                        : 'bi bi-person-badge-fill input-icon';
+                });
+            }
 
             // Password toggle
             if (togglePassword) {
-                togglePassword.addEventListener('click', function(e) {
+                togglePassword.addEventListener('click', function (e) {
                     e.preventDefault();
                     const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
                     password.setAttribute('type', type);
@@ -1123,51 +985,38 @@
                 });
             }
 
-            // Auto hide alerts
-            setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
+            // Auto hide alerts after 5s
+            setTimeout(function () {
+                document.querySelectorAll('.alert').forEach(function (alert) {
+                    new bootstrap.Alert(alert).close();
                 });
             }, 5000);
 
-            // Form submission with loading animation
+            // Loading animation on submit
             if (loginForm) {
-                loginForm.addEventListener('submit', function(e) {
-                    // Jika ada error validation, jangan tampilkan loading
-                    const hasErrors = document.querySelector('.is-invalid');
-                    if (hasErrors) {
-                        return;
-                    }
-
-                    // Tampilkan loading overlay
+                loginForm.addEventListener('submit', function () {
+                    if (document.querySelector('.is-invalid')) return;
                     loadingOverlay.classList.add('active');
-                    
-                    // Animate progress bar
+
                     let progress = 0;
-                    const progressInterval = setInterval(function() {
+                    const interval = setInterval(function () {
                         progress += Math.random() * 15;
-                        if (progress > 90) {
-                            progress = 90;
-                        }
+                        if (progress > 90) progress = 90;
                         progressBar.style.width = progress + '%';
                     }, 200);
 
-                    // Simulate loading stages
-                    setTimeout(function() {
+                    setTimeout(function () {
                         loadingText.textContent = 'Memverifikasi Akun...';
                         loadingSubtext.textContent = 'Memeriksa kredensial Anda';
                     }, 1000);
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         loadingText.textContent = 'Menyiapkan Dashboard...';
                         loadingSubtext.textContent = 'Hampir selesai';
                         progressBar.style.width = '100%';
                     }, 2000);
 
-                    // Show success checkmark
-                    setTimeout(function() {
+                    setTimeout(function () {
                         successCheckmark.classList.add('active');
                         loadingText.textContent = 'Berhasil!';
                         loadingSubtext.textContent = 'Mengalihkan ke dashboard...';
@@ -1175,24 +1024,18 @@
                 });
             }
 
-            // Input focus animations
-            const inputs = document.querySelectorAll('.form-control');
-            inputs.forEach(input => {
-                input.addEventListener('focus', function() {
+            // Input focus color sync
+            document.querySelectorAll('.form-control').forEach(function (input) {
+                input.addEventListener('focus', function () {
                     const icon = this.parentElement.querySelector('.input-icon');
-                    if (icon) {
-                        icon.style.color = '#3b82f6';
-                    }
+                    if (icon) icon.style.color = '#3b82f6';
                 });
-                
-                input.addEventListener('blur', function() {
+                input.addEventListener('blur', function () {
                     const icon = this.parentElement.querySelector('.input-icon');
-                    if (icon && !this.value) {
-                        icon.style.color = '#94a3b8';
-                    }
+                    if (icon && !this.value) icon.style.color = '#94a3b8';
                 });
             });
         });
     </script>
 </body>
-</html> 
+</html>

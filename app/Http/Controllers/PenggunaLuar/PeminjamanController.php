@@ -120,7 +120,7 @@ class PeminjamanController extends Controller
                 return redirect()->back()->with('error', 'Anda sudah meminjam buku ini dan belum mengembalikannya.');
             }
 
-            // Cek batas maksimal peminjaman untuk pengguna luar (misalnya 2 buku)
+            // Cek batas maksimal peminjaman untuk pengguna luar (2 buku)
             $jumlahPinjaman = Peminjaman::where('mahasiswa_id', $user->id)
                 ->where('status', 'dipinjam')
                 ->count();
@@ -130,8 +130,8 @@ class PeminjamanController extends Controller
                 return redirect()->back()->with('error', 'Anda sudah mencapai batas maksimal peminjaman (2 buku).');
             }
 
-            // Hitung tanggal deadline (7 hari dari tanggal pinjam untuk pengguna luar)
-            $tanggalDeadline = now()->addDays(7);
+            // Hitung tanggal deadline (4 hari dari tanggal pinjam untuk pengguna luar) ✅ Diubah dari 7 → 4 hari
+            $tanggalDeadline = now()->addDays(4);
 
             // Buat peminjaman baru
             $peminjaman = Peminjaman::create([
@@ -199,5 +199,5 @@ class PeminjamanController extends Controller
             ]);
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-    }
+    }   
 }

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PeminjamanController extends Controller
 {
@@ -19,26 +20,20 @@ class PeminjamanController extends Controller
         $this->middleware(['auth', 'role:petugas']);
     }
 
-    /**
-     * Tampilkan semua data peminjaman
-     */
     public function index(Request $request)
     {
         $query = Peminjaman::with(['mahasiswa', 'buku', 'petugas']);
 
-        // Filter berdasarkan status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Filter berdasarkan role peminjam
         if ($request->filled('role')) {
             $query->whereHas('mahasiswa', function($q) use ($request) {
                 $q->where('role', $request->role);
             });
         }
 
-        // Filter berdasarkan tanggal
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal_pinjam', '>=', $request->tanggal_dari);
         }
@@ -47,7 +42,6 @@ class PeminjamanController extends Controller
             $query->whereDate('tanggal_pinjam', '<=', $request->tanggal_sampai);
         }
 
-        // Pencarian
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -69,7 +63,6 @@ class PeminjamanController extends Controller
             ->simplePaginate(15)
             ->appends(request()->query());
 
-        // Statistik
         $stats = [
             'total' => Peminjaman::count(),
             'dipinjam' => Peminjaman::where('status', 'dipinjam')->count(),
@@ -83,9 +76,6 @@ class PeminjamanController extends Controller
         return view('petugas.peminjaman.index', compact('peminjamans', 'stats'));
     }
 
-    /**
-     * Form tambah peminjaman
-     */
     public function create()
     {
         $peminjams = User::whereIn('role', ['mahasiswa', 'pengguna_luar'])
@@ -97,9 +87,6 @@ class PeminjamanController extends Controller
         return view('petugas.peminjaman.create', compact('peminjams', 'bukus'));
     }
 
-    /**
-     * Simpan data peminjaman baru
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -114,12 +101,10 @@ class PeminjamanController extends Controller
             $mahasiswa = User::findOrFail($request->mahasiswa_id);
             $petugas = Auth::user();
 
-            // Cek stok
             if ($buku->stok <= 0) {
                 return redirect()->back()->with('error', 'Stok buku tidak tersedia.');
             }
 
-            // Cek apakah sudah meminjam buku yang sama
             $sudahPinjam = Peminjaman::where('mahasiswa_id', $request->mahasiswa_id)
                 ->where('buku_id', $request->buku_id)
                 ->where('status', 'dipinjam')
@@ -129,25 +114,21 @@ class PeminjamanController extends Controller
                 return redirect()->back()->with('error', 'Peminjam sudah meminjam buku ini.');
             }
 
-            // Hitung tanggal deadline
-            $tanggalPinjam = now();
+            $tanggalPinjam   = now();
             $tanggalDeadline = now()->addDays($request->durasi_hari);
 
-            // Buat peminjaman
             $peminjaman = Peminjaman::create([
-                'mahasiswa_id' => $request->mahasiswa_id,
-                'buku_id' => $request->buku_id,
-                'petugas_id' => Auth::id(),
-                'tanggal_pinjam' => $tanggalPinjam,
-                'durasi_hari' => $request->durasi_hari,
-                'tanggal_deadline' => $tanggalDeadline,
-                'status' => 'dipinjam',
+                'mahasiswa_id'    => $request->mahasiswa_id,
+                'buku_id'         => $request->buku_id,
+                'petugas_id'      => Auth::id(),
+                'tanggal_pinjam'  => $tanggalPinjam,
+                'durasi_hari'     => $request->durasi_hari,
+                'tanggal_deadline'=> $tanggalDeadline,
+                'status'          => 'dipinjam',
             ]);
 
-            // Kurangi stok
             $buku->decrement('stok');
 
-            // Kirim notifikasi peminjaman disetujui
             Notifikasi::kirim(
                 $mahasiswa->id,
                 'peminjaman_disetujui',
@@ -166,9 +147,9 @@ class PeminjamanController extends Controller
                 "• Jaga kondisi buku dengan baik",
                 [
                     'peminjaman_id' => $peminjaman->id,
-                    'buku_id' => $buku->id,
-                    'deadline' => $tanggalDeadline->format('Y-m-d H:i:s'),
-                    'durasi' => $request->durasi_hari
+                    'buku_id'       => $buku->id,
+                    'deadline'      => $tanggalDeadline->format('Y-m-d H:i:s'),
+                    'durasi'        => $request->durasi_hari
                 ],
                 route('mahasiswa.peminjaman.show', $peminjaman->id),
                 'normal',
@@ -177,9 +158,9 @@ class PeminjamanController extends Controller
 
             Log::info('Peminjaman baru dibuat', [
                 'peminjaman_id' => $peminjaman->id,
-                'mahasiswa' => $mahasiswa->name,
-                'buku' => $buku->judul,
-                'deadline' => $tanggalDeadline->format('Y-m-d H:i:s')
+                'mahasiswa'     => $mahasiswa->name,
+                'buku'          => $buku->judul,
+                'deadline'      => $tanggalDeadline->format('Y-m-d H:i:s')
             ]);
 
             DB::commit();
@@ -189,22 +170,15 @@ class PeminjamanController extends Controller
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error create peminjaman', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            Log::error('Error create peminjaman', ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Detail peminjaman
-     */
     public function show($id)
     {
         $peminjaman = Peminjaman::with(['mahasiswa', 'buku', 'petugas'])->findOrFail($id);
         
-        // Hitung status keterlambatan jika masih dipinjam
         $hariTerlambat = 0;
         $denda = 0;
         
@@ -216,9 +190,6 @@ class PeminjamanController extends Controller
         return view('petugas.peminjaman.show', compact('peminjaman', 'hariTerlambat', 'denda'));
     }
 
-    /**
-     * Proses pengembalian buku
-     */
     public function kembalikan($id)
     {
         DB::beginTransaction();
@@ -229,28 +200,24 @@ class PeminjamanController extends Controller
                 return redirect()->back()->with('error', 'Buku sudah dikembalikan.');
             }
 
-            // Hitung keterlambatan dan denda
-            $hariTerlambat = 0;
-            $denda = 0;
+            $hariTerlambat      = 0;
+            $denda              = 0;
             $statusKeterlambatan = 'tepat_waktu';
 
             if ($peminjaman->tanggal_deadline < now()) {
-                $hariTerlambat = now()->diffInDays($peminjaman->tanggal_deadline);
-                $denda = $hariTerlambat * 5000;
+                $hariTerlambat      = now()->diffInDays($peminjaman->tanggal_deadline);
+                $denda              = $hariTerlambat * 5000;
                 $statusKeterlambatan = 'terlambat';
             }
 
-            // Update status peminjaman
             $peminjaman->update([
-                'status' => 'dikembalikan',
-                'tanggal_kembali' => now(),
-                'petugas_id' => Auth::id(),
+                'status'         => 'dikembalikan',
+                'tanggal_kembali'=> now(),
+                'petugas_id'     => Auth::id(),
             ]);
 
-            // Tambah stok buku
             $peminjaman->buku->increment('stok');
 
-            // Kirim notifikasi pengembalian
             $pesanNotifikasi = "Buku yang Anda pinjam telah berhasil dikembalikan.\n\n" .
                 "📚 Buku: {$peminjaman->buku->judul}\n" .
                 "📅 Tanggal Pinjam: " . $peminjaman->tanggal_pinjam->translatedFormat('d F Y') . "\n" .
@@ -274,25 +241,16 @@ class PeminjamanController extends Controller
                 "📖 Buku Dikembalikan: {$peminjaman->buku->judul}",
                 $pesanNotifikasi,
                 [
-                    'peminjaman_id' => $peminjaman->id,
-                    'buku_id' => $peminjaman->buku_id,
-                    'status_keterlambatan' => $statusKeterlambatan,
-                    'hari_terlambat' => $hariTerlambat,
-                    'denda' => $denda
+                    'peminjaman_id'       => $peminjaman->id,
+                    'buku_id'             => $peminjaman->buku_id,
+                    'status_keterlambatan'=> $statusKeterlambatan,
+                    'hari_terlambat'      => $hariTerlambat,
+                    'denda'               => $denda
                 ],
                 route('mahasiswa.peminjaman.show', $peminjaman->id),
                 $statusKeterlambatan === 'terlambat' ? 'urgent' : 'normal',
                 Auth::id()
             );
-
-            Log::info('Buku dikembalikan', [
-                'peminjaman_id' => $peminjaman->id,
-                'mahasiswa' => $peminjaman->mahasiswa->name,
-                'buku' => $peminjaman->buku->judul,
-                'status_keterlambatan' => $statusKeterlambatan,
-                'hari_terlambat' => $hariTerlambat,
-                'denda' => $denda
-            ]);
 
             DB::commit();
             
@@ -301,22 +259,14 @@ class PeminjamanController extends Controller
                 $message .= " Terlambat {$hariTerlambat} hari. Denda: Rp " . number_format($denda, 0, ',', '.');
             }
             
-            return redirect()->route('petugas.peminjaman.index')
-                ->with('success', $message);
+            return redirect()->route('petugas.peminjaman.index')->with('success', $message);
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error kembalikan buku', [
-                'peminjaman_id' => $id,
-                'error' => $e->getMessage()
-            ]);
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    /**
-     * ✅ Kirim notifikasi reminder manual ke peminjaman terlambat
-     */
     public function kirimReminderTerlambat($id)
     {
         try {
@@ -347,42 +297,28 @@ class PeminjamanController extends Controller
                 "• Hubungi petugas jika ada kendala",
                 [
                     'peminjaman_id' => $peminjaman->id,
-                    'buku_id' => $peminjaman->buku_id,
-                    'hari_terlambat' => $hariTerlambat,
-                    'denda' => $denda
+                    'buku_id'       => $peminjaman->buku_id,
+                    'hari_terlambat'=> $hariTerlambat,
+                    'denda'         => $denda
                 ],
                 route('mahasiswa.peminjaman.show', $peminjaman->id),
                 'mendesak',
                 Auth::id()
             );
 
-            Log::info('Reminder manual dikirim', [
-                'peminjaman_id' => $peminjaman->id,
-                'mahasiswa' => $peminjaman->mahasiswa->name,
-                'dikirim_oleh' => Auth::user()->name
-            ]);
-
             return redirect()->back()->with('success', "Notifikasi reminder berhasil dikirim ke {$peminjaman->mahasiswa->name}.");
 
         } catch (\Exception $e) {
-            Log::error('Error kirim reminder manual', [
-                'peminjaman_id' => $id,
-                'error' => $e->getMessage()
-            ]);
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Hapus data peminjaman
-     */
     public function destroy($id)
     {
         DB::beginTransaction();
         try {
             $peminjaman = Peminjaman::findOrFail($id);
 
-            // Jika masih dipinjam, kembalikan stok
             if ($peminjaman->status == 'dipinjam') {
                 $peminjaman->buku->increment('stok');
             }
@@ -396,5 +332,60 @@ class PeminjamanController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Export semua peminjaman ke PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        $query = Peminjaman::with(['mahasiswa', 'buku', 'petugas']);
+
+        // Terapkan filter yang sama dengan index
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('role')) {
+            $query->whereHas('mahasiswa', function($q) use ($request) {
+                $q->where('role', $request->role);
+            });
+        }
+
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_pinjam', '>=', $request->tanggal_dari);
+        }
+
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_pinjam', '<=', $request->tanggal_sampai);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('mahasiswa', function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('nim', 'like', "%{$search}%");
+                })->orWhereHas('buku', function($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $peminjamans = $query->orderByDesc('tanggal_pinjam')->get();
+
+        // Buat info filter untuk ditampilkan di PDF
+        $filters = [];
+        if ($request->filled('status'))       $filters[] = 'Status: ' . ucfirst($request->status);
+        if ($request->filled('role'))         $filters[] = 'Tipe: ' . ucfirst(str_replace('_', ' ', $request->role));
+        if ($request->filled('tanggal_dari')) $filters[] = 'Dari: ' . $request->tanggal_dari;
+        if ($request->filled('tanggal_sampai')) $filters[] = 'Sampai: ' . $request->tanggal_sampai;
+        if ($request->filled('search'))       $filters[] = 'Pencarian: ' . $request->search;
+        $filterInfo = count($filters) ? implode(' | ', $filters) : null;
+
+        $pdf = Pdf::loadView('petugas.peminjaman.peminjaman-pdf', compact('peminjamans', 'filterInfo'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('rekap-peminjaman-' . date('d-m-Y') . '.pdf');
     }
 }

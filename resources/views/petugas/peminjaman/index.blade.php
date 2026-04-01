@@ -210,6 +210,11 @@
         color: var(--gray-700);
     }
 
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger), #e53e3e);
+        color: white;
+    }
+
     /* Table Card */
     .table-card {
         background: white;
@@ -667,6 +672,12 @@
                     <a href="{{ route('petugas.peminjaman.create') }}" class="btn btn-success">
                         <i class="bi bi-plus-circle"></i>Tambah Peminjaman
                     </a>
+                    <a href="{{ route('petugas.peminjaman.export-pdf', request()->query()) }}"
+                       class="btn btn-danger"
+                       target="_blank"
+                       title="Export data yang sedang ditampilkan ke PDF">
+                        <i class="bi bi-file-earmark-pdf"></i>Export PDF
+                    </a>
                 </div>
             </div>
         </div>
@@ -918,12 +929,10 @@
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
                 submitBtn.disabled = true;
                 
-                // Reset badge peminjaman jika form berhasil
                 if (typeof resetPeminjamanBadge === 'function') {
                     resetPeminjamanBadge();
                 }
                 
-                // Reset if form submission fails
                 setTimeout(() => {
                     submitBtn.innerHTML = originalContent;
                     submitBtn.disabled = false;

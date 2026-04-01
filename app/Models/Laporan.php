@@ -11,10 +11,10 @@ class Laporan extends Model
 
     protected $table = 'laporan';
 
-    protected $fillable = ['judul', 'isi', 'dibuat_oleh'];
+    protected $fillable = ['judul', 'bulan', 'tahun', 'isi', 'dibuat_oleh'];
 
     public function pembuat()
     {
         return $this->belongsTo(User::class, 'dibuat_oleh');
     }
-}
+}   

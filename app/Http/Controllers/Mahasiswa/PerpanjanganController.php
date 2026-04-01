@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use App\Models\Perpanjangan;
-use App\Models\Notifikasi; // ✅ TAMBAHAN
+use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -51,12 +51,12 @@ class PerpanjanganController extends Controller
 
         // Validasi input form
         $validated = $request->validate([
-            'durasi_tambahan' => 'required|integer|min:1|max:7',
+            'durasi_tambahan' => 'required|integer|min:1|max:3', // ✅ Diubah dari max:7 → max:3
             'alasan' => 'required|string|max:500',
         ], [
             'durasi_tambahan.required' => 'Durasi tambahan wajib diisi',
             'durasi_tambahan.min' => 'Durasi tambahan minimal 1 hari',
-            'durasi_tambahan.max' => 'Durasi tambahan maksimal 7 hari',
+            'durasi_tambahan.max' => 'Durasi tambahan maksimal 3 hari', // ✅ Diubah dari 7 → 3
             'alasan.required' => 'Alasan perpanjangan wajib diisi',
             'alasan.max' => 'Alasan maksimal 500 karakter',
         ]);

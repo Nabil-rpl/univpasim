@@ -203,7 +203,7 @@
 let currentQRCode = null;
 let videoStream = null;
 let scanning = false;
-let selectedDuration = 3; // Default 3 hari
+let selectedDuration = 7; // Default 7 hari
 
 // Initialize Scanner
 document.addEventListener('DOMContentLoaded', function() {
@@ -362,37 +362,33 @@ function showDurationSelection() {
     const content = document.getElementById('book-preview-content');
     const footer = document.getElementById('modal-footer-buttons');
     
-    // Hitung tanggal untuk setiap durasi
     const today = new Date();
-    const durations = [];
-    for (let i = 1; i <= 5; i++) {
-        const deadline = new Date(today);
-        deadline.setDate(deadline.getDate() + i);
-        durations.push({
-            days: i,
-            deadline: deadline.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-        });
-    }
+    const durations = [1, 2, 3, 4, 5, 6, 7]; // ✅ Diubah: opsi 1–7 hari, hapus 10 & 14
     
     content.innerHTML = `
         <h6 class="mb-3 text-center"><i class="bi bi-calendar-check me-2"></i>Pilih Durasi Peminjaman</h6>
         <div class="alert alert-info" role="alert">
             <small><i class="bi bi-info-circle me-1"></i> 
-            Denda keterlambatan: <strong>Rp 5.000/hari</strong></small>
+            Denda keterlambatan: <strong>Rp 1.000/hari</strong></small>
         </div>
         <div class="row g-2">
-            ${durations.map(d => `
-                <div class="col-4">
-                    <div class="duration-option ${d.days === 3 ? 'selected' : ''}" onclick="selectDuration(event, ${d.days})">
-                        <div class="days">${d.days}</div>
-                        <div class="label">Hari</div>
-                        <div class="deadline">
-                            <i class="bi bi-calendar-x me-1"></i>
-                            ${d.deadline}
+            ${durations.map(days => {
+                const deadline = new Date(today);
+                deadline.setDate(deadline.getDate() + days);
+                const deadlineStr = deadline.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+                return `
+                    <div class="col-4">
+                        <div class="duration-option ${days === 7 ? 'selected' : ''}" onclick="selectDuration(event, ${days})">
+                            <div class="days">${days}</div>
+                            <div class="label">Hari</div>
+                            <div class="deadline">
+                                <i class="bi bi-calendar-x me-1"></i>
+                                ${deadlineStr}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('')}
+                `;
+            }).join('')}
         </div>
         <div class="mt-3 text-center">
             <small class="text-muted">Pilih durasi, lalu klik "Pinjam Buku"</small>
@@ -516,7 +512,7 @@ window.addEventListener('beforeunload', () => {
 // Restart scanning when modal is closed
 document.getElementById('bookPreviewModal').addEventListener('hidden.bs.modal', () => {
     currentQRCode = null;
-    selectedDuration = 3; // Reset to default
+    selectedDuration = 7; // Reset ke default 7 hari
     scanning = true;
     scanQRCode();
 });

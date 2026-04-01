@@ -6,36 +6,37 @@ use App\Http\Controllers\Controller;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanController extends Controller
 {
-    // Menampilkan daftar laporan
     public function index()
     {
         $laporan = Laporan::with('pembuat')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
             ->paginate(10);
 
         return view('petugas.laporan.index', compact('laporan'));
     }
 
-    // Form untuk membuat laporan baru
     public function create()
     {
         return view('petugas.laporan.create');
     }
 
-    // Menyimpan laporan baru
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'isi' => 'required|string',
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2000|max:' . (date('Y') + 1),
+            'isi'   => 'required|string',
         ]);
 
         Laporan::create([
-            'judul' => $validated['judul'],
-            'isi' => $validated['isi'],
+            'bulan'       => $validated['bulan'],
+            'tahun'       => $validated['tahun'],
+            'isi'         => $validated['isi'],
             'dibuat_oleh' => Auth::id(),
         ]);
 
@@ -43,35 +44,30 @@ class LaporanController extends Controller
             ->with('success', 'Laporan berhasil dibuat!');
     }
 
-    // Menampilkan detail laporan
     public function show(Laporan $laporan)
     {
         $laporan->load('pembuat');
         return view('petugas.laporan.show', compact('laporan'));
     }
 
-    // Form untuk edit laporan
     public function edit(Laporan $laporan)
     {
-        // Hanya pembuat atau admin yang bisa edit
         if ($laporan->dibuat_oleh !== Auth::id() && Auth::user()->role !== 'admin') {
-            abort(403, 'Anda tidak memiliki akses untuk mengedit laporan ini.');
+            abort(403);
         }
-
         return view('petugas.laporan.edit', compact('laporan'));
     }
 
-    // Update laporan
     public function update(Request $request, Laporan $laporan)
     {
-        // Hanya pembuat atau admin yang bisa update
         if ($laporan->dibuat_oleh !== Auth::id() && Auth::user()->role !== 'admin') {
-            abort(403, 'Anda tidak memiliki akses untuk mengedit laporan ini.');
+            abort(403);
         }
 
         $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'isi' => 'required|string',
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2000|max:' . (date('Y') + 1),
+            'isi'   => 'required|string',
         ]);
 
         $laporan->update($validated);
@@ -80,17 +76,28 @@ class LaporanController extends Controller
             ->with('success', 'Laporan berhasil diperbarui!');
     }
 
-    // Hapus laporan
     public function destroy(Laporan $laporan)
     {
-        // Hanya pembuat atau admin yang bisa hapus
         if ($laporan->dibuat_oleh !== Auth::id() && Auth::user()->role !== 'admin') {
-            abort(403, 'Anda tidak memiliki akses untuk menghapus laporan ini.');
+            abort(403);
         }
 
         $laporan->delete();
 
         return redirect()->route('petugas.laporan.index')
             ->with('success', 'Laporan berhasil dihapus!');
+    }
+
+    public function exportPdf()
+    {
+        $laporan = Laporan::with('pembuat')
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('petugas.laporan.laporan-pdf', compact('laporan'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('rekap-laporan-' . date('d-m-Y') . '.pdf');
     }
 }

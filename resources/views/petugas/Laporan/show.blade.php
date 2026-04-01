@@ -9,13 +9,13 @@
                     <h5 class="mb-0">Detail Laporan</h5>
                     <div>
                         @if($laporan->dibuat_oleh === Auth::id() || Auth::user()->role === 'admin')
-                            <a href="{{ route('petugas.laporan.edit', $laporan->id) }}" 
+                            <a href="{{ route('petugas.laporan.edit', $laporan->id) }}"
                                class="btn btn-sm btn-warning">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
-                            
-                            <form action="{{ route('petugas.laporan.destroy', $laporan->id) }}" 
-                                  method="POST" 
+
+                            <form action="{{ route('petugas.laporan.destroy', $laporan->id) }}"
+                                  method="POST"
                                   class="d-inline"
                                   onsubmit="return confirm('Yakin ingin menghapus laporan ini?')">
                                 @csrf
@@ -36,8 +36,17 @@
                         </div>
                     @endif
 
+                    @php
+                        $namaBulan = [
+                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret',
+                            4 => 'April',   5 => 'Mei',      6 => 'Juni',
+                            7 => 'Juli',    8 => 'Agustus',  9 => 'September',
+                            10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+                        ];
+                    @endphp
+
                     <div class="mb-4">
-                        <h3>{{ $laporan->judul }}</h3>
+                        <h3>Laporan Bulan {{ $namaBulan[$laporan->bulan] ?? '-' }} {{ $laporan->tahun }}</h3>
                         <hr>
                     </div>
 
@@ -46,7 +55,7 @@
                             <p class="mb-1">
                                 <strong><i class="bi bi-person"></i> Dibuat oleh:</strong><br>
                                 @if($laporan->pembuat)
-                                    {{ $laporan->pembuat->name }} 
+                                    {{ $laporan->pembuat->name }}
                                     <span class="badge bg-secondary">{{ ucfirst($laporan->pembuat->role) }}</span>
                                 @else
                                     <span class="text-muted">-</span>
@@ -55,7 +64,7 @@
                         </div>
                         <div class="col-md-6">
                             <p class="mb-1">
-                                <strong><i class="bi bi-calendar"></i> Tanggal:</strong><br>
+                                <strong><i class="bi bi-calendar"></i> Tanggal Dibuat:</strong><br>
                                 {{ $laporan->created_at->format('d F Y, H:i') }} WIB
                             </p>
                         </div>
@@ -64,7 +73,7 @@
                     @if($laporan->created_at != $laporan->updated_at)
                         <div class="alert alert-light">
                             <small>
-                                <i class="bi bi-info-circle"></i> 
+                                <i class="bi bi-info-circle"></i>
                                 Terakhir diperbarui: {{ $laporan->updated_at->format('d F Y, H:i') }} WIB
                             </small>
                         </div>

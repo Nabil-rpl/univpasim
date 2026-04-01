@@ -8,7 +8,9 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('laporan', function (Blueprint $table) {
             $table->id();
-            $table->string('judul');
+            $table->string('judul')->nullable();
+            $table->tinyInteger('bulan');
+            $table->smallInteger('tahun');
             $table->text('isi');
             $table->foreignId('dibuat_oleh')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();

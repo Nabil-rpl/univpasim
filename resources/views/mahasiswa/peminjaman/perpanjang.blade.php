@@ -384,7 +384,7 @@
                     <h6>Ketentuan Perpanjangan:</h6>
                     <ul>
                         <li>Perpanjangan hanya dapat dilakukan <strong>1 kali</strong></li>
-                        <li>Durasi perpanjangan maksimal <strong>7 hari</strong></li>
+                        <li>Durasi perpanjangan maksimal <strong>3 hari</strong></li>{{-- ✅ Diubah dari 7 → 3 hari --}}
                         <li>Wajib mencantumkan alasan perpanjangan yang jelas</li>
                         <li>Perpanjangan memerlukan persetujuan dari petugas perpustakaan</li>
                         <li>Jika terdapat denda keterlambatan, harus dilunasi saat pengembalian</li>
@@ -400,18 +400,15 @@
                     <label class="form-label-custom">
                         <i class="bi bi-calendar-plus"></i> Durasi Tambahan (Hari) <span class="text-danger">*</span>
                     </label>
+                    {{-- ✅ Opsi hanya 1–3 hari --}}
                     <select name="durasi_tambahan" class="form-select form-select-custom" id="durasiTambahan" required>
                         <option value="">Pilih Durasi Perpanjangan</option>
                         <option value="1" {{ old('durasi_tambahan') == 1 ? 'selected' : '' }}>1 Hari</option>
                         <option value="2" {{ old('durasi_tambahan') == 2 ? 'selected' : '' }}>2 Hari</option>
                         <option value="3" {{ old('durasi_tambahan') == 3 ? 'selected' : '' }}>3 Hari</option>
-                        <option value="4" {{ old('durasi_tambahan') == 4 ? 'selected' : '' }}>4 Hari</option>
-                        <option value="5" {{ old('durasi_tambahan') == 5 ? 'selected' : '' }}>5 Hari</option>
-                        <option value="6" {{ old('durasi_tambahan') == 6 ? 'selected' : '' }}>6 Hari</option>
-                        <option value="7" {{ old('durasi_tambahan') == 7 ? 'selected' : '' }}>7 Hari</option>
                     </select>
                     <small class="text-muted d-block mt-2">
-                        <i class="bi bi-info-circle"></i> Pilih berapa hari tambahan yang Anda butuhkan
+                        <i class="bi bi-info-circle"></i> Pilih berapa hari tambahan yang Anda butuhkan (maksimal 3 hari)
                     </small>
                 </div>
 
@@ -514,7 +511,6 @@
 </div>
 
 <script>
-    // Preview tanggal deadline baru saat memilih durasi
     document.getElementById('durasiTambahan').addEventListener('change', function() {
         const durasi = parseInt(this.value);
         if (durasi > 0) {

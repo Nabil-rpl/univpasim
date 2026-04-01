@@ -11,7 +11,7 @@
                 <p class="text-muted">Arahkan kamera ke QR Code pada buku untuk meminjam</p>
                 <div class="alert alert-info d-inline-block">
                     <i class="bi bi-info-circle me-2"></i>
-                    <small>Batas peminjaman: <strong>2 buku</strong> | Durasi maksimal: <strong>7 hari</strong></small>
+                    <small>Batas peminjaman: <strong>2 buku</strong> | Durasi maksimal: <strong>4 hari</strong></small>
                 </div>
             </div>
         </div>
@@ -210,7 +210,7 @@
 let currentQRCode = null;
 let videoStream = null;
 let scanning = false;
-let selectedDuration = 3; // Default 3 hari (pengguna luar bisa sampai 7 hari)
+let selectedDuration = 4; // ✅ Default 4 hari untuk pengguna luar
 
 // Initialize Scanner
 document.addEventListener('DOMContentLoaded', function() {
@@ -236,7 +236,6 @@ async function initScanner() {
         loadingEl.classList.add('d-none');
         readyEl.classList.remove('d-none');
 
-        // Start scanning
         scanning = true;
         scanQRCode();
     } catch (error) {
@@ -385,10 +384,10 @@ function showDurationSelection() {
     const content = document.getElementById('book-preview-content');
     const footer = document.getElementById('modal-footer-buttons');
     
-    // Hitung tanggal untuk setiap durasi (1-7 hari untuk pengguna luar)
+    // ✅ Opsi durasi 1–4 hari untuk pengguna luar
     const today = new Date();
     const durations = [];
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 4; i++) {
         const deadline = new Date(today);
         deadline.setDate(deadline.getDate() + i);
         durations.push({
@@ -401,12 +400,12 @@ function showDurationSelection() {
         <h6 class="mb-3 text-center"><i class="bi bi-calendar-check me-2"></i>Pilih Durasi Peminjaman</h6>
         <div class="alert alert-info" role="alert">
             <small><i class="bi bi-info-circle me-1"></i> 
-            Durasi maksimal untuk pengguna umum: <strong>7 hari</strong></small>
+            Durasi maksimal untuk pengguna umum: <strong>4 hari</strong></small>
         </div>
         <div class="row g-2">
             ${durations.map(d => `
-                <div class="col-4">
-                    <div class="duration-option ${d.days === 3 ? 'selected' : ''}" onclick="selectDuration(event, ${d.days})">
+                <div class="col-3">
+                    <div class="duration-option ${d.days === 4 ? 'selected' : ''}" onclick="selectDuration(event, ${d.days})">
                         <div class="days">${d.days}</div>
                         <div class="label">Hari</div>
                         <div class="deadline">
@@ -433,13 +432,11 @@ function showDurationSelection() {
 function selectDuration(event, days) {
     selectedDuration = days;
     
-    // Update visual selection
     document.querySelectorAll('.duration-option').forEach(el => {
         el.classList.remove('selected');
     });
     event.currentTarget.classList.add('selected');
     
-    // Update button text
     const btn = document.querySelector('#modal-footer-buttons button:last-child');
     if (btn) {
         btn.innerHTML = `<i class="bi bi-check-circle me-1"></i> Pinjam Buku (${days} Hari)`;
@@ -530,17 +527,15 @@ function processManualCode() {
     handleQRCodeDetected(code);
 }
 
-// Cleanup on page unload
 window.addEventListener('beforeunload', () => {
     if (videoStream) {
         videoStream.getTracks().forEach(track => track.stop());
     }
 });
 
-// Restart scanning when modal is closed
 document.getElementById('bookPreviewModal').addEventListener('hidden.bs.modal', () => {
     currentQRCode = null;
-    selectedDuration = 3; // Reset to default
+    selectedDuration = 4; // ✅ Reset ke default 4 hari
     scanning = true;
     scanQRCode();
 });

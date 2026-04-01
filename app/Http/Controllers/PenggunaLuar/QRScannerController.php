@@ -32,23 +32,21 @@ class QRScannerController extends Controller
     public function process(Request $request)
     {
         try {
-            // Log request data
             Log::info('QR Process - Pengguna Luar - Request Data:', [
                 'qr_code' => $request->qr_code,
                 'durasi_hari' => $request->durasi_hari,
                 'user_id' => Auth::id()
             ]);
 
-            // Validasi input - durasi maksimal 7 hari untuk pengguna luar
+            // ✅ Durasi maksimal 4 hari untuk pengguna luar
             $validated = $request->validate([
                 'qr_code' => 'required|string',
-                'durasi_hari' => 'required|integer|min:1|max:7'
+                'durasi_hari' => 'required|integer|min:1|max:4'
             ]);
 
             $kodeQR = $validated['qr_code'];
             $durasiHari = $validated['durasi_hari'];
 
-            // Cari QR Code di database
             $qrCode = QRCode::where('kode_unik', $kodeQR)->first();
 
             if (!$qrCode) {
@@ -67,7 +65,6 @@ class QRScannerController extends Controller
                 ], 400);
             }
 
-            // Load relasi buku
             $buku = $qrCode->buku;
 
             if (!$buku) {
@@ -78,7 +75,6 @@ class QRScannerController extends Controller
                 ], 404);
             }
 
-            // Cek stok buku
             if ($buku->stok < 1) {
                 Log::info('Stok buku habis:', ['buku_id' => $buku->id, 'stok' => $buku->stok]);
                 return response()->json([
@@ -87,48 +83,35 @@ class QRScannerController extends Controller
                 ], 400);
             }
 
-            // Cek apakah pengguna luar sudah meminjam buku yang sama dan belum dikembalikan
             $peminjamanAktif = Peminjaman::where('mahasiswa_id', Auth::id())
                 ->where('buku_id', $buku->id)
                 ->where('status', 'dipinjam')
                 ->exists();
 
             if ($peminjamanAktif) {
-                Log::info('Peminjaman aktif sudah ada:', [
-                    'user_id' => Auth::id(),
-                    'buku_id' => $buku->id
-                ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda masih memiliki peminjaman aktif untuk buku ini!'
                 ], 400);
             }
 
-            // Cek batas maksimal peminjaman untuk pengguna luar (2 buku)
             $jumlahPeminjamanAktif = Peminjaman::where('mahasiswa_id', Auth::id())
                 ->where('status', 'dipinjam')
                 ->count();
 
             if ($jumlahPeminjamanAktif >= 2) {
-                Log::info('Batas peminjaman tercapai:', [
-                    'user_id' => Auth::id(),
-                    'jumlah_peminjaman' => $jumlahPeminjamanAktif
-                ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda sudah mencapai batas maksimal peminjaman (2 buku). Harap kembalikan buku terlebih dahulu.'
                 ], 400);
             }
 
-            // Mulai database transaction
             DB::beginTransaction();
 
             try {
-                // Hitung tanggal deadline
                 $tanggalPinjam = Carbon::now();
                 $tanggalDeadline = $tanggalPinjam->copy()->addDays($durasiHari);
 
-                // Buat peminjaman baru
                 $peminjaman = Peminjaman::create([
                     'mahasiswa_id' => Auth::id(),
                     'buku_id' => $buku->id,
@@ -138,7 +121,6 @@ class QRScannerController extends Controller
                     'status' => 'dipinjam',
                 ]);
 
-                // Kurangi stok buku
                 $buku->decrement('stok');
 
                 DB::commit();
@@ -169,9 +151,7 @@ class QRScannerController extends Controller
             }
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validation Error (Pengguna Luar):', [
-                'errors' => $e->errors()
-            ]);
+            Log::error('Validation Error (Pengguna Luar):', ['errors' => $e->errors()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Data tidak valid: ' . json_encode($e->errors())
@@ -220,7 +200,6 @@ class QRScannerController extends Controller
                 ], 404);
             }
 
-            // Cek kuota peminjaman pengguna luar
             $jumlahPeminjamanAktif = Peminjaman::where('mahasiswa_id', Auth::id())
                 ->where('status', 'dipinjam')
                 ->count();
@@ -237,8 +216,8 @@ class QRScannerController extends Controller
                     'stok' => $buku->stok,
                     'foto' => $buku->foto ? asset('storage/' . $buku->foto) : null,
                     'sisa_kuota' => $sisaKuota,
-                    'max_durasi' => 7,
-                    'info' => 'Pengguna luar dapat meminjam maksimal 2 buku dengan durasi maksimal 7 hari'
+                    'max_durasi' => 4, // ✅ Diubah dari 7 → 4 hari
+                    'info' => 'Pengguna luar dapat meminjam maksimal 2 buku dengan durasi maksimal 4 hari'
                 ]
             ]);
 

@@ -121,7 +121,7 @@ class PeminjamanController extends Controller
     }
 
     /**
-     * ✅ Proses pinjam buku - FIXED WITH NOTIFICATION
+     * ✅ Proses pinjam buku
      */
     public function pinjam($id)
     {
@@ -177,7 +177,7 @@ class PeminjamanController extends Controller
             }
 
             $tanggalPinjam = Carbon::now('Asia/Jakarta');
-            $tanggalDeadline = Carbon::now('Asia/Jakarta')->addDays(3);
+            $tanggalDeadline = Carbon::now('Asia/Jakarta')->addDays(7); // ✅ Diubah dari 3 → 7 hari
 
             Log::info('⏰ Waktu peminjaman', [
                 'tanggal_pinjam' => $tanggalPinjam->format('Y-m-d H:i:s'),
@@ -191,7 +191,7 @@ class PeminjamanController extends Controller
                 'buku_id' => $buku->id,
                 'petugas_id' => null,
                 'tanggal_pinjam' => $tanggalPinjam,
-                'durasi_hari' => 3,
+                'durasi_hari' => 7, // ✅ Diubah dari 3 → 7 hari
                 'tanggal_deadline' => $tanggalDeadline,
                 'tanggal_kembali' => null,
                 'status' => 'dipinjam',
@@ -203,7 +203,7 @@ class PeminjamanController extends Controller
             $buku->decrement('stok');
             Log::info('✅ Stok buku dikurangi', ['stok_lama' => $buku->stok + 1, 'stok_baru' => $buku->fresh()->stok]);
 
-            // ✅✅✅ KIRIM NOTIFIKASI KE SEMUA PETUGAS/ADMIN - FIXED ✅✅✅
+            // ✅ KIRIM NOTIFIKASI KE SEMUA PETUGAS/ADMIN
             Log::info('📧 Memulai pengiriman notifikasi ke petugas...');
             
             $notifikasiDikirim = Notifikasi::kirimKePetugas(
@@ -216,7 +216,7 @@ class PeminjamanController extends Controller
                 "• Buku: {$buku->judul}\n" .
                 "• Tanggal Pinjam: " . $tanggalPinjam->translatedFormat('d F Y, H:i') . " WIB\n" .
                 "• Deadline: " . $tanggalDeadline->translatedFormat('d F Y, H:i') . " WIB\n" .
-                "• Durasi: 3 hari\n\n" .
+                "• Durasi: 7 hari\n\n" . // ✅ Diubah dari 3 → 7 hari
                 "Silakan cek detail peminjaman untuk informasi lebih lanjut.",
                 [
                     'peminjaman_id' => $peminjaman->id,
@@ -229,14 +229,13 @@ class PeminjamanController extends Controller
                     'tanggal_deadline' => $tanggalDeadline->format('Y-m-d H:i:s'),
                 ],
                 route('petugas.peminjaman.show', $peminjaman->id),
-                'tinggi', // prioritas tinggi karena peminjaman baru
+                'tinggi',
                 $user->id
             );
 
             if ($notifikasiDikirim) {
                 Log::info('✅✅✅ NOTIFIKASI BERHASIL DIKIRIM KE PETUGAS');
                 
-                // Verifikasi notifikasi tersimpan
                 $jumlahNotifikasi = \App\Models\Notifikasi::where('tipe', 'peminjaman_baru')
                     ->where('created_at', '>=', now()->subMinute())
                     ->count();
@@ -311,8 +310,8 @@ class PeminjamanController extends Controller
             $buku = $peminjaman->buku;
             $mahasiswa = MahasiswaModel::where('email', $user->email)->first();
 
-            // Perpanjang deadline 3 hari lagi
-            $deadlineBaru = Carbon::parse($peminjaman->tanggal_deadline)->addDays(3);
+            // Perpanjang deadline 7 hari lagi ✅ Diubah dari 3 → 7 hari
+            $deadlineBaru = Carbon::parse($peminjaman->tanggal_deadline)->addDays(7);
             
             $peminjaman->update([
                 'tanggal_deadline' => $deadlineBaru,
@@ -332,7 +331,7 @@ class PeminjamanController extends Controller
                 "Mahasiswa {$user->name} ({$mahasiswa->nim}) telah memperpanjang peminjaman buku \"{$buku->judul}\".\n\n" .
                 "📋 Detail:\n" .
                 "• Deadline Baru: " . $deadlineBaru->translatedFormat('d F Y, H:i') . " WIB\n" .
-                "• Durasi Tambahan: 3 hari",
+                "• Durasi Tambahan: 7 hari", // ✅ Diubah dari 3 → 7 hari
                 [
                     'peminjaman_id' => $peminjaman->id,
                     'buku_id' => $buku->id,

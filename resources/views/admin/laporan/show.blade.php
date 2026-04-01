@@ -18,10 +18,22 @@
                 </div>
 
                 <div class="card-body">
-                    <!-- Judul Laporan -->
+                    @php
+                        $namaBulan = [
+                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret',
+                            4 => 'April',   5 => 'Mei',      6 => 'Juni',
+                            7 => 'Juli',    8 => 'Agustus',  9 => 'September',
+                            10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+                        ];
+                    @endphp
+
+                    <!-- Periode Laporan -->
                     <div class="mb-4 pb-3 border-bottom">
-                        <h3 class="text-primary">{{ $laporan->judul }}</h3>
-                        
+                        <h3 class="text-primary">
+                            <i class="bi bi-calendar-month"></i>
+                            Laporan Bulan {{ $namaBulan[$laporan->bulan] ?? '-' }} {{ $laporan->tahun }}
+                        </h3>
+
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center mb-2">
@@ -71,7 +83,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <small class="text-muted">
-                                    <i class="bi bi-clock-history"></i> 
+                                    <i class="bi bi-clock-history"></i>
                                     Dibuat {{ $laporan->created_at->diffForHumans() }}
                                 </small>
                             </div>

@@ -13,25 +13,64 @@
                     <form action="{{ route('petugas.laporan.store') }}" method="POST">
                         @csrf
 
+                        {{-- Periode Laporan --}}
                         <div class="mb-3">
-                            <label for="judul" class="form-label">Judul Laporan <span class="text-danger">*</span></label>
-                            <input type="text" 
-                                   class="form-control @error('judul') is-invalid @enderror" 
-                                   id="judul" 
-                                   name="judul" 
-                                   value="{{ old('judul') }}"
-                                   placeholder="Masukkan judul laporan"
-                                   required>
-                            @error('judul')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <label class="form-label">Periode Laporan <span class="text-danger">*</span></label>
+                            <div class="row g-2">
+
+                                <div class="col-md-7">
+                                    <select class="form-select @error('bulan') is-invalid @enderror"
+                                            name="bulan"
+                                            id="bulan"
+                                            required>
+                                        <option value="" disabled {{ old('bulan') ? '' : 'selected' }}>-- Pilih Bulan --</option>
+                                        @php
+                                            $namaBulan = [
+                                                1  => 'Januari',  2  => 'Februari', 3  => 'Maret',
+                                                4  => 'April',    5  => 'Mei',      6  => 'Juni',
+                                                7  => 'Juli',     8  => 'Agustus',  9  => 'September',
+                                                10 => 'Oktober',  11 => 'November', 12 => 'Desember',
+                                            ];
+                                        @endphp
+                                        @foreach ($namaBulan as $num => $nama)
+                                            <option value="{{ $num }}" {{ old('bulan') == $num ? 'selected' : '' }}>
+                                                {{ $nama }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('bulan')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-5">
+                                    <select class="form-select @error('tahun') is-invalid @enderror"
+                                            name="tahun"
+                                            id="tahun"
+                                            required>
+                                        <option value="" disabled {{ old('tahun') ? '' : 'selected' }}>-- Pilih Tahun --</option>
+                                        @php $tahunSekarang = (int) date('Y'); @endphp
+                                        @for ($t = $tahunSekarang; $t >= $tahunSekarang - 4; $t--)
+                                            <option value="{{ $t }}" {{ old('tahun', $tahunSekarang) == $t ? 'selected' : '' }}>
+                                                {{ $t }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                    @error('tahun')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                            </div>
+                            <small class="text-muted">Pilih bulan dan tahun periode laporan</small>
                         </div>
 
+                        {{-- Isi Laporan --}}
                         <div class="mb-3">
                             <label for="isi" class="form-label">Isi Laporan <span class="text-danger">*</span></label>
-                            <textarea class="form-control @error('isi') is-invalid @enderror" 
-                                      id="isi" 
-                                      name="isi" 
+                            <textarea class="form-control @error('isi') is-invalid @enderror"
+                                      id="isi"
+                                      name="isi"
                                       rows="15"
                                       placeholder="Tulis isi laporan disini..."
                                       required>{{ old('isi') }}</textarea>
