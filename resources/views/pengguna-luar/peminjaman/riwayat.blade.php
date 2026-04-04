@@ -643,7 +643,7 @@
             </div>
             <div class="info-box-content">
                 <h6>Informasi Peminjaman Pengguna Umum</h6>
-                <p>Sebagai pengguna umum, Anda dapat meminjam <strong>maksimal 2 buku</strong> dengan durasi peminjaman <strong>maksimal 7 hari</strong>. Harap kembalikan buku tepat waktu untuk menghindari denda keterlambatan sebesar <strong>Rp 5.000/hari</strong>.</p>
+                <p>Sebagai pengguna umum, Anda dapat meminjam <strong>maksimal 2 buku</strong> dengan durasi peminjaman <strong>maksimal 4 hari</strong>. Harap kembalikan buku tepat waktu untuk menghindari denda keterlambatan sebesar <strong>Rp 5.000/hari</strong>.</p>
             </div>
         </div>
 

@@ -857,15 +857,15 @@
 </form>
 
 <!-- Form untuk Tandai Semua Dibaca -->
-<form id="form-tandai-semua-dibaca" 
-      action="{{ route('pengguna-luar.notifikasi.index') }}" 
+<form id="form-tandai-semua-dibaca"
+      action="{{ route('pengguna-luar.notifikasi.mark-all-read') }}"
       method="POST" class="d-none">
     @csrf
 </form>
 
 <!-- Form untuk Hapus Sudah Dibaca -->
-<form id="form-hapus-sudah-dibaca" 
-      action="{{ route('pengguna-luar.notifikasi.index') }}" 
+<form id="form-hapus-sudah-dibaca"
+      action="{{ route('pengguna-luar.notifikasi.delete-read') }}"
       method="POST" class="d-none">
     @csrf
     @method('DELETE')
