@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Mahasiswa;
 use App\Models\Notifikasi;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -296,5 +297,38 @@ class MahasiswaController extends Controller
         };
     
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export data mahasiswa to PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        $query = Mahasiswa::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%")
+                  ->orWhere('jurusan', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('jurusan')) {
+            $query->where('jurusan', $request->jurusan);
+        }
+
+        $mahasiswas = $query->orderBy('created_at', 'desc')->get();
+        $jurusan    = $request->jurusan ?? 'Semua Jurusan';
+        $tanggal    = now()->format('d/m/Y H:i');
+
+        $pdf = Pdf::loadView('admin.mahasiswa.pdf', compact('mahasiswas', 'jurusan', 'tanggal'))
+                  ->setPaper('a4', 'landscape');
+
+        $filename = 'data_mahasiswa_' . date('YmdHis') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

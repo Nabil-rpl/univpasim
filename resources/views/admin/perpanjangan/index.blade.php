@@ -272,20 +272,23 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .btn-export {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    .btn-export-pdf {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
         padding: 10px 24px;
         border-radius: 10px;
         font-weight: 600;
         border: none;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
     }
 
-    .btn-export:hover {
+    .btn-export-pdf:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
         color: white;
     }
 
@@ -372,8 +375,8 @@
                 </p>
             </div>
             <a href="{{ route('admin.perpanjangan.export', request()->query()) }}" 
-               class="btn btn-export">
-                <i class="bi bi-file-earmark-arrow-down me-2"></i>Export CSV
+               class="btn-export-pdf">
+                <i class="bi bi-filetype-pdf me-2"></i>Export PDF
             </a>
         </div>
     </div>
