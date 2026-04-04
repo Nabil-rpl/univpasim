@@ -95,9 +95,10 @@ Route::middleware(['auth', 'role:admin'])
         // CRUD User
         Route::resource('users', UserController::class);
 
-        // CRUD Mahasiswa
-        Route::resource('mahasiswa', MahasiswaController::class);
+        // CRUD Mahasiswa — export routes HARUS di atas Route::resource
         Route::get('/mahasiswa/export', [MahasiswaController::class, 'export'])->name('mahasiswa.export');
+        Route::get('/mahasiswa/export-pdf', [MahasiswaController::class, 'exportPdf'])->name('mahasiswa.export.pdf');
+        Route::resource('mahasiswa', MahasiswaController::class);
 
         // CRUD Buku
         Route::resource('buku', BukuController::class);
@@ -128,11 +129,11 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/laporan/{laporan}', 'show')->name('laporan.show');
         });
 
-        // Perpanjangan (Admin Read-Only)
+        // Perpanjangan (Admin Read-Only) — export HARUS di atas /{id}
         Route::prefix('perpanjangan')->as('perpanjangan.')->group(function () {
+            Route::get('/export', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'export'])->name('export');
             Route::get('/', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'index'])->name('index');
             Route::get('/{id}', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'show'])->name('show');
-            Route::get('/export/csv', [\App\Http\Controllers\Admin\PerpanjanganController::class, 'export'])->name('export');
         });
 
         // NOTIFIKASI ADMIN

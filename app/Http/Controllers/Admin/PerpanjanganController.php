@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Perpanjangan;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class PerpanjanganController extends Controller
@@ -93,18 +94,16 @@ class PerpanjanganController extends Controller
     }
 
     /**
-     * Export data perpanjangan (opsional)
+     * Export data perpanjangan to PDF
      */
     public function export(Request $request)
     {
-        // ✅ Tambahkan qrCode di eager loading
         $query = Perpanjangan::with([
-            'peminjaman.buku.qrCode',  // Load relasi qrCode
-            'peminjaman.mahasiswa', 
+            'peminjaman.buku.qrCode',
+            'peminjaman.mahasiswa',
             'petugas'
         ]);
 
-        // Apply filters sama seperti di index
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -117,58 +116,28 @@ class PerpanjanganController extends Controller
             $query->whereDate('created_at', '<=', $request->tanggal_sampai);
         }
 
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('peminjaman.mahasiswa', function($mhs) use ($search) {
+                    $mhs->where('name', 'like', "%{$search}%")
+                        ->orWhere('nim', 'like', "%{$search}%");
+                })
+                ->orWhereHas('peminjaman.buku', function($buku) use ($search) {
+                    $buku->where('judul', 'like', "%{$search}%");
+                });
+            });
+        }
+
         $perpanjangan = $query->orderBy('created_at', 'desc')->get();
+        $status       = $request->status ? ucfirst($request->status) : 'Semua Status';
+        $tanggal      = now()->format('d/m/Y H:i');
 
-        // Return sebagai CSV atau Excel
-        $filename = 'perpanjangan_' . date('Y-m-d_His') . '.csv';
-        
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"$filename\"",
-        ];
+        $pdf = Pdf::loadView('admin.perpanjangan.pdf', compact('perpanjangan', 'status', 'tanggal'))
+                  ->setPaper('a4', 'landscape');
 
-        $callback = function() use ($perpanjangan) {
-            $file = fopen('php://output', 'w');
-            
-            // Header CSV
-            fputcsv($file, [
-                'ID',
-                'Tanggal Perpanjangan',
-                'Nama Peminjam',
-                'NIM/NIK',
-                'Judul Buku',
-                'Kode Buku',
-                'Deadline Lama',
-                'Deadline Baru',
-                'Durasi Tambahan (Hari)',
-                'Status',
-                'Diproses Oleh',
-                'Alasan',
-                'Catatan Petugas'
-            ]);
+        $filename = 'perpanjangan_' . date('YmdHis') . '.pdf';
 
-            // Data
-            foreach ($perpanjangan as $item) {
-                fputcsv($file, [
-                    $item->id,
-                    $item->tanggal_perpanjangan->format('d/m/Y'),
-                    $item->peminjaman->mahasiswa->name ?? '-',
-                    $item->peminjaman->mahasiswa->nim ?? $item->peminjaman->mahasiswa->nik ?? '-',
-                    $item->peminjaman->buku->judul ?? '-',
-                    $item->peminjaman->buku->kode_buku ?? '-',  // ✅ Sekarang akan ambil dari accessor
-                    $item->tanggal_deadline_lama->format('d/m/Y'),
-                    $item->tanggal_deadline_baru->format('d/m/Y'),
-                    $item->durasi_tambahan,
-                    $item->getStatusLabel(),
-                    $item->petugas->name ?? '-',
-                    $item->alasan ?? '-',
-                    $item->catatan_petugas ?? '-'
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return $pdf->download($filename);
     }
 }

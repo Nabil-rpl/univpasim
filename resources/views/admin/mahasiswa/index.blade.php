@@ -12,8 +12,9 @@
                     <h2 class="mb-1 text-dark fw-bold">Data Mahasiswa</h2>
                     <p class="text-muted mb-0 small">Kelola data mahasiswa dengan mudah</p>
                 </div>
-                <a href="{{ route('admin.mahasiswa.export') }}" class="btn btn-success btn-export">
-                    <i class="bi bi-download me-2"></i>Export CSV
+                <a href="{{ route('admin.mahasiswa.export.pdf') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" 
+                   class="btn btn-export btn-export-pdf">
+                    <i class="bi bi-filetype-pdf me-2"></i>Export PDF
                 </a>
             </div>
 
@@ -263,6 +264,16 @@ h2 {
 .btn-export:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 28px rgba(16, 185, 129, 0.4);
+    color: white;
+}
+
+.btn-export-pdf {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25) !important;
+}
+
+.btn-export-pdf:hover {
+    box-shadow: 0 12px 28px rgba(239, 68, 68, 0.4) !important;
     color: white;
 }
 
@@ -647,8 +658,8 @@ h2 {
     }
 
     .btn-export {
-        padding: 10px 20px;
-        font-size: 13px;
+        padding: 10px 16px;
+        font-size: 12px;
     }
 
     .modern-table thead th,
@@ -695,8 +706,8 @@ h2 {
     }
 
     .btn-export {
-        padding: 8px 16px;
-        font-size: 12px;
+        padding: 8px 12px;
+        font-size: 11px;
     }
 
     .avatar-circle {
