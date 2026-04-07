@@ -444,6 +444,7 @@
 
 <div class="book-list-container">
     <div class="container">
+        {{-- Bagian Header Halaman --}}
         <div class="page-header">
             <div class="header-badge">
                 <i class="bi bi-book-fill"></i>
@@ -460,6 +461,7 @@
                 </div>
                 <h5>Cari Buku</h5>
             </div>
+            {{-- Form untuk mencari buku berdasarkan judul, penulis, atau kategori --}}
             <form action="{{ route('mahasiswa.buku.index') }}" method="GET" class="search-form">
                 <div class="row g-3">
                     <div class="col-md-5">
@@ -500,6 +502,7 @@
         @endif
 
         <div class="row">
+            {{-- Perulangan untuk menampilkan data buku --}}
             @forelse ($buku as $item)
                 <div class="col-lg-3 col-md-4 col-sm-6">
                     <div class="book-card">
@@ -561,6 +564,7 @@
             @endforelse
         </div>
 
+        {{-- Menampilkan pagination jika data lebih dari 1 halaman --}}
         @if($buku->hasPages())
         <div class="d-flex justify-content-center">
             {{ $buku->links() }}
