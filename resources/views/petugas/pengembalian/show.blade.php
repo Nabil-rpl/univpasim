@@ -1,6 +1,6 @@
 @extends('layouts.petugas')
 
-@section('page-title', 'Proses Pengembalian Buku')
+@section('page-title', 'Pengembalian Buku')
 
 @section('content')
 <style>
@@ -29,17 +29,45 @@
         border-bottom: none;
     }
 
+    .info-peminjam {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        border-left: 5px solid #10b981;
+    }
+
+    .info-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .info-header i {
+        font-size: 1.6rem;
+        color: #10b981;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 16px 24px;
+        align-items: center;
+    }
+
     .info-label {
         font-weight: 600;
         color: #6b7280;
-        min-width: 180px;
+        font-size: 0.95rem;
     }
 
     .info-value {
-        color: #1f2937;
         font-weight: 500;
-        text-align: right;
-        flex: 1;
+        color: #1f2937;
+        word-break: break-all;
     }
 
     .book-cover {
@@ -235,11 +263,30 @@
         margin-top: 15px;
         font-size: 0.9rem;
     }
+
+    @media (max-width: 576px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+        }
+        
+        .info-value {
+            font-size: 1rem;
+        }
+
+        .detail-card {
+            padding: 20px;
+        }
+    }
 </style>
 
 <div class="container-fluid">
     <!-- Back Button -->
-    <div class="mb-3">
+    <div class="mb-4">
         <a href="{{ route('petugas.pengembalian.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Kembali ke Daftar Pengembalian
         </a>
@@ -312,31 +359,29 @@
 
             <!-- Student Information -->
             <div class="detail-card">
-                <h5 class="mb-4">
-                    <i class="bi bi-person-fill text-success me-2"></i>Informasi Peminjam
-                </h5>
-                
-                <div class="info-section">
-                    <div class="info-item">
-                        <span class="info-label">Nama {{ $peminjaman->mahasiswa->role == 'mahasiswa' ? 'Mahasiswa' : 'Peminjam' }}</span>
-                        <span class="info-value"><strong>{{ $peminjaman->mahasiswa->name }}</strong></span>
+                <div class="info-peminjam">
+                    <div class="info-header">
+                        <i class="bi bi-person-circle"></i>
+                        <h5 class="mb-0">Informasi Peminjam</h5>
                     </div>
-                    @if($peminjaman->mahasiswa->role == 'mahasiswa')
-                    <div class="info-item">
-                        <span class="info-label">NIM</span>
-                        <span class="info-value">{{ $peminjaman->mahasiswa->nim ?? '-' }}</span>
+
+                    <div class="info-grid">
+                        <div class="info-label">Nama {{ $peminjaman->mahasiswa->role == 'mahasiswa' ? 'Mahasiswa' : 'Peminjam' }}</div>
+                        <div class="info-value"><strong>{{ $peminjaman->mahasiswa->name }}</strong></div>
+
+                        @if($peminjaman->mahasiswa->role == 'mahasiswa' && $peminjaman->mahasiswa->nim)
+                        <div class="info-label">NIM</div>
+                        <div class="info-value">{{ $peminjaman->mahasiswa->nim }}</div>
+                        @endif
+
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ $peminjaman->mahasiswa->email }}</div>
+
+                        @if($peminjaman->mahasiswa->no_hp)
+                        <div class="info-label">Nomor HP</div>
+                        <div class="info-value">{{ $peminjaman->mahasiswa->no_hp }}</div>
+                        @endif
                     </div>
-                    @endif
-                    <div class="info-item">
-                        <span class="info-label">Email</span>
-                        <span class="info-value">{{ $peminjaman->mahasiswa->email }}</span>
-                    </div>
-                    @if($peminjaman->mahasiswa->no_hp)
-                    <div class="info-item">
-                        <span class="info-label">No HP</span>
-                        <span class="info-value">{{ $peminjaman->mahasiswa->no_hp }}</span>
-                    </div>
-                    @endif
                 </div>
             </div>
 

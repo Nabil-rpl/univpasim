@@ -1,5 +1,5 @@
 @extends('layouts.petugas')
-@section('page-title', 'Detail Perpanjangan Peminjaman')
+@section('page-title', 'Detail Perpanjangan')
 @section('content')
 <style>
     /* Styling dari index.blade.php dipertahankan */

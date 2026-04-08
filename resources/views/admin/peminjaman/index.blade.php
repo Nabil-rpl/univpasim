@@ -170,12 +170,7 @@
         gap: 10px;
     }
 
-    .user-details {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        min-width: 0;
-    }
+
 
     .user-name {
         font-weight: 600;
@@ -331,6 +326,40 @@
     .pagination-wrapper .page-item:last-child .page-link {
         border-radius: 8px !important;
     }
+
+    @media (max-width: 768px) {
+        .stats-card {
+            padding: 20px;
+        }
+        
+        .stats-number {
+            font-size: 1.5rem;
+        }
+
+        .stats-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 1.25rem;
+        }
+
+        .custom-table {
+            font-size: 0.8rem;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+        }
+
+        .user-name {
+            font-size: 0.85rem;
+        }
+
+        .filter-section {
+            padding: 18px;
+        }
+    }
+    
 </style>
 
 <div class="container-fluid mt-4">
@@ -342,11 +371,6 @@
                     <i class="bi bi-journal-bookmark-fill me-2"></i>Data Peminjaman Buku
                 </h3>
                 <p class="mb-0 opacity-75">Monitoring semua aktivitas peminjaman buku perpustakaan</p>
-            </div>
-            <div>
-                <span class="badge bg-light text-dark px-3 py-2">
-                    <i class="bi bi-eye me-1"></i>Mode: Read Only
-                </span>
             </div>
         </div>
     </div>
