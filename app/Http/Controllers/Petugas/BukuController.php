@@ -56,6 +56,7 @@ class BukuController extends Controller
         ];
     }
 
+    // Ini disebut function karena dia mengembalikan ke tampilan halaman
     public function index(Request $request)
     {
         $query = Buku::query();
