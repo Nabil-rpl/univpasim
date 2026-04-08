@@ -39,7 +39,7 @@ class LoginController extends Controller
         $request->validate($rules, $messages);
 
         if ($isEmail) {
-            // Login Email — hanya untuk admin & petugas
+            // Login email — hanya untuk admin & petugas & pengguna luar
             $user = User::where('email', $input)
                         ->whereIn('role', ['admin', 'petugas', 'pengguna_luar'])
                         ->first();
