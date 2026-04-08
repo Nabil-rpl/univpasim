@@ -1,6 +1,6 @@
 @extends('layouts.petugas')
 
-@section('page-title', 'Manajemen Peminjaman')
+@section('page-title', 'Peminjaman Buku')
 
 @section('content')
 <style>

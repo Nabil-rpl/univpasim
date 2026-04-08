@@ -1,3 +1,4 @@
+petugas/peminjaman/create
 @extends('layouts.petugas')
 
 @section('page-title', 'Tambah Peminjaman Baru')
@@ -419,10 +420,9 @@
                             Durasi (Hari) <span class="text-danger">*</span>
                         </label>
                         <select name="durasi_hari" class="form-select @error('durasi_hari') is-invalid @enderror" required>
-                            <option value="3" {{ old('durasi_hari', 3) == 3 ? 'selected' : '' }}>3 Hari</option>
-                            <option value="7" {{ old('durasi_hari') == 7 ? 'selected' : '' }}>7 Hari</option>
-                            <option value="14" {{ old('durasi_hari') == 14 ? 'selected' : '' }}>14 Hari</option>
-                            <option value="30" {{ old('durasi_hari') == 30 ? 'selected' : '' }}>30 Hari</option>
+                            <option value="3"  {{ old('durasi_hari', 7) == 3  ? 'selected' : '' }}>3 Hari</option>
+                            <option value="7"  {{ old('durasi_hari', 7) == 7  ? 'selected' : '' }}>7 Hari (Default)</option>
+                            <option value="14" {{ old('durasi_hari', 7) == 14 ? 'selected' : '' }}>14 Hari</option>
                         </select>
                         @error('durasi_hari')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -617,7 +617,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Search functionality
     searchBook.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
         filterBooks();
     });
 

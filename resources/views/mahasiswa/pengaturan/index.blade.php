@@ -1,6 +1,7 @@
 @extends('layouts.mahasiswa')
 
 @section('title', 'Pengaturan Akun')
+@section('page-title', 'Pengaturan Akun') 
 
 @section('content')
 <style>

@@ -44,7 +44,6 @@
         font-size: 1.1rem;
     }
 
-    /* Stats Grid dalam Welcome Card */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -108,8 +107,39 @@
         font-size: 1.15rem;
     }
 
+    /* RESPONSIVE CHART FIX */
     .chart-card .card-body {
         padding: 30px;
+        position: relative;
+    }
+
+    .chart-card .card-body canvas {
+        width: 100% !important;
+        min-height: 300px;           /* Mobile */
+        max-height: 450px;
+    }
+
+    /* Grafik utama (line chart) lebih tinggi */
+    #peminjamanChart {
+        min-height: 340px !important;
+    }
+
+    @media (min-width: 768px) {
+        .chart-card .card-body canvas {
+            min-height: 320px;
+        }
+        #peminjamanChart {
+            min-height: 380px !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .chart-card .card-body {
+            padding: 20px 15px;
+        }
+        #peminjamanChart {
+            min-height: 300px !important;
+        }
     }
 
     /* List Card */
@@ -147,32 +177,12 @@
     .list-item:hover {
         background: #f8fafc;
     }
-
-    @media (max-width: 768px) {
-        .welcome-card .card-title {
-            font-size: 1.5rem;
-        }
-        
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .stat-item .value {
-            font-size: 2rem;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-    }
 </style>
 @endpush
 
 @section('content')
 <div class="container-fluid">
-    <!-- Welcome Card dengan Stats Terintegrasi -->
+    <!-- Welcome Card (tetap sama) -->
     <div class="row">
         <div class="col-12 mb-4">
             <div class="card welcome-card shadow-sm border-0">
@@ -180,52 +190,34 @@
                     <h5 class="card-title">Selamat Datang, {{ Auth::user()->name }} 👋</h5>
                     <p class="text-muted">Berikut ringkasan data perpustakaan hari ini</p>
 
-                    <!-- Stats Grid Inside Welcome Card -->
                     <div class="stats-grid">
                         <div class="stat-item">
-                            <div class="icon">
-                                <i class="bi bi-journal-text"></i>
-                            </div>
+                            <div class="icon"><i class="bi bi-journal-text"></i></div>
                             <div class="value">{{ $totalPeminjaman }}</div>
                             <div class="label">Total Peminjaman</div>
                         </div>
-
                         <div class="stat-item">
-                            <div class="icon">
-                                <i class="bi bi-check-circle"></i>
-                            </div>
+                            <div class="icon"><i class="bi bi-check-circle"></i></div>
                             <div class="value">{{ $peminjamanAktif }}</div>
                             <div class="label">Peminjaman Aktif</div>
                         </div>
-
                         <div class="stat-item">
-                            <div class="icon">
-                                <i class="bi bi-exclamation-triangle"></i>
-                            </div>
+                            <div class="icon"><i class="bi bi-exclamation-triangle"></i></div>
                             <div class="value">{{ $peminjamanTerlambat }}</div>
                             <div class="label">Terlambat</div>
                         </div>
-
                         <div class="stat-item">
-                            <div class="icon">
-                                <i class="bi bi-hourglass-split"></i>
-                            </div>
+                            <div class="icon"><i class="bi bi-hourglass-split"></i></div>
                             <div class="value">{{ $perpanjanganMenunggu }}</div>
                             <div class="label">Perpanjangan Menunggu</div>
                         </div>
-
                         <div class="stat-item">
-                            <div class="icon">
-                                <i class="bi bi-book"></i>
-                            </div>
+                            <div class="icon"><i class="bi bi-book"></i></div>
                             <div class="value">{{ $buku->count() }}</div>
                             <div class="label">Total Buku</div>
                         </div>
-
                         <div class="stat-item">
-                            <div class="icon">
-                                <i class="bi bi-cash-coin"></i>
-                            </div>
+                            <div class="icon"><i class="bi bi-cash-coin"></i></div>
                             <div class="value">Rp {{ number_format($dendaBelumLunas / 1000, 0) }}K</div>
                             <div class="label">Denda Belum Lunas</div>
                         </div>
@@ -235,16 +227,16 @@
         </div>
     </div>
 
-    <!-- Charts Section -->
+    <!-- Charts Section - SUDAH DIPERBAIKI -->
     <div class="row">
-        <!-- Grafik Utama: Peminjaman & Pengembalian -->
+        <!-- Grafik Utama -->
         <div class="col-12 mb-4">
             <div class="card chart-card">
                 <div class="card-header">
                     <h5><i class="bi bi-graph-up me-2"></i>Tren Peminjaman & Pengembalian</h5>
                 </div>
-                <div class="card-body">
-                    <canvas id="peminjamanChart" height="60"></canvas>
+                <div class="card-body p-0">
+                    <canvas id="peminjamanChart"></canvas>
                 </div>
             </div>
         </div>
@@ -257,8 +249,8 @@
                 <div class="card-header">
                     <h5><i class="bi bi-star me-2"></i>Buku Terpopuler</h5>
                 </div>
-                <div class="card-body">
-                    <canvas id="topBukuChart" height="80"></canvas>
+                <div class="card-body p-0">
+                    <canvas id="topBukuChart"></canvas>
                 </div>
             </div>
         </div>
@@ -268,15 +260,16 @@
                 <div class="card-header">
                     <h5><i class="bi bi-cash me-2"></i>Tren Denda</h5>
                 </div>
-                <div class="card-body">
-                    <canvas id="dendaChart" height="80"></canvas>
+                <div class="card-body p-0">
+                    <canvas id="dendaChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Activity Lists -->
+    <!-- Activity Lists (tetap sama) -->
     <div class="row">
+        <!-- Peminjaman Terbaru & Perpanjangan Menunggu tetap sama seperti kode kamu sebelumnya -->
         <div class="col-lg-6 mb-4">
             <div class="card list-card">
                 <div class="card-header">
@@ -349,12 +342,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Konfigurasi global untuk semua chart
     Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
     Chart.defaults.plugins.legend.labels.usePointStyle = true;
     Chart.defaults.plugins.legend.labels.padding = 15;
 
-    // Gradien untuk Peminjaman
+    // Gradien
     const peminjamanCtx = document.getElementById('peminjamanChart').getContext('2d');
     const gradientPinjam = peminjamanCtx.createLinearGradient(0, 0, 0, 400);
     gradientPinjam.addColorStop(0, 'rgba(37, 99, 235, 0.3)');
@@ -364,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gradientKembali.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
     gradientKembali.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
-    // Grafik Peminjaman & Pengembalian - Area Chart Modern
+    // Grafik Utama - Peminjaman & Pengembalian
     new Chart(peminjamanCtx, {
         type: 'line',
         data: {
@@ -381,9 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 pointHoverRadius: 8,
                 pointBackgroundColor: '#fff',
                 pointBorderColor: '#2563eb',
-                pointBorderWidth: 3,
-                pointHoverBackgroundColor: '#2563eb',
-                pointHoverBorderColor: '#fff'
+                pointBorderWidth: 3
             }, {
                 label: 'Pengembalian',
                 data: {!! json_encode($pengembalianPerBulan) !!},
@@ -396,14 +386,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 pointHoverRadius: 8,
                 pointBackgroundColor: '#fff',
                 pointBorderColor: '#10b981',
-                pointBorderWidth: 3,
-                pointHoverBackgroundColor: '#10b981',
-                pointHoverBorderColor: '#fff'
+                pointBorderWidth: 3
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,     // ← Penting untuk responsive
             interaction: {
                 mode: 'index',
                 intersect: false,
@@ -416,10 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         boxWidth: 12,
                         boxHeight: 12,
                         borderRadius: 6,
-                        font: {
-                            size: 13,
-                            weight: '600'
-                        }
+                        font: { size: 13, weight: '600' }
                     }
                 },
                 tooltip: {
@@ -427,55 +412,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     padding: 12,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     borderWidth: 1,
-                    titleFont: {
-                        size: 14,
-                        weight: 'bold'
-                    },
-                    bodyFont: {
-                        size: 13
-                    },
-                    displayColors: true,
-                    boxPadding: 6
                 }
             },
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        font: {
-                            size: 12
-                        },
-                        color: '#64748b'
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    }
+                    ticks: { stepSize: 1, font: { size: 12 }, color: '#64748b' },
+                    grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+                    border: { display: false }
                 },
                 x: {
-                    ticks: {
-                        font: {
-                            size: 12
-                        },
-                        color: '#64748b'
-                    },
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    }
+                    ticks: { font: { size: 12 }, color: '#64748b' },
+                    grid: { display: false, drawBorder: false },
+                    border: { display: false }
                 }
             }
         }
     });
 
-    // Grafik Top Buku - Bar Chart dengan Gradien
+    // Grafik Top Buku
     const topBukuCtx = document.getElementById('topBukuChart').getContext('2d');
     const colors = [
         { bg: 'rgba(37, 99, 235, 0.8)', border: '#2563eb' },
@@ -496,22 +451,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderColor: colors.map(c => c.border),
                 borderWidth: 2,
                 borderRadius: 8,
-                borderSkipped: false,
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,     // ← Penting
             indexAxis: 'y',
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1,
                     callbacks: {
                         label: function(context) {
                             return ' ' + context.parsed.x + ' peminjaman';
@@ -522,42 +470,20 @@ document.addEventListener('DOMContentLoaded', function() {
             scales: {
                 x: {
                     beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        font: {
-                            size: 12
-                        },
-                        color: '#64748b'
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    }
+                    ticks: { stepSize: 1, font: { size: 12 }, color: '#64748b' },
+                    grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+                    border: { display: false }
                 },
                 y: {
-                    ticks: {
-                        font: {
-                            size: 12,
-                            weight: '500'
-                        },
-                        color: '#1e293b'
-                    },
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    }
+                    ticks: { font: { size: 12, weight: '500' }, color: '#1e293b' },
+                    grid: { display: false, drawBorder: false },
+                    border: { display: false }
                 }
             }
         }
     });
 
-    // Grafik Denda - Bar Chart dengan Gradien
+    // Grafik Tren Denda
     const dendaCtx = document.getElementById('dendaChart').getContext('2d');
     const gradientDenda = dendaCtx.createLinearGradient(0, 0, 0, 400);
     gradientDenda.addColorStop(0, 'rgba(239, 68, 68, 0.8)');
@@ -574,21 +500,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderColor: '#ef4444',
                 borderWidth: 2,
                 borderRadius: 8,
-                borderSkipped: false,
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,     // ← Penting
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1,
                     callbacks: {
                         label: function(context) {
                             return ' Rp ' + context.parsed.y.toLocaleString('id-ID');
@@ -600,41 +519,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        font: {
-                            size: 12
-                        },
+                        font: { size: 12 },
                         color: '#64748b',
                         callback: function(value) {
-                            if (value >= 1000000) {
-                                return 'Rp ' + (value / 1000000) + 'jt';
-                            } else if (value >= 1000) {
-                                return 'Rp ' + (value / 1000) + 'rb';
-                            }
+                            if (value >= 1000000) return 'Rp ' + (value / 1000000) + 'jt';
+                            if (value >= 1000) return 'Rp ' + (value / 1000) + 'rb';
                             return 'Rp ' + value;
                         }
                     },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    }
+                    grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+                    border: { display: false }
                 },
                 x: {
-                    ticks: {
-                        font: {
-                            size: 12
-                        },
-                        color: '#64748b'
-                    },
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    },
-                    border: {
-                        display: false
-                    }
+                    ticks: { font: { size: 12 }, color: '#64748b' },
+                    grid: { display: false, drawBorder: false },
+                    border: { display: false }
                 }
             }
         }

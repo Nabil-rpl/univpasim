@@ -1,6 +1,6 @@
 @extends('layouts.petugas')
 
-@section('page-title', 'Kelola Perpanjangan Peminjaman')
+@section('page-title', 'Perpanjangan Peminjaman')
 
 @section('content')
 <style>
