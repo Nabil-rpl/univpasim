@@ -1,5 +1,8 @@
 @extends('layouts.mahasiswa')
 
+@section('title', 'Daftar Buku')
+@section('page-title', 'Daftar Buku') 
+
 @section('content')
 <style>
     .book-list-container {

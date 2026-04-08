@@ -1,5 +1,7 @@
 @extends('layouts.petugas')
 
+@section('page-title', 'Manajemen Data Buku')
+
 @section('content')
     <div class="container mt-4 mb-5">
         <!-- Hero Header dengan Ilustrasi -->

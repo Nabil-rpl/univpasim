@@ -369,7 +369,7 @@ function showDurationSelection() {
         <h6 class="mb-3 text-center"><i class="bi bi-calendar-check me-2"></i>Pilih Durasi Peminjaman</h6>
         <div class="alert alert-info" role="alert">
             <small><i class="bi bi-info-circle me-1"></i> 
-            Denda keterlambatan: <strong>Rp 1.000/hari</strong></small>
+            Denda keterlambatan: <strong>Rp 5.000/hari</strong></small>
         </div>
         <div class="row g-2">
             ${durations.map(days => {
