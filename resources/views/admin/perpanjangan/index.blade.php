@@ -4,7 +4,7 @@
 
 @section('content')
 <style>
-    /* Modern Card Design */
+    /* ==================== GLOBAL & CARD ==================== */
     .stats-card {
         background: white;
         border-radius: 16px;
@@ -41,7 +41,6 @@
         font-size: 0.875rem;
         color: #64748b;
         font-weight: 500;
-        margin-bottom: 8px;
     }
 
     .stats-status {
@@ -62,7 +61,7 @@
         margin-bottom: 28px;
     }
 
-    /* Main Content Card */
+    /* Main Card */
     .main-card {
         background: white;
         border-radius: 16px;
@@ -71,7 +70,7 @@
         overflow: hidden;
     }
 
-    /* Filter Section */
+    /* Filter */
     .filter-section {
         background: #f8fafc;
         padding: 24px;
@@ -85,20 +84,7 @@
         margin-bottom: 8px;
     }
 
-    .form-control, .form-select {
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 10px 14px;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    /* Table Styles - COMPACT VERSION */
+    /* Table */
     .custom-table {
         margin: 0;
         font-size: 0.875rem;
@@ -110,7 +96,6 @@
         padding: 12px 16px;
         font-size: 0.75rem;
         font-weight: 700;
-        letter-spacing: 0.05em;
         text-transform: uppercase;
         color: #64748b;
         white-space: nowrap;
@@ -122,31 +107,25 @@
         border-bottom: 1px solid #f1f5f9;
     }
 
-    .custom-table tbody tr {
-        transition: all 0.2s;
-    }
-
     .custom-table tbody tr:hover {
         background-color: #f8fafc;
     }
 
-    /* Compact User Info */
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 180px;
-    }
+    /* User Info - RESPONSIF */
+
 
     .user-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        font-size: 1rem;
+        width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 200px 200px rgba(102, 126, 234, 0.3);
     }
 
     .user-details {
@@ -169,7 +148,7 @@
         color: #64748b;
     }
 
-    /* Compact Book Info */
+    /* Book Info */
     .book-info {
         min-width: 160px;
     }
@@ -193,8 +172,8 @@
         font-weight: 600;
     }
 
-    /* Compact Timeline */
-    .timeline-compact {
+    /* Timeline & Status */
+    .timeline-compact, .status-compact, .petugas-compact {
         min-width: 140px;
     }
 
@@ -206,70 +185,22 @@
         font-size: 0.75rem;
     }
 
-    .date-icon {
-        font-size: 0.875rem;
-    }
-
-    .duration-text {
-        font-size: 0.7rem;
-        font-weight: 600;
-        padding: 2px 8px;
-        border-radius: 12px;
-        display: inline-block;
-        margin-top: 4px;
-    }
-
-    /* Compact Status */
-    .status-compact {
-        min-width: 100px;
-    }
-
     .status-badge {
         padding: 6px 12px;
         border-radius: 16px;
         font-size: 0.75rem;
         font-weight: 700;
-        display: inline-block;
         white-space: nowrap;
     }
 
-    .status-date {
-        font-size: 0.7rem;
-        color: #64748b;
-        margin-top: 4px;
-    }
-
-    /* Compact Petugas */
-    .petugas-compact {
-        min-width: 120px;
-    }
-
-    .petugas-name {
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 0.8rem;
-        margin-bottom: 2px;
-    }
-
-    .petugas-time {
-        font-size: 0.7rem;
-        color: #64748b;
-    }
-
-    /* Button Styles */
+    /* Button */
     .btn-action {
         padding: 6px 16px;
         border-radius: 8px;
         font-size: 0.8rem;
         font-weight: 600;
         transition: all 0.2s;
-        border: none;
         white-space: nowrap;
-    }
-
-    .btn-action:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .btn-export-pdf {
@@ -280,10 +211,6 @@
         font-weight: 600;
         border: none;
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
     }
 
     .btn-export-pdf:hover {
@@ -304,25 +231,12 @@
         margin-bottom: 16px;
     }
 
-    .empty-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #64748b;
-        margin-bottom: 8px;
-    }
-
-    .empty-text {
-        font-size: 0.875rem;
-        color: #94a3b8;
-    }
-
     /* Pagination */
     .pagination-info {
         font-size: 0.875rem;
         color: #64748b;
     }
 
-    /* Section Header */
     .section-header {
         background: white;
         padding: 16px 24px;
@@ -333,13 +247,22 @@
         font-size: 0.875rem;
         font-weight: 700;
         color: #475569;
-        margin: 0;
         letter-spacing: 0.05em;
         text-transform: uppercase;
     }
 
-    /* Responsive */
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 992px) {
+        .stats-number {
+            font-size: 1.7rem;
+        }
+    }
+
     @media (max-width: 768px) {
+        .stats-card {
+            padding: 20px;
+        }
+        
         .stats-number {
             font-size: 1.5rem;
         }
@@ -355,9 +278,24 @@
         }
 
         .user-avatar {
-            width: 32px;
-            height: 32px;
-            font-size: 0.875rem;
+            width: 45px;
+            height: 45px;
+        }
+
+        .user-name {
+            font-size: 0.85rem;
+        }
+
+        .filter-section {
+            padding: 18px;
+        }
+    }
+
+    @media (max-width: 576px) {
+
+        .user-info {
+            gap: 8px;
+            min-width: auto;
         }
     }
 </style>
@@ -391,7 +329,7 @@
                         <div class="stats-label">Menunggu Persetujuan</div>
                         <div class="stats-number text-warning">{{ $stats['menunggu'] }}</div>
                         <span class="stats-status bg-warning bg-opacity-10 text-warning">
-                            <i class="bi bi-hourglass-split me-1"></i>Pending
+                            <i class="bi bi-hourglass-split me-1"></i>Menunggu
                         </span>
                     </div>
                     <div class="stats-icon bg-warning bg-opacity-10 text-warning">
@@ -409,7 +347,7 @@
                         <div class="stats-label">Disetujui</div>
                         <div class="stats-number text-success">{{ $stats['disetujui'] }}</div>
                         <span class="stats-status bg-success bg-opacity-10 text-success">
-                            <i class="bi bi-check-circle-fill me-1"></i>Approved
+                            <i class="bi bi-check-circle-fill me-1"></i>Disetujui
                         </span>
                     </div>
                     <div class="stats-icon bg-success bg-opacity-10 text-success">
@@ -427,7 +365,7 @@
                         <div class="stats-label">Ditolak</div>
                         <div class="stats-number text-danger">{{ $stats['ditolak'] }}</div>
                         <span class="stats-status bg-danger bg-opacity-10 text-danger">
-                            <i class="bi bi-x-circle-fill me-1"></i>Rejected
+                            <i class="bi bi-x-circle-fill me-1"></i>Ditolak
                         </span>
                     </div>
                     <div class="stats-icon bg-danger bg-opacity-10 text-danger">
@@ -445,7 +383,7 @@
                         <div class="stats-label">Total Perpanjangan</div>
                         <div class="stats-number text-primary">{{ $stats['total'] }}</div>
                         <span class="stats-status bg-primary bg-opacity-10 text-primary">
-                            <i class="bi bi-collection me-1"></i>All Records
+                            <i class="bi bi-collection me-1"></i>Semua Catatan
                         </span>
                     </div>
                     <div class="stats-icon bg-primary bg-opacity-10 text-primary">
@@ -560,9 +498,10 @@
                         <!-- Peminjam -->
                         <td>
                             <div class="user-info">
-                                <div class="user-avatar bg-primary bg-opacity-10 text-primary">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
+                                <div class="user-avatar">
+        {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
+    </div>
+    <i class="bi bi-chevron-down"></i>
                                 <div class="user-details">
                                     <div class="user-name" title="{{ $item->peminjaman->mahasiswa->name ?? '-' }}">
                                         {{ $item->peminjaman->mahasiswa->name ?? '-' }}
