@@ -29,6 +29,7 @@
             left: 0;
             padding: 20px;
             overflow-y: auto;
+            z-index: 1000;
         }
 
         .sidebar h4 {
@@ -65,7 +66,6 @@
             position: relative;
         }
 
-        /* Badge untuk notifikasi di sidebar */
         .sidebar a .badge {
             position: absolute;
             right: 10px;
@@ -84,7 +84,6 @@
             50% { transform: translateY(-50%) scale(1.1); }
         }
 
-        /* Garis indikator kiri */
         .sidebar a::before {
             content: '';
             position: absolute;
@@ -98,7 +97,6 @@
             transition: height 0.3s ease;
         }
 
-        /* Background effect saat hover */
         .sidebar a::after {
             content: '';
             position: absolute;
@@ -117,13 +115,8 @@
             transform: translateX(5px);
         }
 
-        .sidebar a:hover::before {
-            height: 70%;
-        }
-
-        .sidebar a:hover::after {
-            left: 0;
-        }
+        .sidebar a:hover::before { height: 70%; }
+        .sidebar a:hover::after { left: 0; }
 
         .sidebar a.active {
             background-color: rgba(255, 255, 255, 0.2);
@@ -139,13 +132,12 @@
             background-color: #676666;
         }
 
-        .sidebar a.active i {
-            transform: scale(1.1);
-        }
+        .sidebar a.active i { transform: scale(1.1); }
 
         .main-content {
             margin-left: 240px;
             padding: 20px;
+            min-height: 100vh;
         }
 
         .navbar {
@@ -163,7 +155,7 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
 
-        /* ✅ Notification Bell Styles */
+        /* ========== NOTIFICATION BELL ========== */
         .notification-bell {
             position: relative;
             cursor: pointer;
@@ -204,7 +196,7 @@
             50% { transform: translateY(-5px); }
         }
 
-        /* ✅ Notification Dropdown */
+        /* ========== NOTIFICATION DROPDOWN ========== */
         .notification-dropdown {
             position: absolute;
             top: 100%;
@@ -216,7 +208,7 @@
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             display: none;
-            z-index: 1000;
+            z-index: 1050;
             overflow: hidden;
         }
 
@@ -226,14 +218,8 @@
         }
 
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .notification-dropdown-header {
@@ -268,9 +254,7 @@
             color: inherit;
         }
 
-        .notification-item:hover {
-            background: #f8f9fa;
-        }
+        .notification-item:hover { background: #f8f9fa; }
 
         .notification-item.unread {
             background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
@@ -289,9 +273,7 @@
             flex-shrink: 0;
         }
 
-        .notification-item-content {
-            flex: 1;
-        }
+        .notification-item-content { flex: 1; }
 
         .notification-item-title {
             font-weight: 600;
@@ -338,9 +320,7 @@
             gap: 6px;
         }
 
-        .notification-dropdown-footer a:hover {
-            color: #0a58ca;
-        }
+        .notification-dropdown-footer a:hover { color: #0a58ca; }
 
         .notification-empty {
             padding: 40px 20px;
@@ -354,7 +334,7 @@
             opacity: 0.5;
         }
 
-        /* Gradient backgrounds for notification icons */
+        /* Gradient backgrounds */
         .bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .bg-gradient-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
         .bg-gradient-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
@@ -362,24 +342,43 @@
         .bg-gradient-warning { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
         .bg-gradient-secondary { background: linear-gradient(135deg, #a8caba 0%, #5d4e6d 100%); }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        /* TABLET (577px - 991px): sidebar menyempit jadi ikon */
+        @media (max-width: 991px) and (min-width: 577px) {
             .sidebar {
                 width: 70px;
+                padding: 15px 8px;
+                overflow: visible;
             }
 
             .sidebar h4,
-            .sidebar a span {
+            .sidebar a span,
+            .sidebar a .badge {
                 display: none;
             }
 
             .sidebar a {
                 justify-content: center;
-                padding: 12px;
+                padding: 12px 0;
+                border: 2px solid transparent;
             }
 
             .sidebar a i {
                 margin-right: 0;
+                font-size: 22px;
+                width: auto;
+            }
+
+            .sidebar a:hover {
+                transform: none;
+            }
+
+            .sidebar a::before,
+            .sidebar a::after {
+                display: none;
             }
 
             .main-content {
@@ -388,12 +387,136 @@
 
             .notification-dropdown {
                 width: 320px;
-                right: -80px;
+                right: -60px;
+            }
+        }
+
+        /* MOBILE (≤ 576px): sidebar jadi bottom navigation */
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                padding: 6px 4px 10px;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: center;
+                overflow: visible;
+                box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
+                z-index: 1001;
+            }
+
+            .sidebar h4 {
+                display: none;
+            }
+
+            .sidebar a {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 6px 4px;
+                margin-bottom: 0;
+                border: none !important;
+                border-radius: 10px;
+                flex: 1;
+                text-align: center;
+                transform: none !important;
+                min-width: 0;
+                overflow: visible;
+            }
+
+            .sidebar a i {
+                margin-right: 0;
+                font-size: 19px;
+                margin-bottom: 2px;
+                width: auto;
+            }
+
+            .sidebar a span {
+                display: block;
+                font-size: 9px;
+                font-weight: 500;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
+            }
+
+            .sidebar a .badge {
+                position: absolute;
+                top: -4px;
+                right: 4px;
+                transform: none;
+                font-size: 8px;
+                padding: 2px 5px;
+                animation: none;
+            }
+
+            .sidebar a:hover {
+                transform: none !important;
+                border: none !important;
+            }
+
+            .sidebar a.active {
+                background-color: rgba(255, 255, 255, 0.25);
+                border: none !important;
+                box-shadow: none;
+            }
+
+            .sidebar a::before,
+            .sidebar a::after {
+                display: none;
+            }
+
+            /* Beri ruang bawah agar konten tidak tertutup bottom nav */
+            .main-content {
+                margin-left: 0;
+                padding: 12px 12px 80px;
+            }
+
+            /* Navbar atas */
+            .navbar {
+                padding: 10px 14px;
+                margin-bottom: 14px;
+            }
+
+            .navbar h5 {
+                font-size: 14px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 140px;
+            }
+
+            /* Sembunyikan nama user */
+            .username-text {
+                display: none;
+            }
+
+            .notification-bell {
+                margin-right: 12px;
+            }
+
+            /* Notification dropdown full width */
+            .notification-dropdown {
+                width: calc(100vw - 24px);
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                margin-top: 12px;
+            }
+
+            .content {
+                padding: 16px;
+                min-height: auto;
             }
         }
     </style>
 
-    {{-- Custom styles dari halaman child --}}
     @stack('styles')
 </head>
 
@@ -413,12 +536,11 @@
             <i class="bi bi-book"></i>
             <span>Data Buku</span>
         </a>
-        {{-- ✅ Menu Notifikasi dengan Badge --}}
         <a href="{{ route('mahasiswa.notifikasi.index') }}" class="{{ request()->routeIs('mahasiswa.notifikasi.*') ? 'active' : '' }}">
             <i class="bi bi-bell"></i>
             <span>Notifikasi</span>
             @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-            <span class="badge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
+                <span class="badge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
             @endif
         </a>
         <a href="{{ route('mahasiswa.pengaturan.index') }}" class="{{ request()->routeIs('mahasiswa.pengaturan.index') ? 'active' : '' }}">
@@ -441,21 +563,19 @@
         <div class="navbar d-flex justify-content-between align-items-center">
             <h5 class="m-0">@yield('page-title', 'Dashboard Mahasiswa')</h5>
             <div class="d-flex align-items-center">
-                {{-- ✅ Notification Bell Dropdown --}}
+                {{-- Notification Bell Dropdown --}}
                 <div class="notification-bell" id="notificationBell">
                     <i class="bi bi-bell-fill notification-bell-icon"></i>
                     @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-                    <span class="notification-badge" id="topBadge">{{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}</span>
+                        <span class="notification-badge" id="topBadge">{{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}</span>
                     @endif
 
-                    {{-- Dropdown --}}
                     <div class="notification-dropdown" id="notificationDropdown">
                         <div class="notification-dropdown-header">
                             <h6><i class="bi bi-bell me-2"></i>Notifikasi</h6>
                             <small><span id="unreadCountText">{{ $unreadNotifCount ?? 0 }}</span> Belum Dibaca</small>
                         </div>
                         <div class="notification-dropdown-body" id="notificationList">
-                            {{-- Akan diisi via AJAX --}}
                             <div class="text-center py-3">
                                 <div class="spinner-border spinner-border-sm text-primary" role="status">
                                     <span class="visually-hidden">Loading...</span>
@@ -472,8 +592,8 @@
                 </div>
 
                 {{-- User Info --}}
-                <span class="text-muted me-3">{{ Auth::user()->name ?? 'Mahasiswa' }}</span>
-                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'Mahasiswa') }}" 
+                <span class="text-muted me-3 username-text">{{ Auth::user()->name ?? 'Mahasiswa' }}</span>
+                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'Mahasiswa') }}"
                      class="rounded-circle" width="40" height="40" alt="User">
             </div>
         </div>
@@ -487,7 +607,6 @@
     {{-- JS Bootstrap --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    {{-- ✅ Notification Dropdown Script --}}
     <script>
         // Toggle notification dropdown
         const notificationBell = document.getElementById('notificationBell');
@@ -497,28 +616,25 @@
             notificationBell.addEventListener('click', function(e) {
                 e.stopPropagation();
                 notificationDropdown.classList.toggle('show');
-                
-                // Load notifications via AJAX
                 if (notificationDropdown.classList.contains('show')) {
                     loadNotifications();
                 }
             });
         }
 
-        // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
             if (!notificationBell.contains(e.target)) {
                 notificationDropdown.classList.remove('show');
             }
         });
 
-        // ✅ Load notifications via AJAX (FIXED ROUTE)
+        // Load notifications via AJAX
         function loadNotifications() {
             fetch('{{ route("mahasiswa.notifikasi.latest") }}')
                 .then(response => response.json())
                 .then(data => {
                     const notificationList = document.getElementById('notificationList');
-                    
+
                     if (data.success && data.notifikasi && data.notifikasi.length > 0) {
                         let html = '';
                         data.notifikasi.forEach(notif => {
@@ -526,7 +642,7 @@
                             const iconBg = getNotificationBgClass(notif.tipe);
                             const icon = getNotificationIcon(notif.tipe);
                             const timeAgo = getTimeAgo(notif.created_at);
-                            
+
                             html += `
                                 <a href="{{ url('/mahasiswa/notifikasi') }}/${notif.id}" class="notification-item ${unreadClass}">
                                     <div class="notification-item-icon ${iconBg}">
@@ -543,8 +659,6 @@
                             `;
                         });
                         notificationList.innerHTML = html;
-                        
-                        // Update badge count
                         updateBadgeCount(data.unread_count || 0);
                     } else {
                         notificationList.innerHTML = `
@@ -567,11 +681,11 @@
                 });
         }
 
-        // ✅ Update badge count
+        // Update badge count
         function updateBadgeCount(count) {
-            const badges = document.querySelectorAll('.notification-badge, .badge');
+            const badges = document.querySelectorAll('.notification-badge, .sidebar a .badge');
             const unreadText = document.getElementById('unreadCountText');
-            
+
             badges.forEach(badge => {
                 if (count > 0) {
                     badge.textContent = count > 9 ? '9+' : count;
@@ -580,13 +694,10 @@
                     badge.style.display = 'none';
                 }
             });
-            
-            if (unreadText) {
-                unreadText.textContent = count;
-            }
+
+            if (unreadText) unreadText.textContent = count;
         }
 
-        // Helper functions
         function getNotificationBgClass(tipe) {
             const colors = {
                 'peminjaman_disetujui': 'bg-gradient-success',
@@ -623,7 +734,7 @@
             const date = new Date(dateString);
             const now = new Date();
             const seconds = Math.floor((now - date) / 1000);
-            
+
             if (seconds < 60) return 'Baru saja';
             if (seconds < 3600) return Math.floor(seconds / 60) + ' menit lalu';
             if (seconds < 86400) return Math.floor(seconds / 3600) + ' jam lalu';
@@ -638,32 +749,21 @@
 
         function escapeHtml(text) {
             if (!text) return '';
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
-        // ✅ Auto-refresh notification count every 30 seconds (FIXED ROUTE)
+        // Auto-refresh notification count every 30 seconds
         setInterval(function() {
             fetch('{{ route("mahasiswa.notifikasi.count") }}')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        updateBadgeCount(data.count || 0);
-                    }
+                    if (data.success) updateBadgeCount(data.count || 0);
                 })
-                .catch(error => {
-                    console.error('Error fetching notification count:', error);
-                });
+                .catch(error => console.error('Error fetching notification count:', error));
         }, 30000);
     </script>
 
-    {{-- Custom scripts dari halaman child --}}
     @stack('scripts')
 </body>
 </html>

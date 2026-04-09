@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    {{-- ✅ TAMBAHAN: Meta tag untuk base URL --}}
     <meta name="base-url" content="{{ url('/') }}">
 
     <title>{{ config('app.name', 'Admin Dashboard') }} - @yield('title', 'Dashboard')</title>
@@ -18,567 +17,571 @@
 
     <!-- Custom CSS -->
     <style>
-        /* admin-layout.css - Complete Admin Layout Styles */
-
-:root {
-    --sidebar-width: 280px;
-    --header-height: 70px;
-    --primary-color: #4e73df;
-    --sidebar-bg: #1a1f36;
-    --sidebar-hover: #252b48;
-    --accent-color: #5e72e4;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
-    overflow-x: hidden;
-}
-
-/* ========== SIDEBAR STYLES ========== */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--sidebar-width);
-    height: 100vh;
-    background: linear-gradient(180deg, #1a1f36 0%, #0f1419 100%);
-    padding-top: 20px;
-    transition: all 0.3s;
-    z-index: 1000;
-    overflow-y: auto;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
-}
-
-.sidebar-brand {
-    padding: 0 25px 25px;
-    text-align: center;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 10px;
-}
-
-.sidebar-brand h4 {
-    color: white;
-    font-weight: 700;
-    margin: 0;
-    font-size: 1.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-}
-
-.sidebar-brand h4 i {
-    font-size: 1.8rem;
-    color: var(--accent-color);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-.sidebar-menu {
-    list-style: none;
-    padding: 20px 15px;
-}
-
-.sidebar-menu li {
-    margin-bottom: 6px;
-}
-
-.sidebar-menu a {
-    display: flex;
-    align-items: center;
-    padding: 14px 18px;
-    color: rgba(255, 255, 255, 0.7);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-    font-weight: 500;
-    border: 2px solid transparent;
-}
-
-.sidebar-menu a::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 0%;
-    width: 4px;
-    background: linear-gradient(180deg, #5e72e4 0%, #825ee4 100%);
-    border-radius: 0 4px 4px 0;
-    transition: height 0.3s ease;
-}
-
-.sidebar-menu a::after {
-    content: '';
-    position: absolute;
-    right: -100%;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(94, 114, 228, 0.2));
-    transition: right 0.4s ease;
-}
-
-.sidebar-menu a:hover {
-    background: var(--sidebar-hover);
-    color: white;
-    transform: translateX(8px);
-    border: 2px solid rgba(94, 114, 228, 0.3);
-}
-
-.sidebar-menu a:hover::before {
-    height: 70%;
-}
-
-.sidebar-menu a:hover::after {
-    right: 0;
-}
-
-.sidebar-menu a.active {
-    background: linear-gradient(90deg, rgba(94, 114, 228, 0.2) 0%, rgba(94, 114, 228, 0.05) 100%);
-    color: white;
-    border: 2px solid rgba(94, 114, 228, 0.4);
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(94, 114, 228, 0.3);
-}
-
-.sidebar-menu a.active::before {
-    height: 80%;
-    width: 5px;
-}
-
-.sidebar-menu a.active i {
-    color: #5e72e4;
-    transform: scale(1.15);
-}
-
-.sidebar-menu a i {
-    margin-right: 14px;
-    font-size: 1.3rem;
-    width: 28px;
-    z-index: 2;
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.sidebar-menu a span {
-    z-index: 2;
-    position: relative;
-}
-
-.menu-section {
-    padding: 25px 20px 12px;
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: 700;
-    position: relative;
-}
-
-.menu-section::after {
-    content: '';
-    position: absolute;
-    bottom: 8px;
-    left: 20px;
-    right: 20px;
-    height: 2px;
-    background: linear-gradient(90deg, rgba(94, 114, 228, 0.3), transparent);
-}
-
-.menu-badge {
-    margin-left: auto;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    box-shadow: 0 2px 8px rgba(245, 87, 108, 0.4);
-    z-index: 2;
-    position: relative;
-}
-
-/* ========== MAIN CONTENT ========== */
-.main-content {
-    margin-left: var(--sidebar-width);
-    min-height: 100vh;
-    transition: all 0.3s;
-}
-
-.top-navbar {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
-    height: var(--header-height);
-    padding: 0 35px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    border-bottom: 3px solid #5e72e4;
-}
-
-.navbar-left {
-    display: flex;
-    align-items: center;
-}
-
-.navbar-left h5 {
-    color: #2d3748;
-    font-weight: 700;
-    margin: 0;
-    font-size: 1.3rem;
-}
-
-.menu-toggle {
-    background: none;
-    border: none;
-    font-size: 1.6rem;
-    color: #5a5c69;
-    cursor: pointer;
-    margin-right: 20px;
-    display: none;
-    transition: all 0.3s;
-}
-
-.menu-toggle:hover {
-    color: var(--accent-color);
-    transform: scale(1.1);
-}
-
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-/* ========== NOTIFICATION STYLES ========== */
-.notification-icon {
-    position: relative;
-    background: #f0f4ff;
-    width: 45px;
-    height: 45px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    border: 2px solid transparent;
-}
-
-.notification-icon:hover {
-    background: var(--accent-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(94, 114, 228, 0.4);
-    border: 2px solid var(--accent-color);
-}
-
-.notification-icon:hover i {
-    color: white;
-}
-
-.notification-icon i {
-    font-size: 1.3rem;
-    color: var(--accent-color);
-    transition: all 0.3s;
-}
-
-.notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    font-weight: 700;
-    box-shadow: 0 2px 8px rgba(245, 87, 108, 0.5);
-    animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-.notification-dropdown {
-    width: 400px;
-    max-height: 500px;
-    overflow-y: auto;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    border-radius: 16px;
-    border: none;
-}
-
-.notification-header {
-    padding: 18px 20px;
-    background: linear-gradient(135deg, var(--accent-color) 0%, #764ba2 100%);
-    color: white;
-    font-weight: 700;
-    font-size: 1.1rem;
-    border-radius: 16px 16px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.notification-item {
-    padding: 16px 20px;
-    border-bottom: 1px solid #e9ecef;
-    transition: all 0.3s;
-    cursor: pointer;
-    display: flex;
-    gap: 15px;
-    align-items: flex-start;
-}
-
-.notification-item:hover {
-    background: #f8f9fc;
-    transform: translateX(5px);
-}
-
-.notification-item.unread {
-    background: #f0f4ff;
-    border-left: 4px solid var(--accent-color);
-}
-
-.notification-icon-small {
-    width: 45px;
-    height: 45px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.notification-icon-small i {
-    font-size: 1.3rem;
-    color: white;
-}
-
-.notification-content {
-    flex: 1;
-}
-
-.notification-title {
-    font-weight: 600;
-    color: #2d3748;
-    font-size: 0.95rem;
-    margin-bottom: 4px;
-}
-
-.notification-text {
-    color: #718096;
-    font-size: 0.85rem;
-    line-height: 1.4;
-}
-
-.notification-time {
-    color: #a0aec0;
-    font-size: 0.75rem;
-    margin-top: 6px;
-}
-
-.notification-footer {
-    padding: 12px 20px;
-    background: #f8f9fc;
-    text-align: center;
-    border-radius: 0 0 16px 16px;
-}
-
-.notification-footer a {
-    color: var(--accent-color);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s;
-}
-
-.notification-footer a:hover {
-    color: #764ba2;
-}
-
-.empty-notification {
-    padding: 40px 20px;
-    text-align: center;
-    color: #a0aec0;
-}
-
-.empty-notification i {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    opacity: 0.5;
-}
-
-/* ========== USER INFO ========== */
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    padding: 10px 16px;
-    border-radius: 12px;
-    transition: all 0.3s;
-    border: 2px solid transparent;
-}
-
-.user-info:hover {
-    background: #f0f4ff;
-    border: 2px solid rgba(94, 114, 228, 0.3);
-    transform: translateY(-2px);
-}
-
-.user-avatar {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.user-details {
-    display: flex;
-    flex-direction: column;
-}
-
-.user-name {
-    font-weight: 600;
-    color: #2d3748;
-    font-size: 0.95rem;
-}
-
-.user-role {
-    font-size: 0.75rem;
-    color: #718096;
-    text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-/* ========== CONTENT AREA ========== */
-.content-area {
-    padding: 35px;
-}
-
-/* ========== DROPDOWN MENU ========== */
-.dropdown-menu {
-    border: none;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    border-radius: 12px;
-    padding: 10px;
-    margin-top: 10px;
-}
-
-.dropdown-item {
-    padding: 12px 18px;
-    border-radius: 8px;
-    transition: all 0.3s;
-    font-weight: 500;
-}
-
-.dropdown-item:hover {
-    background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
-    transform: translateX(5px);
-    color: var(--accent-color);
-}
-
-.dropdown-item i {
-    margin-right: 12px;
-    width: 20px;
-}
-
-/* ========== RESPONSIVE ========== */
-@media (max-width: 768px) {
-    .sidebar {
-        left: calc(-1 * var(--sidebar-width));
-    }
-
-    .sidebar.active {
-        left: 0;
-    }
-
-    .main-content {
-        margin-left: 0;
-    }
-
-    .menu-toggle {
-        display: block;
-    }
-
-    .user-details {
-        display: none;
-    }
-
-    .notification-dropdown {
-        width: 320px;
-    }
-}
-
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 999;
-    backdrop-filter: blur(4px);
-}
-
-.sidebar-overlay.active {
-    display: block;
-}
-
-/* ========== SCROLLBAR ========== */
-.sidebar::-webkit-scrollbar,
-.notification-dropdown::-webkit-scrollbar {
-    width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-track,
-.notification-dropdown::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar::-webkit-scrollbar-thumb,
-.notification-dropdown::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(94, 114, 228, 0.6), rgba(94, 114, 228, 0.3));
-    border-radius: 3px;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover,
-.notification-dropdown::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(94, 114, 228, 0.8), rgba(94, 114, 228, 0.5));
-}
+        /* ========== CSS VARIABLES ========== */
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-collapsed: 72px;
+            --header-height: 64px;
+            --primary: #5e72e4;
+            --primary-dark: #4a5cd0;
+            --sidebar-bg: #16192c;
+            --sidebar-hover: #1e2340;
+            --sidebar-active-bg: rgba(94, 114, 228, 0.15);
+            --sidebar-active-border: #5e72e4;
+            --text-muted-sidebar: rgba(255,255,255,0.5);
+            --transition: 0.25s ease;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f0f2f8;
+            overflow-x: hidden;
+            color: #2d3748;
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            z-index: 1050;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: width var(--transition), left var(--transition), transform var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(94,114,228,0.4); border-radius: 4px; }
+
+        /* Brand */
+        .sidebar-brand {
+            padding: 20px 20px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+            min-height: var(--header-height);
+        }
+
+        .sidebar-brand-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand-icon i {
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-brand-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity var(--transition), width var(--transition);
+        }
+
+        /* Menu */
+        .sidebar-scroll {
+            flex: 1;
+            padding: 12px 12px 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar { width: 0; }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 2px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-muted-sidebar);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+            transition: color var(--transition);
+        }
+
+        .sidebar-menu a span.menu-label {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: opacity var(--transition);
+        }
+
+        .sidebar-menu a:hover {
+            background: var(--sidebar-hover);
+            color: rgba(255,255,255,0.9);
+        }
+
+        .sidebar-menu a:hover i {
+            color: var(--primary);
+        }
+
+        .sidebar-menu a.active {
+            background: var(--sidebar-active-bg);
+            color: white;
+            border-left: 3px solid var(--sidebar-active-border);
+            padding-left: 9px;
+        }
+
+        .sidebar-menu a.active i {
+            color: var(--primary);
+        }
+
+        .menu-section {
+            padding: 16px 12px 6px;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity var(--transition);
+        }
+
+        .menu-badge {
+            margin-left: auto;
+            flex-shrink: 0;
+            background: #f5576c;
+            color: white;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            line-height: 1.4;
+            transition: opacity var(--transition);
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            transition: margin-left var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== TOP NAVBAR ========== */
+        .top-navbar {
+            background: white;
+            height: var(--header-height);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e8ecf4;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .navbar-left h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #4a5568;
+            font-size: 1.1rem;
+            transition: all var(--transition);
+            flex-shrink: 0;
+        }
+
+        .menu-toggle:hover {
+            background: #f7f8fc;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Desktop toggle — always visible */
+        .menu-toggle-desktop {
+            display: flex;
+        }
+
+        /* Mobile toggle — only visible on small screens */
+        .menu-toggle-mobile {
+            display: none;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ========== NOTIFICATION ========== */
+        .notif-btn {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            background: #f7f8fc;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: #4a5568;
+            font-size: 1rem;
+        }
+
+        .notif-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #f5576c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.62rem;
+            font-weight: 700;
+            border: 2px solid white;
+        }
+
+        .notification-dropdown {
+            width: 360px;
+            max-height: 480px;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            border-radius: var(--radius-lg);
+            border: 1px solid #e8ecf4;
+        }
+
+        .notification-dropdown::-webkit-scrollbar { width: 4px; }
+        .notification-dropdown::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+        .notification-header {
+            padding: 14px 18px;
+            background: var(--sidebar-bg);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            sticky: top;
+        }
+
+        .notification-item {
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f3f8;
+            transition: background var(--transition);
+            cursor: pointer;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .notification-item:hover { background: #f7f8fc; }
+
+        .notification-item.unread {
+            background: #f0f4ff;
+            border-left: 3px solid var(--primary);
+        }
+
+        .notification-icon-small {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-icon-small i { font-size: 1rem; color: white; }
+
+        .notification-content { flex: 1; min-width: 0; }
+
+        .notification-title {
+            font-weight: 600;
+            color: #1a202c;
+            font-size: 0.85rem;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .notification-text {
+            color: #718096;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            color: #a0aec0;
+            font-size: 0.72rem;
+            margin-top: 5px;
+        }
+
+        .notification-footer {
+            padding: 12px 18px;
+            background: #f7f8fc;
+            text-align: center;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            border-top: 1px solid #e8ecf4;
+        }
+
+        .notification-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .empty-notification {
+            padding: 32px 20px;
+            text-align: center;
+            color: #a0aec0;
+        }
+
+        .empty-notification i { font-size: 2rem; margin-bottom: 10px; opacity: 0.5; display: block; }
+        .empty-notification p { font-size: 0.85rem; margin: 0; }
+
+        /* ========== USER PROFILE ========== */
+        .user-profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px 6px 6px;
+            border-radius: var(--radius-md);
+            border: 1px solid #e2e8f0;
+            background: white;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .user-profile-btn:hover {
+            background: #f7f8fc;
+            border-color: var(--primary);
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1a202c;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+            line-height: 1.2;
+        }
+
+        .user-role {
+            font-size: 0.7rem;
+            color: #718096;
+            text-transform: capitalize;
+            line-height: 1.2;
+        }
+
+        .user-profile-btn .bi-chevron-down {
+            font-size: 0.7rem;
+            color: #a0aec0;
+            flex-shrink: 0;
+        }
+
+        /* ========== CONTENT ========== */
+        .content-area {
+            padding: 28px;
+            flex: 1;
+        }
+
+        /* ========== DROPDOWN ========== */
+        .dropdown-menu {
+            border: 1px solid #e8ecf4;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            border-radius: var(--radius-md);
+            padding: 8px;
+            margin-top: 8px;
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dropdown-item:hover {
+            background: #f0f4ff;
+            color: var(--primary);
+        }
+
+        .dropdown-item i { width: 16px; text-align: center; }
+
+        /* ========== SIDEBAR OVERLAY ========== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+            backdrop-filter: blur(2px);
+        }
+
+        .sidebar-overlay.active { display: block; }
+
+        /* ========== RESPONSIVE ========== */
+
+        /* Tablet (768px - 1023px): sidebar narrows */
+        @media (max-width: 1023px) and (min-width: 769px) {
+            .content-area { padding: 20px; }
+        }
+
+        /* Mobile (≤768px): sidebar slides off-screen */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+
+            .menu-toggle-desktop { display: none; }
+            .menu-toggle-mobile { display: flex; }
+
+            .content-area { padding: 16px; }
+
+            .notification-dropdown { width: 300px; }
+
+            /* Hide user name text on very small screens, keep avatar */
+            .user-details { display: none; }
+            .user-profile-btn {
+                padding: 5px;
+                border-radius: 50%;
+            }
+            .user-profile-btn .bi-chevron-down { display: none; }
+
+            .navbar-left h5 { font-size: 0.9rem; }
+
+            .top-navbar { padding: 0 16px; }
+        }
+
+        /* Small mobile (≤480px) */
+        @media (max-width: 480px) {
+            .notification-dropdown {
+                width: calc(100vw - 32px);
+                right: -8px !important;
+            }
+        }
+
+        /* Large screens: ensure name always visible */
+        @media (min-width: 769px) {
+            .user-details { display: flex !important; }
+        }
     </style>
 
     @stack('styles')
@@ -587,133 +590,148 @@ body {
 <body>
     <!-- Sidebar Overlay (Mobile) -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <h4><i class="bi bi-mortarboard-fill"></i> AdminPASIM</h4>
+            <div class="sidebar-brand-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <span class="sidebar-brand-text">AdminPASIM</span>
         </div>
 
-        <ul class="sidebar-menu">
-            <li>
-                <a href="{{ route('admin.dashboard') }}" 
-                   class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            
-            <div class="menu-section">Management</div>
-            
-            <li>
-                <a href="{{ route('admin.users.index') }}" 
-                   class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                    <i class="bi bi-people-fill"></i>
-                    <span>Kelola User</span>
-                </a>
-            </li>
-            
-            <li>
-                <a href="{{ route('admin.mahasiswa.index') }}" 
-                   class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}"
-                   id="mahasiswaLink">
-                    <i class="bi bi-person-badge-fill"></i>
-                    <span>Data Mahasiswa</span>
-                    @php
-                        $mahasiswaBaru = \App\Models\Mahasiswa::whereDate('created_at', today())->count();
-                    @endphp
-                    @if($mahasiswaBaru > 0)
-                        <span class="menu-badge" id="mahasiswaBadge">{{ $mahasiswaBaru }}</span>
-                    @endif
-                </a>
-            </li>
-            
-            <li>
-                <a href="{{ route('admin.buku.index') }}" 
-                   class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
-                    <i class="bi bi-book-fill"></i>
-                    <span>Kelola Buku</span>
-                </a>
-            </li>
-            
-            <div class="menu-section">Transaksi</div>
-            
-            <li>
-                <a href="{{ route('admin.peminjaman.index') }}" 
-                   class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}"
-                   id="peminjamanLink">
-                    <i class="bi bi-journal-text"></i>
-                    <span>Peminjaman</span>
-                    @php
-                        $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
-                    @endphp
-                    @if($peminjamanAktif > 0)
-                        <span class="menu-badge" id="peminjamanBadge">{{ $peminjamanAktif }}</span>
-                    @endif
-                </a>
-            </li>
-            
-            <li>
-                <a href="{{ route('admin.perpanjangan.index') }}" 
-                   class="{{ request()->routeIs('admin.perpanjangan.*') ? 'active' : '' }}"
-                   id="perpanjanganLink">
-                    <i class="bi bi-calendar-check"></i>
-                    <span>Perpanjangan</span>
-                    @php
-                        $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
-                    @endphp
-                    @if($perpanjanganMenunggu > 0)
-                        <span class="menu-badge" id="perpanjanganBadge">{{ $perpanjanganMenunggu }}</span>
-                    @endif
-                </a>
-            </li>
-            
-            <div class="menu-section">Komunikasi</div>
-            
-            <li>
-                <a href="{{ route('admin.notifikasi.index') }}" 
-                   class="{{ request()->routeIs('admin.notifikasi.*') ? 'active' : '' }}"
-                   id="notifikasiLink">
-                    <i class="bi bi-bell-fill"></i>
-                    <span>Notifikasi</span>
-                    @php
-                        $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
-                            ->where('dibaca', false)
-                            ->count();
-                    @endphp
-                    @if($unreadNotifCount > 0)
-                        <span class="menu-badge" id="notifikasiBadge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
-                    @endif
-                </a>
-            </li>
-            
-            <div class="menu-section">Laporan</div>
-            
-            <li>
-                <a href="{{ route('admin.laporan.index') }}" 
-                   class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-text-fill"></i>
-                    <span>Laporan Petugas</span>
-                </a>
-            </li>
-        </ul>
+        <div class="sidebar-scroll">
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span class="menu-label">Dashboard</span>
+                    </a>
+                </li>
+
+                <div class="menu-section">Management</div>
+
+                <li>
+                    <a href="{{ route('admin.users.index') }}"
+                       class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                        <i class="bi bi-people-fill"></i>
+                        <span class="menu-label">Kelola User</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('admin.mahasiswa.index') }}"
+                       class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}"
+                       id="mahasiswaLink">
+                        <i class="bi bi-person-badge-fill"></i>
+                        <span class="menu-label">Data Mahasiswa</span>
+                        @php
+                            $mahasiswaBaru = \App\Models\Mahasiswa::whereDate('created_at', today())->count();
+                        @endphp
+                        @if($mahasiswaBaru > 0)
+                            <span class="menu-badge" id="mahasiswaBadge">{{ $mahasiswaBaru }}</span>
+                        @endif
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('admin.buku.index') }}"
+                       class="{{ request()->routeIs('admin.buku.*') ? 'active' : '' }}">
+                        <i class="bi bi-book-fill"></i>
+                        <span class="menu-label">Kelola Buku</span>
+                    </a>
+                </li>
+
+                <div class="menu-section">Transaksi</div>
+
+                <li>
+                    <a href="{{ route('admin.peminjaman.index') }}"
+                       class="{{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}"
+                       id="peminjamanLink">
+                        <i class="bi bi-journal-text"></i>
+                        <span class="menu-label">Peminjaman</span>
+                        @php
+                            $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
+                        @endphp
+                        @if($peminjamanAktif > 0)
+                            <span class="menu-badge" id="peminjamanBadge">{{ $peminjamanAktif }}</span>
+                        @endif
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('admin.perpanjangan.index') }}"
+                       class="{{ request()->routeIs('admin.perpanjangan.*') ? 'active' : '' }}"
+                       id="perpanjanganLink">
+                        <i class="bi bi-calendar-check"></i>
+                        <span class="menu-label">Perpanjangan</span>
+                        @php
+                            $perpanjanganMenunggu = \App\Models\Perpanjangan::where('status', 'menunggu')->count();
+                        @endphp
+                        @if($perpanjanganMenunggu > 0)
+                            <span class="menu-badge" id="perpanjanganBadge">{{ $perpanjanganMenunggu }}</span>
+                        @endif
+                    </a>
+                </li>
+
+                <div class="menu-section">Komunikasi</div>
+
+                <li>
+                    <a href="{{ route('admin.notifikasi.index') }}"
+                       class="{{ request()->routeIs('admin.notifikasi.*') ? 'active' : '' }}"
+                       id="notifikasiLink">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="menu-label">Notifikasi</span>
+                        @php
+                            $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
+                                ->where('dibaca', false)
+                                ->count();
+                        @endphp
+                        @if($unreadNotifCount > 0)
+                            <span class="menu-badge" id="notifikasiBadge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
+                        @endif
+                    </a>
+                </li>
+
+                <div class="menu-section">Laporan</div>
+
+                <li>
+                    <a href="{{ route('admin.laporan.index') }}"
+                       class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                        <span class="menu-label">Laporan Petugas</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </aside>
 
-    <main class="main-content">
+    <main class="main-content" id="mainContent">
         <nav class="top-navbar">
             <div class="navbar-left">
-                <button class="menu-toggle" id="menuToggle"><i class="bi bi-list"></i></button>
+                <!-- Mobile toggle -->
+                <button class="menu-toggle menu-toggle-mobile" id="menuToggleMobile" aria-label="Toggle menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <!-- Desktop toggle -->
+                <button class="menu-toggle menu-toggle-desktop" id="menuToggleDesktop" aria-label="Toggle sidebar">
+                    <i class="bi bi-layout-sidebar"></i>
+                </button>
                 <h5>@yield('page-title', 'Dashboard')</h5>
             </div>
+
             <div class="navbar-right">
+                <!-- Notification -->
                 <div class="dropdown">
-                    <div class="notification-icon" data-bs-toggle="dropdown" id="notificationIcon">
+                    <div class="notif-btn" data-bs-toggle="dropdown" id="notificationIcon" role="button" aria-label="Notifikasi">
                         <i class="bi bi-bell-fill"></i>
                         <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
                     </div>
-                    <div class="dropdown-menu dropdown-menu-end notification-dropdown">
+                    <div class="dropdown-menu dropdown-menu-end notification-dropdown p-0">
                         <div class="notification-header">
                             <span>Notifikasi</span>
-                            <button class="btn btn-sm btn-light" onclick="markAllAsRead()" style="font-size: 0.75rem; padding: 4px 10px;">
+                            <button class="btn btn-sm" onclick="markAllAsRead()"
+                                style="font-size: 0.72rem; padding: 3px 8px; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px;">
                                 <i class="bi bi-check-all"></i> Tandai Semua
                             </button>
                         </div>
@@ -724,13 +742,14 @@ body {
                             </div>
                         </div>
                         <div class="notification-footer">
-                            <a href="{{ route('admin.notifikasi.index') }}">Lihat Semua Notifikasi</a>
+                            <a href="{{ route('admin.notifikasi.index') }}">Lihat Semua Notifikasi →</a>
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- User Profile -->
                 <div class="dropdown">
-                    <div class="user-info" data-bs-toggle="dropdown">
+                    <div class="user-profile-btn" data-bs-toggle="dropdown" role="button">
                         <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}</div>
                         <div class="user-details">
                             <span class="user-name">{{ Auth::user()->name ?? 'Admin' }}</span>
@@ -739,13 +758,19 @@ body {
                         <i class="bi bi-chevron-down"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <div style="padding: 12px 14px 10px; border-bottom: 1px solid #f1f3f8;">
+                                <div style="font-weight: 600; font-size: 0.9rem; color: #1a202c;">{{ Auth::user()->name ?? 'Admin' }}</div>
+                                <div style="font-size: 0.75rem; color: #718096;">{{ Auth::user()->email ?? '' }}</div>
+                            </div>
+                        </li>
                         <li><a class="dropdown-item" href="{{ route('admin.profile.index') }}">
                             <i class="bi bi-person-fill"></i> Profil Saya</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li><hr class="dropdown-divider" style="margin: 6px 8px;"></li>
                         <li>
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
-                                <button type="submit" class="dropdown-item text-danger">
+                                <button type="submit" class="dropdown-item text-danger" style="width: 100%; background: none; border: none; text-align: left; cursor: pointer;">
                                     <i class="bi bi-box-arrow-right"></i> Logout
                                 </button>
                             </form>
@@ -754,7 +779,7 @@ body {
                 </div>
             </div>
         </nav>
-        
+
         <div class="content-area">
             @yield('content')
         </div>
@@ -763,47 +788,75 @@ body {
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- ✅ CUSTOM JAVASCRIPT - DIPERBAIKI -->
     <script>
-        // ========== MOBILE MENU ==========
-        const menuToggle = document.getElementById('menuToggle');
+        // ========== SIDEBAR TOGGLE ==========
         const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const menuToggleMobile = document.getElementById('menuToggleMobile');
+        const menuToggleDesktop = document.getElementById('menuToggleDesktop');
 
-        if (menuToggle) {
-            menuToggle.addEventListener('click', function() {
+        let sidebarCollapsed = false;
+
+        // Desktop toggle: collapse sidebar
+        if (menuToggleDesktop) {
+            menuToggleDesktop.addEventListener('click', function () {
+                sidebarCollapsed = !sidebarCollapsed;
+
+                if (sidebarCollapsed) {
+                    sidebar.style.width = 'var(--sidebar-collapsed)';
+                    mainContent.style.marginLeft = 'var(--sidebar-collapsed)';
+                    document.querySelectorAll('.menu-label, .sidebar-brand-text, .menu-section, .menu-badge').forEach(el => {
+                        el.style.opacity = '0';
+                        el.style.width = '0';
+                        el.style.overflow = 'hidden';
+                    });
+                } else {
+                    sidebar.style.width = 'var(--sidebar-width)';
+                    mainContent.style.marginLeft = 'var(--sidebar-width)';
+                    document.querySelectorAll('.menu-label, .sidebar-brand-text, .menu-section, .menu-badge').forEach(el => {
+                        el.style.opacity = '';
+                        el.style.width = '';
+                        el.style.overflow = '';
+                    });
+                }
+            });
+        }
+
+        // Mobile toggle: slide sidebar in/out
+        if (menuToggleMobile) {
+            menuToggleMobile.addEventListener('click', function () {
                 sidebar.classList.toggle('active');
                 sidebarOverlay.classList.toggle('active');
             });
         }
 
         if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', function() {
+            sidebarOverlay.addEventListener('click', function () {
                 sidebar.classList.remove('active');
                 sidebarOverlay.classList.remove('active');
             });
         }
 
-        // Close sidebar when clicking menu on mobile
-        if (window.innerWidth <= 768) {
-            document.querySelectorAll('.sidebar-menu a').forEach(link => {
-                link.addEventListener('click', function() {
+        // Auto-close sidebar on mobile after clicking a menu item
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 768) {
                     sidebar.classList.remove('active');
                     sidebarOverlay.classList.remove('active');
-                });
+                }
             });
-        }
+        });
 
         // ========== NOTIFICATION SYSTEM ==========
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadNotifications();
-            setInterval(loadNotifications, 30000); // Refresh setiap 30 detik
+            setInterval(loadNotifications, 30000);
         });
 
         function loadNotifications() {
             const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
-            
-            // ✅ PERBAIKAN: Route tanpa /api/
+
             fetch(`${baseUrl}/admin/notifikasi/latest`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -811,54 +864,31 @@ body {
                 }
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 return response.json();
             })
-            .then(data => {
-                console.log('✅ Notifikasi loaded:', data);
-                updateNotificationUI(data.notifikasi, data.count);
-            })
-            .catch(error => {
-                console.error('❌ Error loading notifications:', error);
-            });
+            .then(data => updateNotificationUI(data.notifikasi, data.count))
+            .catch(error => console.error('Error loading notifications:', error));
         }
 
         function updateNotificationUI(notifikasi, count) {
             const badge = document.getElementById('notificationBadge');
             const list = document.getElementById('notificationList');
-            
-            if (!badge || !list) {
-                console.error('❌ Notification elements not found');
-                return;
-            }
-            
-            // Update badge
-            if (count > 0) {
-                badge.textContent = count > 99 ? '99+' : count;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
-            
-            // Update notification list
+            if (!badge || !list) return;
+
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+
             if (!notifikasi || notifikasi.length === 0) {
-                list.innerHTML = `
-                    <div class="empty-notification">
-                        <i class="bi bi-bell-slash"></i>
-                        <p>Tidak ada notifikasi</p>
-                    </div>
-                `;
+                list.innerHTML = `<div class="empty-notification"><i class="bi bi-bell-slash"></i><p>Tidak ada notifikasi</p></div>`;
                 return;
             }
-            
+
             list.innerHTML = notifikasi.map(n => {
                 const iconBg = getNotificationColor(n.tipe);
                 const icon = getNotificationIcon(n.tipe);
                 const timeAgo = formatTimeAgo(n.created_at);
                 const unreadClass = !n.dibaca ? 'unread' : '';
-                
                 return `
                     <div class="notification-item ${unreadClass}" onclick="viewNotification(${n.id})">
                         <div class="notification-icon-small" style="background: ${iconBg}">
@@ -867,9 +897,7 @@ body {
                         <div class="notification-content">
                             <div class="notification-title">${escapeHtml(n.judul)}</div>
                             <div class="notification-text">${escapeHtml(truncateText(n.isi, 60))}</div>
-                            <div class="notification-time">
-                                <i class="bi bi-clock"></i> ${timeAgo}
-                            </div>
+                            <div class="notification-time"><i class="bi bi-clock" style="font-size:0.65rem;"></i> ${timeAgo}</div>
                         </div>
                     </div>
                 `;
@@ -878,19 +906,19 @@ body {
 
         function getNotificationColor(tipe) {
             const colors = {
-                'peminjaman_baru': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                'peminjaman_disetujui': 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-                'peminjaman_ditolak': 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
-                'perpanjangan_baru': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                'perpanjangan_disetujui': 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-                'perpanjangan_ditolak': 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
-                'reminder_deadline': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-                'terlambat': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-                'user_baru': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                'buku_baru': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                'sistem': 'linear-gradient(135deg, #a8caba 0%, #5d4e6d 100%)'
+                'peminjaman_baru': '#667eea',
+                'peminjaman_disetujui': '#11998e',
+                'peminjaman_ditolak': '#eb3349',
+                'perpanjangan_baru': '#4facfe',
+                'perpanjangan_disetujui': '#11998e',
+                'perpanjangan_ditolak': '#eb3349',
+                'reminder_deadline': '#fa709a',
+                'terlambat': '#f5a623',
+                'user_baru': '#667eea',
+                'buku_baru': '#f093fb',
+                'sistem': '#a8caba'
             };
-            return colors[tipe] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            return colors[tipe] || '#667eea';
         }
 
         function getNotificationIcon(tipe) {
@@ -912,45 +940,23 @@ body {
 
         function formatTimeAgo(dateString) {
             const date = new Date(dateString);
-            const now = new Date();
-            const seconds = Math.floor((now - date) / 1000);
-            
-            const intervals = {
-                tahun: 31536000,
-                bulan: 2592000,
-                minggu: 604800,
-                hari: 86400,
-                jam: 3600,
-                menit: 60,
-                detik: 1
-            };
-            
-            for (const [name, secondsCount] of Object.entries(intervals)) {
-                const interval = Math.floor(seconds / secondsCount);
-                if (interval >= 1) {
-                    return `${interval} ${name} yang lalu`;
-                }
+            const seconds = Math.floor((new Date() - date) / 1000);
+            const intervals = { tahun: 31536000, bulan: 2592000, minggu: 604800, hari: 86400, jam: 3600, menit: 60 };
+            for (const [name, s] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / s);
+                if (interval >= 1) return `${interval} ${name} lalu`;
             }
-            
             return 'Baru saja';
         }
 
-        function truncateText(text, maxLength) {
+        function truncateText(text, max) {
             if (!text) return '';
-            if (text.length <= maxLength) return text;
-            return text.substr(0, maxLength) + '...';
+            return text.length <= max ? text : text.substr(0, max) + '...';
         }
 
         function escapeHtml(text) {
             if (!text) return '';
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.toString().replace(/[&<>"']/g, m => map[m]);
+            return text.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
         }
 
         function viewNotification(id) {
@@ -962,155 +968,69 @@ body {
         function markAsRead(id) {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
             const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
-            
             fetch(`${baseUrl}/admin/notifikasi/${id}/baca`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('✅ Notifikasi ditandai sebagai dibaca');
-                    loadNotifications();
-                }
-            })
-            .catch(error => console.error('❌ Error marking as read:', error));
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+            }).then(r => r.json()).then(d => { if (d.success) loadNotifications(); })
+              .catch(e => console.error(e));
         }
 
         function markAllAsRead() {
             if (!confirm('Tandai semua notifikasi sebagai dibaca?')) return;
-            
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
             const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
-            
             fetch(`${baseUrl}/admin/notifikasi/baca-semua`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    loadNotifications();
-                    console.log('✅ Semua notifikasi ditandai sebagai dibaca');
-                }
-            })
-            .catch(error => console.error('❌ Error marking all as read:', error));
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+            }).then(r => r.json()).then(d => { if (d.success) loadNotifications(); })
+              .catch(e => console.error(e));
         }
 
-        // ========== 🎯 BADGE MANAGEMENT SYSTEM ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            // ========== BADGE PEMINJAMAN ==========
-            const peminjamanLink = document.getElementById('peminjamanLink');
-            const peminjamanBadge = document.getElementById('peminjamanBadge');
-
-            if (peminjamanBadge) {
-                const currentCount = parseInt(peminjamanBadge.textContent) || 0;
-                const lastSeenCount = parseInt(localStorage.getItem('admin_lastSeenPeminjamanCount')) || 0;
-
-                if (currentCount <= lastSeenCount) {
-                    peminjamanBadge.style.display = 'none';
-                }
-
-                if (peminjamanLink) {
-                    peminjamanLink.addEventListener('click', function() {
-                        localStorage.setItem('admin_lastSeenPeminjamanCount', currentCount);
-                        peminjamanBadge.style.display = 'none';
-                    });
-                }
-            }
-
-            // ========== BADGE PERPANJANGAN ==========
-            const perpanjanganLink = document.getElementById('perpanjanganLink');
-            const perpanjanganBadge = document.getElementById('perpanjanganBadge');
-
-            if (perpanjanganBadge) {
-                const currentCount = parseInt(perpanjanganBadge.textContent) || 0;
-                const lastSeenCount = parseInt(localStorage.getItem('admin_lastSeenPerpanjanganCount')) || 0;
-
-                if (currentCount <= lastSeenCount) {
-                    perpanjanganBadge.style.display = 'none';
-                }
-
-                if (perpanjanganLink) {
-                    perpanjanganLink.addEventListener('click', function() {
-                        localStorage.setItem('admin_lastSeenPerpanjanganCount', currentCount);
-                        perpanjanganBadge.style.display = 'none';
-                    });
-                }
-            }
-
-            // ========== BADGE NOTIFIKASI SIDEBAR ==========
-            const notifikasiLink = document.getElementById('notifikasiLink');
-            const notifikasiBadge = document.getElementById('notifikasiBadge');
-
-            if (notifikasiBadge) {
-                const currentCount = parseInt(notifikasiBadge.textContent.replace('+', '')) || 0;
-                const lastSeenCount = parseInt(localStorage.getItem('admin_lastSeenNotifikasiCount')) || 0;
-
-                if (currentCount <= lastSeenCount) {
-                    notifikasiBadge.style.display = 'none';
-                }
-
-                if (notifikasiLink) {
-                    notifikasiLink.addEventListener('click', function() {
-                        localStorage.setItem('admin_lastSeenNotifikasiCount', currentCount);
-                        notifikasiBadge.style.display = 'none';
-                    });
-                }
-            }
-
-            // ========== BADGE MAHASISWA BARU (Per Hari) ==========
-            const mahasiswaLink = document.getElementById('mahasiswaLink');
-            const mahasiswaBadge = document.getElementById('mahasiswaBadge');
-
-            if (mahasiswaBadge) {
-                const currentCount = parseInt(mahasiswaBadge.textContent) || 0;
-                const today = new Date().toDateString();
-                const lastSeenDate = localStorage.getItem('admin_mahasiswaLastSeenDate');
-
-                // Reset jika ganti hari
-                if (lastSeenDate !== today) {
-                    localStorage.removeItem('admin_mahasiswaLastSeenCount');
-                    localStorage.setItem('admin_mahasiswaLastSeenDate', today);
-                }
-
-                const lastSeenCount = parseInt(localStorage.getItem('admin_mahasiswaLastSeenCount')) || 0;
-
-                if (currentCount <= lastSeenCount) {
-                    mahasiswaBadge.style.display = 'none';
-                }
-
-                if (mahasiswaLink) {
-                    mahasiswaLink.addEventListener('click', function() {
-                        localStorage.setItem('admin_mahasiswaLastSeenCount', currentCount);
-                        localStorage.setItem('admin_mahasiswaLastSeenDate', today);
-                        mahasiswaBadge.style.display = 'none';
-                    });
-                }
-            }
+        // ========== BADGE MANAGEMENT ==========
+        document.addEventListener('DOMContentLoaded', function () {
+            manageBadge('peminjamanBadge', 'peminjamanLink', 'admin_lastSeenPeminjamanCount');
+            manageBadge('perpanjanganBadge', 'perpanjanganLink', 'admin_lastSeenPerpanjanganCount');
+            manageBadge('notifikasiBadge', 'notifikasiLink', 'admin_lastSeenNotifikasiCount');
+            manageMahasiswaBadge();
         });
 
-        // Fungsi reset badge untuk testing
-        function resetAdminBadges() {
-            localStorage.removeItem('admin_lastSeenPeminjamanCount');
-            localStorage.removeItem('admin_lastSeenPerpanjanganCount');
-            localStorage.removeItem('admin_lastSeenNotifikasiCount');
-            localStorage.removeItem('admin_mahasiswaLastSeenCount');
-            localStorage.removeItem('admin_mahasiswaLastSeenDate');
-            location.reload();
-            console.log('✅ Admin badges reset!');
+        function manageBadge(badgeId, linkId, storageKey) {
+            const badge = document.getElementById(badgeId);
+            const link = document.getElementById(linkId);
+            if (!badge) return;
+            const currentCount = parseInt(badge.textContent.replace('+', '')) || 0;
+            const lastSeen = parseInt(localStorage.getItem(storageKey)) || 0;
+            if (currentCount <= lastSeen) badge.style.display = 'none';
+            if (link) link.addEventListener('click', () => {
+                localStorage.setItem(storageKey, currentCount);
+                badge.style.display = 'none';
+            });
         }
 
-        console.log('✅ Admin Layout & Notification System Loaded');
+        function manageMahasiswaBadge() {
+            const badge = document.getElementById('mahasiswaBadge');
+            const link = document.getElementById('mahasiswaLink');
+            if (!badge) return;
+            const currentCount = parseInt(badge.textContent) || 0;
+            const today = new Date().toDateString();
+            if (localStorage.getItem('admin_mahasiswaLastSeenDate') !== today) {
+                localStorage.removeItem('admin_mahasiswaLastSeenCount');
+                localStorage.setItem('admin_mahasiswaLastSeenDate', today);
+            }
+            const lastSeen = parseInt(localStorage.getItem('admin_mahasiswaLastSeenCount')) || 0;
+            if (currentCount <= lastSeen) badge.style.display = 'none';
+            if (link) link.addEventListener('click', () => {
+                localStorage.setItem('admin_mahasiswaLastSeenCount', currentCount);
+                localStorage.setItem('admin_mahasiswaLastSeenDate', today);
+                badge.style.display = 'none';
+            });
+        }
+
+        function resetAdminBadges() {
+            ['admin_lastSeenPeminjamanCount','admin_lastSeenPerpanjanganCount','admin_lastSeenNotifikasiCount','admin_mahasiswaLastSeenCount','admin_mahasiswaLastSeenDate']
+                .forEach(k => localStorage.removeItem(k));
+            location.reload();
+        }
     </script>
 
     @stack('scripts')

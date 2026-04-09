@@ -92,7 +92,7 @@ class PeminjamanController extends Controller
         $request->validate([
             'mahasiswa_id' => 'required|exists:users,id',
             'buku_id' => 'required|exists:buku,id',
-            'durasi_hari' => 'required|integer|min:1|max:30',
+            'durasi_hari' => 'required|integer|min:1|max:14',
         ]);
 
         DB::beginTransaction();
@@ -341,7 +341,6 @@ class PeminjamanController extends Controller
     {
         $query = Peminjaman::with(['mahasiswa', 'buku', 'petugas']);
 
-        // Terapkan filter yang sama dengan index
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -374,7 +373,6 @@ class PeminjamanController extends Controller
 
         $peminjamans = $query->orderByDesc('tanggal_pinjam')->get();
 
-        // Buat info filter untuk ditampilkan di PDF
         $filters = [];
         if ($request->filled('status'))       $filters[] = 'Status: ' . ucfirst($request->status);
         if ($request->filled('role'))         $filters[] = 'Tipe: ' . ucfirst(str_replace('_', ' ', $request->role));

@@ -474,7 +474,7 @@
                                     <div>
                                         <label style="margin: 0; color: #991B1B;">Estimasi Denda</label>
                                         <div class="amount">Rp {{ number_format($peminjaman->hitungDenda(), 0, ',', '.') }}</div>
-                                        <small style="color: #991B1B;">Denda akan bertambah Rp 2.000 per hari</small>
+                                        <small style="color: #991B1B;">Denda akan bertambah Rp 5.000 per hari</small>
                                     </div>
                                 </div>
                             </div>

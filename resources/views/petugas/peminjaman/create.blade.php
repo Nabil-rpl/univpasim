@@ -16,7 +16,6 @@
         border-radius: 20px;
         padding: 30px;
         box-shadow: var(--card-shadow);
-        margin-bottom: 2rem;
     }
 
     .section-title {
@@ -40,6 +39,12 @@
     }
 
     /* Book Catalog Styles */
+    .book-catalog-container {
+        height: calc(100vh - 180px); /* Sesuaikan dengan kebutuhan */
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
     .book-catalog {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -147,20 +152,9 @@
         border-radius: 10px;
     }
 
-    .stock-available {
-        background: #10b981;
-        color: white;
-    }
-
-    .stock-low {
-        background: #f59e0b;
-        color: white;
-    }
-
-    .stock-empty {
-        background: #ef4444;
-        color: white;
-    }
+    .stock-available { background: #10b981; color: white; }
+    .stock-low      { background: #f59e0b; color: white; }
+    .stock-empty    { background: #ef4444; color: white; }
 
     .select-indicator {
         position: absolute;
@@ -189,26 +183,11 @@
         padding: 1.5rem;
         border-radius: 15px;
         margin-bottom: 1.5rem;
-    }
-
-    .filter-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
         background: white;
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #667eea;
-        border: 2px solid #667eea;
-        cursor: pointer;
-        transition: var(--transition);
-    }
-
-    .filter-badge:hover {
-        background: #667eea;
-        color: white;
+        border-bottom: 1px solid #e2e8f0;
     }
 
     .selected-book-preview {
@@ -225,14 +204,8 @@
     }
 
     @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 
     .empty-state {
@@ -273,10 +246,10 @@
 </style>
 
 <div class="container-fluid">
-    <div class="row">
-        <!-- Left Column: Form Peminjam -->
+    <div class="row g-4">
+        <!-- Left Column: Form Peminjaman (Sticky) -->
         <div class="col-lg-4">
-            <div class="form-card sticky-top" style="top: 20px;">
+            <div class="form-card sticky-top" style="top: 20px; z-index: 20;">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4 class="mb-0">
                         <i class="bi bi-plus-circle text-primary me-2"></i>
@@ -309,20 +282,16 @@
 
                 <form action="{{ route('petugas.peminjaman.store') }}" method="POST" id="peminjamanForm">
                     @csrf
-
-                    <!-- Hidden input untuk buku_id -->
                     <input type="hidden" name="buku_id" id="selected_buku_id" value="{{ old('buku_id') }}">
 
-                    <!-- Pilih Peminjam -->
+                    <!-- Data Peminjam -->
                     <div class="section-title">
                         <i class="bi bi-person-fill"></i>
                         <span>Data Peminjam</span>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">
-                            Pilih Peminjam <span class="text-danger">*</span>
-                        </label>
+                        <label class="form-label fw-bold">Pilih Peminjam <span class="text-danger">*</span></label>
                         <select name="mahasiswa_id" id="mahasiswa_id" class="form-select @error('mahasiswa_id') is-invalid @enderror" required>
                             <option value="">-- Pilih Peminjam --</option>
                             
@@ -369,33 +338,21 @@
                     <!-- Info Peminjam -->
                     <div id="user-info" class="user-info-card d-none">
                         <div class="row g-3">
-                            <div class="col-12">
-                                <small class="text-muted d-block mb-1">Nama Lengkap</small>
-                                <strong id="user-name">-</strong>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block mb-1">Tipe</small>
-                                <span id="user-role-badge"></span>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block mb-1" id="user-identifier-label">-</small>
-                                <span id="user-identifier">-</span>
-                            </div>
-                            <div class="col-12">
-                                <small class="text-muted d-block mb-1">Email</small>
-                                <span id="user-email">-</span>
-                            </div>
+                            <div class="col-12"><small class="text-muted">Nama Lengkap</small><br><strong id="user-name">-</strong></div>
+                            <div class="col-6"><small class="text-muted">Tipe</small><br><span id="user-role-badge"></span></div>
+                            <div class="col-6"><small class="text-muted" id="user-identifier-label">-</small><br><span id="user-identifier">-</span></div>
+                            <div class="col-12"><small class="text-muted">Email</small><br><span id="user-email">-</span></div>
                         </div>
                     </div>
 
-                    <!-- Preview Buku Terpilih -->
+                    <!-- Preview Buku -->
                     <div id="selected-book-preview" class="selected-book-preview mt-4">
                         <div class="section-title" style="border-color: #11998e;">
                             <i class="bi bi-book-fill"></i>
                             <span>Buku Terpilih</span>
                         </div>
                         <div class="d-flex gap-3">
-                            <img id="preview-foto" src="" alt="Book Cover" style="width: 80px; height: 100px; object-fit: cover; border-radius: 10px;">
+                            <img id="preview-foto" src="" alt="Cover" style="width: 80px; height: 100px; object-fit: cover; border-radius: 10px;">
                             <div class="flex-grow-1">
                                 <strong id="preview-judul" class="d-block mb-2"></strong>
                                 <small class="text-muted d-block mb-1">
@@ -415,21 +372,17 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">
-                            Durasi (Hari) <span class="text-danger">*</span>
-                        </label>
+                        <label class="form-label fw-bold">Durasi (Hari) <span class="text-danger">*</span></label>
                         <select name="durasi_hari" class="form-select @error('durasi_hari') is-invalid @enderror" required>
-                            <option value="3" {{ old('durasi_hari', 3) == 3 ? 'selected' : '' }}>3 Hari</option>
-                            <option value="7" {{ old('durasi_hari') == 7 ? 'selected' : '' }}>7 Hari</option>
-                            <option value="14" {{ old('durasi_hari') == 14 ? 'selected' : '' }}>14 Hari</option>
-                            <option value="30" {{ old('durasi_hari') == 30 ? 'selected' : '' }}>30 Hari</option>
+                            <option value="3"  {{ old('durasi_hari', 7) == 3  ? 'selected' : '' }}>3 Hari</option>
+                            <option value="7"  {{ old('durasi_hari', 7) == 7  ? 'selected' : '' }}>7 Hari (Default)</option>
+                            <option value="14" {{ old('durasi_hari', 7) == 14 ? 'selected' : '' }}>14 Hari</option>
                         </select>
                         @error('durasi_hari')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <!-- Buttons -->
                     <div class="d-flex gap-2 pt-3 border-top">
                         <a href="{{ route('petugas.peminjaman.index') }}" class="btn btn-secondary flex-grow-1">
                             <i class="bi bi-x-circle me-2"></i>Batal
@@ -450,14 +403,12 @@
                     <span>Pilih Buku yang Akan Dipinjam</span>
                 </div>
 
-                <!-- Search & Filter -->
+                <!-- Search & Filter (Sticky di dalam container) -->
                 <div class="search-filter-section">
                     <div class="row g-3">
                         <div class="col-md-8">
                             <div class="input-group">
-                                <span class="input-group-text bg-white">
-                                    <i class="bi bi-search"></i>
-                                </span>
+                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
                                 <input type="text" id="searchBook" class="form-control" placeholder="Cari judul atau penulis buku...">
                             </div>
                         </div>
@@ -471,64 +422,65 @@
                     </div>
                 </div>
 
-                <!-- Book Catalog Grid -->
-                <div class="book-catalog" id="bookCatalog">
-                    @forelse($bukus as $buku)
-                    <div class="book-card" 
-                         data-buku-id="{{ $buku->id }}"
-                         data-buku-judul="{{ $buku->judul }}"
-                         data-buku-penulis="{{ $buku->penulis }}"
-                         data-buku-stok="{{ $buku->stok }}"
-                         data-buku-foto="{{ $buku->foto ? asset('storage/' . $buku->foto) : '' }}">
-                        
-                        <div class="select-indicator">
-                            <i class="bi bi-check-lg"></i>
-                        </div>
-
-                        <div class="book-card-image">
-                            @if($buku->foto && file_exists(public_path('storage/' . $buku->foto)))
-                                <img src="{{ asset('storage/' . $buku->foto) }}" alt="{{ $buku->judul }}">
-                            @else
-                                <div class="no-image">
-                                    <i class="bi bi-book"></i>
-                                    <small>No Cover</small>
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="book-card-body">
-                            <h5 class="book-title">{{ $buku->judul }}</h5>
-                            <div class="book-author">
-                                <i class="bi bi-person-fill"></i>
-                                <span>{{ $buku->penulis }}</span>
-                            </div>
+                <!-- Scrollable Book Catalog -->
+                <div class="book-catalog-container">
+                    <div class="book-catalog" id="bookCatalog">
+                        @forelse($bukus as $buku)
+                        <div class="book-card" 
+                             data-buku-id="{{ $buku->id }}"
+                             data-buku-judul="{{ $buku->judul }}"
+                             data-buku-penulis="{{ $buku->penulis }}"
+                             data-buku-stok="{{ $buku->stok }}"
+                             data-buku-foto="{{ $buku->foto ? asset('storage/' . $buku->foto) : '' }}">
                             
-                            @if($buku->kategori)
-                            <div class="mb-2">
-                                <span class="category-badge">{{ Str::limit($buku->kategori, 20) }}</span>
+                            <div class="select-indicator">
+                                <i class="bi bi-check-lg"></i>
                             </div>
-                            @endif
 
-                            <div class="book-info">
-                                <span class="book-stock {{ $buku->stok > 5 ? 'stock-available' : ($buku->stok > 0 ? 'stock-low' : 'stock-empty') }}">
-                                    <i class="bi bi-box-seam"></i>
-                                    <span>{{ $buku->stok }} tersedia</span>
-                                </span>
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar3"></i>
-                                    {{ $buku->tahun_terbit }}
-                                </small>
+                            <div class="book-card-image">
+                                @if($buku->foto && file_exists(public_path('storage/' . $buku->foto)))
+                                    <img src="{{ asset('storage/' . $buku->foto) }}" alt="{{ $buku->judul }}">
+                                @else
+                                    <div class="no-image">
+                                        <i class="bi bi-book"></i>
+                                        <small>No Cover</small>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="book-card-body">
+                                <h5 class="book-title">{{ $buku->judul }}</h5>
+                                <div class="book-author">
+                                    <i class="bi bi-person-fill"></i>
+                                    <span>{{ $buku->penulis }}</span>
+                                </div>
+                                
+                                @if($buku->kategori)
+                                <div class="mb-2">
+                                    <span class="category-badge">{{ Str::limit($buku->kategori, 20) }}</span>
+                                </div>
+                                @endif
+
+                                <div class="book-info">
+                                    <span class="book-stock {{ $buku->stok > 5 ? 'stock-available' : ($buku->stok > 0 ? 'stock-low' : 'stock-empty') }}">
+                                        <i class="bi bi-box-seam"></i>
+                                        <span>{{ $buku->stok }} tersedia</span>
+                                    </span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3"></i> {{ $buku->tahun_terbit }}
+                                    </small>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    @empty
-                    <div class="col-12">
-                        <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <p>Belum ada buku tersedia</p>
+                        @empty
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p>Belum ada buku tersedia</p>
+                            </div>
                         </div>
+                        @endforelse
                     </div>
-                    @endforelse
                 </div>
             </div>
         </div>
@@ -546,88 +498,59 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchBook = document.getElementById('searchBook');
     const filterStok = document.getElementById('filterStok');
 
-    // Handle pemilihan peminjam
+    // Pilih Peminjam
     mahasiswaSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        
+        const opt = this.options[this.selectedIndex];
         if (this.value) {
-            const role = selectedOption.dataset.role;
-            const name = selectedOption.dataset.name;
-            const email = selectedOption.dataset.email;
-            
-            document.getElementById('user-name').textContent = name;
-            document.getElementById('user-email').textContent = email;
-            
-            const roleBadge = document.getElementById('user-role-badge');
+            const role = opt.dataset.role;
+            document.getElementById('user-name').textContent = opt.dataset.name;
+            document.getElementById('user-email').textContent = opt.dataset.email;
+
+            const badge = document.getElementById('user-role-badge');
             if (role === 'mahasiswa') {
-                roleBadge.innerHTML = '<span class="badge bg-primary"><i class="bi bi-mortarboard-fill me-1"></i>Mahasiswa</span>';
+                badge.innerHTML = '<span class="badge bg-primary"><i class="bi bi-mortarboard-fill me-1"></i>Mahasiswa</span>';
                 document.getElementById('user-identifier-label').textContent = 'NIM';
-                document.getElementById('user-identifier').textContent = selectedOption.dataset.nim || '-';
+                document.getElementById('user-identifier').textContent = opt.dataset.nim || '-';
             } else {
-                roleBadge.innerHTML = '<span class="badge bg-info"><i class="bi bi-person-fill me-1"></i>Pengguna Luar</span>';
+                badge.innerHTML = '<span class="badge bg-info"><i class="bi bi-person-fill me-1"></i>Pengguna Luar</span>';
                 document.getElementById('user-identifier-label').textContent = 'No. HP';
-                document.getElementById('user-identifier').textContent = selectedOption.dataset.nohp || '-';
+                document.getElementById('user-identifier').textContent = opt.dataset.nohp || '-';
             }
-            
             userInfo.classList.remove('d-none');
         } else {
             userInfo.classList.add('d-none');
         }
     });
 
-    // Handle pemilihan buku
+    // Pilih Buku
     bookCards.forEach(card => {
         card.addEventListener('click', function() {
-            const bukuId = this.dataset.bukuId;
             const stok = parseInt(this.dataset.bukuStok);
-            
-            // Cek stok
             if (stok <= 0) {
                 alert('Maaf, stok buku ini sedang kosong.');
                 return;
             }
-            
-            // Remove selected class from all cards
+
             bookCards.forEach(c => c.classList.remove('selected'));
-            
-            // Add selected class to clicked card
             this.classList.add('selected');
-            
-            // Set hidden input value
-            selectedBukuInput.value = bukuId;
-            
-            // Update preview
+
+            selectedBukuInput.value = this.dataset.bukuId;
+
             document.getElementById('preview-judul').textContent = this.dataset.bukuJudul;
             document.getElementById('preview-penulis').textContent = this.dataset.bukuPenulis;
             document.getElementById('preview-stok').textContent = stok;
-            
-            const fotoUrl = this.dataset.bukuFoto;
-            if (fotoUrl) {
-                document.getElementById('preview-foto').src = fotoUrl;
-            } else {
-                document.getElementById('preview-foto').src = 'https://via.placeholder.com/80x100?text=No+Cover';
-            }
-            
+
+            const foto = this.dataset.bukuFoto || 'https://via.placeholder.com/80x100?text=No+Cover';
+            document.getElementById('preview-foto').src = foto;
+
             selectedBookPreview.classList.add('show');
-            
-            // Scroll to preview (smooth)
             selectedBookPreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     });
 
-    // Search functionality
-    searchBook.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        filterBooks();
-    });
-
-    // Filter by stock
-    filterStok.addEventListener('change', function() {
-        filterBooks();
-    });
-
+    // Filter Buku
     function filterBooks() {
-        const searchTerm = searchBook.value.toLowerCase();
+        const term = searchBook.value.toLowerCase();
         const stokFilter = filterStok.value;
 
         bookCards.forEach(card => {
@@ -635,49 +558,34 @@ document.addEventListener('DOMContentLoaded', function() {
             const penulis = card.dataset.bukuPenulis.toLowerCase();
             const stok = parseInt(card.dataset.bukuStok);
 
-            let matchSearch = judul.includes(searchTerm) || penulis.includes(searchTerm);
+            const matchSearch = judul.includes(term) || penulis.includes(term);
             let matchStok = true;
+            if (stokFilter === 'available') matchStok = stok > 0;
+            if (stokFilter === 'empty') matchStok = stok === 0;
 
-            if (stokFilter === 'available') {
-                matchStok = stok > 0;
-            } else if (stokFilter === 'empty') {
-                matchStok = stok === 0;
-            }
-
-            if (matchSearch && matchStok) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
+            card.style.display = (matchSearch && matchStok) ? 'block' : 'none';
         });
     }
 
-    // Form validation
+    searchBook.addEventListener('input', filterBooks);
+    filterStok.addEventListener('change', filterBooks);
+
+    // Validasi Submit
     document.getElementById('peminjamanForm').addEventListener('submit', function(e) {
         if (!selectedBukuInput.value) {
             e.preventDefault();
             alert('Silakan pilih buku terlebih dahulu!');
-            return false;
-        }
-        
-        if (!mahasiswaSelect.value) {
+        } else if (!mahasiswaSelect.value) {
             e.preventDefault();
             alert('Silakan pilih peminjam terlebih dahulu!');
-            return false;
         }
     });
 
-    // Trigger change jika ada old value
-    if (mahasiswaSelect.value) {
-        mahasiswaSelect.dispatchEvent(new Event('change'));
-    }
-
-    // Select book if old value exists
+    // Load old values
+    if (mahasiswaSelect.value) mahasiswaSelect.dispatchEvent(new Event('change'));
     if (selectedBukuInput.value) {
-        const selectedCard = document.querySelector(`[data-buku-id="${selectedBukuInput.value}"]`);
-        if (selectedCard) {
-            selectedCard.click();
-        }
+        const card = document.querySelector(`[data-buku-id="${selectedBukuInput.value}"]`);
+        if (card) card.click();
     }
 });
 </script>

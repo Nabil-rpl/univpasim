@@ -202,15 +202,8 @@
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .notification-dropdown {
@@ -233,15 +226,8 @@
         }
 
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .notification-header {
@@ -280,24 +266,11 @@
             overflow-y: auto;
         }
 
-        .notification-list::-webkit-scrollbar {
-            width: 6px;
-        }
+        .notification-list::-webkit-scrollbar { width: 6px; }
+        .notification-list::-webkit-scrollbar-track { background: #f1f1f1; }
+        .notification-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .notification-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        .notification-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .notification-list::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        .notification-list::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* ✅ UPDATED: Item notifikasi tidak bisa diklik */
         .notification-item {
             padding: 16px 20px;
             border-bottom: 1px solid #f1f5f9;
@@ -310,13 +283,8 @@
             color: inherit;
         }
 
-        .notification-item:hover {
-            background: transparent !important;
-        }
-
-        .notification-item.unread {
-            background: #eff6ff;
-        }
+        .notification-item:hover { background: transparent !important; }
+        .notification-item.unread { background: #eff6ff; }
 
         .notification-icon {
             width: 40px;
@@ -328,64 +296,19 @@
             flex-shrink: 0;
         }
 
-        .notification-icon.terlambat {
-            background: #fee2e2;
-            color: #dc2626;
-        }
+        .notification-icon.terlambat { background: #fee2e2; color: #dc2626; }
+        .notification-icon.reminder_deadline { background: #fef3c7; color: #f59e0b; }
+        .notification-icon.denda_belum_dibayar { background: #fce7f3; color: #ec4899; }
+        .notification-icon.peminjaman_disetujui { background: #dcfce7; color: #16a34a; }
+        .notification-icon.peminjaman_ditolak { background: #fee2e2; color: #dc2626; }
+        .notification-icon.perpanjangan_disetujui { background: #dcfce7; color: #16a34a; }
+        .notification-icon.perpanjangan_ditolak { background: #fee2e2; color: #dc2626; }
+        .notification-icon.pengembalian_sukses { background: #dcfce7; color: #16a34a; }
+        .notification-icon.buku_tersedia { background: #dbeafe; color: #3b82f6; }
+        .notification-icon.sistem { background: #e2e8f0; color: #64748b; }
+        .notification-icon.default { background: #e0e7ff; color: #6366f1; }
 
-        .notification-icon.reminder_deadline {
-            background: #fef3c7;
-            color: #f59e0b;
-        }
-
-        .notification-icon.denda_belum_dibayar {
-            background: #fce7f3;
-            color: #ec4899;
-        }
-
-        .notification-icon.peminjaman_disetujui {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .notification-icon.peminjaman_ditolak {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .notification-icon.perpanjangan_disetujui {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .notification-icon.perpanjangan_ditolak {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .notification-icon.pengembalian_sukses {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .notification-icon.buku_tersedia {
-            background: #dbeafe;
-            color: #3b82f6;
-        }
-
-        .notification-icon.sistem {
-            background: #e2e8f0;
-            color: #64748b;
-        }
-
-        .notification-icon.default {
-            background: #e0e7ff;
-            color: #6366f1;
-        }
-
-        .notification-content {
-            flex: 1;
-        }
+        .notification-content { flex: 1; }
 
         .notification-title {
             font-weight: 600;
@@ -409,7 +332,6 @@
             color: #94a3b8;
         }
 
-        /* ✅ Footer tetap bisa diklik */
         .notification-footer {
             padding: 12px 20px;
             border-top: 1px solid #e2e8f0;
@@ -427,9 +349,7 @@
             pointer-events: auto !important;
         }
 
-        .notification-footer a:hover {
-            color: #2563eb;
-        }
+        .notification-footer a:hover { color: #2563eb; }
 
         .empty-notification {
             padding: 40px 20px;
@@ -451,11 +371,16 @@
             min-height: calc(100vh - 180px);
         }
 
-        /* Responsive */
-        @media (max-width: 992px) {
+        /* ===================================================
+           RESPONSIVE
+        =================================================== */
+
+        /* TABLET (768px - 991px): sidebar menyempit jadi ikon saja */
+        @media (max-width: 991px) {
             .sidebar {
-                width: 80px;
-                padding: 15px 10px;
+                width: 70px;
+                padding: 15px 8px;
+                overflow: hidden;
             }
 
             .sidebar h4,
@@ -465,7 +390,9 @@
 
             .sidebar a {
                 justify-content: center;
-                padding: 12px;
+                padding: 12px 0;
+                margin-bottom: 6px;
+                border: 2px solid transparent;
             }
 
             .sidebar a i {
@@ -473,8 +400,12 @@
                 font-size: 22px;
             }
 
+            .sidebar a:hover {
+                transform: none;
+            }
+
             .main-content {
-                margin-left: 80px;
+                margin-left: 70px;
             }
 
             .notification-dropdown {
@@ -483,29 +414,115 @@
             }
         }
 
+        /* MOBILE (≤ 576px): sidebar jadi bottom navigation */
         @media (max-width: 576px) {
             .sidebar {
                 width: 100%;
                 height: auto;
-                position: relative;
-                padding: 15px;
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: center;
+                padding: 6px 4px 10px;
+                box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
+                z-index: 1001;
+                display: flex;
+                overflow: visible;
             }
 
+            .sidebar h4 {
+                display: none;
+            }
+
+            .sidebar a {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 6px 8px;
+                margin-bottom: 0;
+                border: none !important;
+                border-radius: 10px;
+                flex: 1;
+                text-align: center;
+                transform: none !important;
+                min-width: 0;
+            }
+
+            .sidebar a i {
+                margin-right: 0;
+                font-size: 20px;
+                margin-bottom: 2px;
+                width: auto;
+            }
+
+            .sidebar a span {
+                display: block;
+                font-size: 9px;
+                font-weight: 500;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
+            }
+
+            .sidebar a:hover {
+                transform: none !important;
+                border: none !important;
+            }
+
+            .sidebar a.active {
+                background: rgba(255, 255, 255, 0.25);
+                border: none !important;
+                box-shadow: none;
+            }
+
+            .sidebar a::before,
+            .sidebar a::after {
+                display: none;
+            }
+
+            /* Beri ruang bawah agar konten tidak tertutup bottom nav */
             .main-content {
                 margin-left: 0;
-                padding: 15px;
+                padding: 12px 12px 80px;
             }
 
+            /* Navbar atas tetap rapi */
             .navbar {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
+                flex-direction: row;
+                padding: 12px 16px;
+                margin-bottom: 16px;
+                gap: 0;
             }
 
+            .navbar h5 {
+                font-size: 14px;
+            }
+
+            /* Sembunyikan nama user, terlalu sempit */
+            .user-info .username-text {
+                display: none;
+            }
+
+            .user-info {
+                gap: 12px;
+            }
+
+            /* Notification dropdown full width */
             .notification-dropdown {
-                width: calc(100% - 30px);
-                right: 15px;
-                left: 15px;
+                width: calc(100vw - 24px);
+                right: 12px;
+                left: 12px;
+                top: 55px;
+            }
+
+            /* Content padding lebih kecil */
+            .content {
+                padding: 16px;
+                min-height: auto;
             }
         }
     </style>
@@ -565,7 +582,7 @@
                     <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
                 </div>
 
-                <span>{{ auth()->user()->name ?? 'Pengguna' }}</span>
+                <span class="username-text">{{ auth()->user()->name ?? 'Pengguna' }}</span>
                 <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Pengguna') }}&background=60A5FA&color=fff&bold=true"
                     class="rounded-circle" width="40" height="40" alt="User">
             </div>
@@ -611,7 +628,7 @@
         const notificationList = document.getElementById('notificationList');
         const markAllReadBtn = document.getElementById('markAllReadBtn');
 
-        // ✅ Set initial badge count dari server
+        // Set initial badge count dari server
         @if (isset($unreadNotifCount) && $unreadNotifCount > 0)
             updateBadge({{ $unreadNotifCount }});
         @else
@@ -634,171 +651,152 @@
             }
         });
 
-        // ✅ Load notifications
-    function loadNotifications() {
-        console.log('🔔 Loading notifications...');
-        
-        fetch('{{ route("pengguna-luar.notifikasi.latest") }}', {
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            console.log('📥 Response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('✅ Data received:', data);
-            if (data.success) {
-                displayNotifications(data.notifikasi);
-                updateBadge(data.unread_count);
-            } else {
-                throw new Error(data.message || 'Gagal memuat');
-            }
-        })
-        .catch(error => {
-            console.error('❌ Error loading notifications:', error);
-            notificationList.innerHTML = `
-                <div class="empty-notification">
-                    <i class="bi bi-exclamation-circle"></i>
-                    <p class="mb-0">Gagal memuat notifikasi</p>
-                    <small class="text-muted d-block mt-1">${error.message}</small>
-                </div>
-            `;
-        });
-    }
-
-    // ✅ Display notifications (item TIDAK bisa diklik - hanya tampil)
-    function displayNotifications(notifikasi) {
-        console.log('📋 Displaying notifications:', notifikasi.length, 'items');
-        
-        if (!notifikasi || notifikasi.length === 0) {
-            notificationList.innerHTML = `
-                <div class="empty-notification">
-                    <i class="bi bi-bell-slash"></i>
-                    <p class="mb-0">Tidak ada notifikasi</p>
-                </div>
-            `;
-            return;
-        }
-
-        let html = '';
-        notifikasi.forEach(notif => {
-            const unreadClass = !notif.dibaca ? 'unread' : '';
-            const iconClass = notif.tipe || 'default';
-            const icon = getNotificationIcon(notif.tipe);
-            
-            // ✅ Menggunakan div, BUKAN anchor tag (item tidak bisa diklik)
-            html += `
-                <div class="notification-item ${unreadClass}">
-                    <div class="notification-icon ${iconClass}">
-                        <i class="${icon}"></i>
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-title">${escapeHtml(notif.judul)}</div>
-                        <div class="notification-text">${escapeHtml(notif.isi)}</div>
-                        <div class="notification-time">
-                            <i class="bi bi-clock"></i> ${notif.waktu}
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        notificationList.innerHTML = html;
-        console.log('✅ Notifications displayed successfully');
-    }
-
-    // Get notification icon
-    function getNotificationIcon(tipe) {
-        const icons = {
-            'terlambat': 'bi bi-exclamation-triangle-fill',
-            'reminder_deadline': 'bi bi-clock-fill',
-            'denda_belum_dibayar': 'bi bi-cash-coin',
-            'peminjaman_disetujui': 'bi bi-check-circle-fill',
-            'peminjaman_ditolak': 'bi bi-x-circle-fill',
-            'peminjaman_baru': 'bi bi-book-fill',
-            'perpanjangan_disetujui': 'bi bi-check2-circle',
-            'perpanjangan_ditolak': 'bi bi-x-octagon',
-            'perpanjangan_baru': 'bi bi-arrow-clockwise',
-            'pengembalian_sukses': 'bi bi-check-circle',
-            'buku_tersedia': 'bi bi-bell-fill',
-            'sistem': 'bi bi-info-circle-fill',
-            'default': 'bi bi-bell-fill'
-        };
-        return icons[tipe] || icons['default'];
-    }
-
-    // ✅ Update badge count
-    function updateBadge(count) {
-        console.log('🔔 Updating badge count:', count);
-        if (count > 0) {
-            notificationBadge.textContent = count > 99 ? '99+' : count;
-            notificationBadge.style.display = 'flex';
-        } else {
-            notificationBadge.style.display = 'none';
-        }
-    }
-
-    // Escape HTML to prevent XSS
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // ✅ Mark all as read - UPDATE BADGE SETELAH SUCCESS
-    markAllReadBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        console.log('🔔 Mark all as read clicked');
-        
-        if (confirm('Tandai semua notifikasi sebagai dibaca?')) {
-            fetch('{{ route("pengguna-luar.notifikasi.mark-all-read") }}', {
-                method: 'POST',
+        // Load notifications
+        function loadNotifications() {
+            fetch('{{ route("pengguna-luar.notifikasi.latest") }}', {
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Accept': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
             .then(data => {
-                console.log('✅ Mark all read response:', data);
                 if (data.success) {
-                    // ✅ PENTING: Reload notifications dan update badge
-                    loadNotifications();
-                    // ✅ Set badge ke 0
-                    updateBadge(0);
+                    displayNotifications(data.notifikasi);
+                    updateBadge(data.unread_count);
+                } else {
+                    throw new Error(data.message || 'Gagal memuat');
                 }
             })
-            .catch(error => console.error('❌ Error marking all as read:', error));
+            .catch(error => {
+                notificationList.innerHTML = `
+                    <div class="empty-notification">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <p class="mb-0">Gagal memuat notifikasi</p>
+                        <small class="text-muted d-block mt-1">${error.message}</small>
+                    </div>
+                `;
+            });
         }
-    });
 
-    // ✅ Load initial notification count
-    console.log('🚀 Initializing notifications...');
-    loadNotifications();
+        // Display notifications
+        function displayNotifications(notifikasi) {
+            if (!notifikasi || notifikasi.length === 0) {
+                notificationList.innerHTML = `
+                    <div class="empty-notification">
+                        <i class="bi bi-bell-slash"></i>
+                        <p class="mb-0">Tidak ada notifikasi</p>
+                    </div>
+                `;
+                return;
+            }
 
-    // ✅ Auto refresh every 60 seconds
-    setInterval(function() {
-        console.log('🔄 Auto-refreshing notifications...');
-        loadNotifications();
-    }, 60000);
+            let html = '';
+            notifikasi.forEach(notif => {
+                const unreadClass = !notif.dibaca ? 'unread' : '';
+                const iconClass = notif.tipe || 'default';
+                const icon = getNotificationIcon(notif.tipe);
 
-    // Tooltip Bootstrap
-    document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+                html += `
+                    <div class="notification-item ${unreadClass}">
+                        <div class="notification-icon ${iconClass}">
+                            <i class="${icon}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">${escapeHtml(notif.judul)}</div>
+                            <div class="notification-text">${escapeHtml(notif.isi)}</div>
+                            <div class="notification-time">
+                                <i class="bi bi-clock"></i> ${notif.waktu}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            notificationList.innerHTML = html;
+        }
+
+        // Get notification icon
+        function getNotificationIcon(tipe) {
+            const icons = {
+                'terlambat': 'bi bi-exclamation-triangle-fill',
+                'reminder_deadline': 'bi bi-clock-fill',
+                'denda_belum_dibayar': 'bi bi-cash-coin',
+                'peminjaman_disetujui': 'bi bi-check-circle-fill',
+                'peminjaman_ditolak': 'bi bi-x-circle-fill',
+                'peminjaman_baru': 'bi bi-book-fill',
+                'perpanjangan_disetujui': 'bi bi-check2-circle',
+                'perpanjangan_ditolak': 'bi bi-x-octagon',
+                'perpanjangan_baru': 'bi bi-arrow-clockwise',
+                'pengembalian_sukses': 'bi bi-check-circle',
+                'buku_tersedia': 'bi bi-bell-fill',
+                'sistem': 'bi bi-info-circle-fill',
+                'default': 'bi bi-bell-fill'
+            };
+            return icons[tipe] || icons['default'];
+        }
+
+        // Update badge count
+        function updateBadge(count) {
+            if (count > 0) {
+                notificationBadge.textContent = count > 99 ? '99+' : count;
+                notificationBadge.style.display = 'flex';
+            } else {
+                notificationBadge.style.display = 'none';
+            }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Mark all as read
+        markAllReadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (confirm('Tandai semua notifikasi sebagai dibaca?')) {
+                fetch('{{ route("pengguna-luar.notifikasi.mark-all-read") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadNotifications();
+                        updateBadge(0);
+                    }
+                })
+                .catch(error => console.error('Error marking all as read:', error));
+            }
         });
-    });
+
+        // Load initial notifications
+        loadNotifications();
+
+        // Auto refresh every 60 seconds
+        setInterval(function() {
+            loadNotifications();
+        }, 60000);
+
+        // Tooltip Bootstrap
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
     </script>
 
     @stack('scripts')
