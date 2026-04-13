@@ -6,18 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB; // ✅ TAMBAHAN
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Buku;
 use App\Models\QRCode as QRCodeModel;
-use App\Models\Notifikasi; // ✅ TAMBAHAN: Import Model Notifikasi
+use App\Models\Notifikasi;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class BukuController extends Controller
 {
-    /**
-     * Mendapatkan daftar semua kategori jurusan kuliah
-     */
+    // ini untuk mendapatkan semua kategori jurusan kuliah yang akan digunakan di form tambah dan edit buku agar mempermudah petugas
     private function getCategories()
     {
         return [
@@ -56,7 +54,11 @@ class BukuController extends Controller
         ];
     }
 
-    // Ini disebut function karena dia mengembalikan ke tampilan halaman
+    /**
+     * Menampilkan halaman utama daftar buku untuk Petugas.
+     * Mengambil data buku dari database dan mendukung fitur 
+     * pencarian serta pemfilteran berdasarkan kategori.
+     */
     public function index(Request $request)
     {
         $query = Buku::query();
@@ -71,12 +73,14 @@ class BukuController extends Controller
         return view('petugas.buku.index', compact('buku'));
     }
 
+    // ini untuk membuat form tambah buku baru dan menampilkan halaman tambah buku
     public function create()
     {
         $categories = $this->getCategories();
         return view('petugas.buku.create', compact('categories'));
     }
 
+    // ini untuk menyimpan data buku baru ke database setelah form tambah buku disubmit
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -89,7 +93,7 @@ class BukuController extends Controller
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // ✅ GUNAKAN TRANSACTION untuk memastikan semua proses berhasil
+        // disini menggunakan transaction untuk memastikan semua proses berhasil
         DB::beginTransaction();
         try {
             if ($request->hasFile('foto')) {
@@ -110,25 +114,26 @@ class BukuController extends Controller
 
             return redirect()->route('petugas.buku.index')
                 ->with('success', 'Buku dan QR Code berhasil ditambahkan! Notifikasi telah dikirim ke Admin.');
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             // Log error
             \Log::error('Error saat menambah buku: ' . $e->getMessage());
-            
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Terjadi kesalahan saat menambahkan buku. Silakan coba lagi.');
         }
     }
 
+    // ini untuk menampilkan form edit buku dan mengisi data buku yang akan diedit ke dalam form
     public function edit(Buku $buku)
     {
         $categories = $this->getCategories();
         return view('petugas.buku.edit', compact('buku', 'categories'));
     }
 
+    // ini untuk mengupdate data buku yang sudah diedit ke database setelah form edit buku disubmit
     public function update(Request $request, Buku $buku)
     {
         $validated = $request->validate([
@@ -155,6 +160,7 @@ class BukuController extends Controller
         return redirect()->route('petugas.buku.index')->with('success', 'Data buku berhasil diperbarui!');
     }
 
+    // ini untuk menampilkan detail buku tertentu, termasuk juga qr code
     public function show(Buku $buku)
     {
         // Load relasi qrCode dan petugas
@@ -163,6 +169,7 @@ class BukuController extends Controller
         return view('petugas.buku.show', compact('buku'));
     }
 
+    // ini untuk menghapus buku dari database, termasuk juga foto dan qr code yang terkait dengan buku tersebut
     public function destroy(Buku $buku)
     {
         // Hapus foto jika ada
@@ -179,9 +186,7 @@ class BukuController extends Controller
         return redirect()->route('petugas.buku.index')->with('success', 'Buku berhasil dihapus!');
     }
 
-    /**
-     * Generate QR Code untuk buku (SVG Format)
-     */
+    // ini untuk menggenerate ulang qr code jika diperlukan, misalnya jika qr code rusak atau hilang
     private function generateQRCode($buku)
     {
         // Generate kode unik
@@ -211,9 +216,7 @@ class BukuController extends Controller
         ]);
     }
 
-    /**
-     * Regenerate QR Code untuk buku tertentu
-     */
+    // ini untuk regenarate ataupun  qr code jika diperlukan
     public function regenerateQR(Buku $buku)
     {
         // Hapus QR lama jika ada
@@ -230,13 +233,11 @@ class BukuController extends Controller
         return redirect()->back()->with('success', 'QR Code berhasil di-generate ulang!');
     }
 
-    /**
-     * ✅ PRIVATE METHOD: Kirim notifikasi buku baru ke Admin & Petugas lain
-     */
+    // ini untuk mengirim notifikasi ke admin dan petugas lain ketika ada buku baru yang ditambahkan
     private function kirimNotifikasiBukuBaru(Buku $buku)
     {
         $petugas = Auth::user();
-        
+
         // Buat detail informasi
         $detailInfo = "Buku baru telah ditambahkan ke perpustakaan.\n\n";
         $detailInfo .= "Judul: {$buku->judul}\n";
@@ -279,13 +280,11 @@ class BukuController extends Controller
             );
         }
 
-        // ✅ TAMBAHAN: Kirim notifikasi ke Mahasiswa yang sesuai dengan kategori buku
+        // ini untuk mengirim notifikasi ke mahasiswa yang jurusannya sesuai dengan kategori buku yang baru ditambahkan
         $this->kirimNotifikasiKeMahasiswaTerkait($buku, $petugas);
     }
 
-    /**
-     * ✅ PRIVATE METHOD: Kirim notifikasi ke mahasiswa yang jurusannya sesuai dengan kategori buku
-     */
+    // ini untuk mengirim notifikasi ke mahasiswa yang jurusannya sesuai dengan kategori buku yang baru ditambahkan
     private function kirimNotifikasiKeMahasiswaTerkait(Buku $buku, $petugas)
     {
         // Ambil mahasiswa yang jurusannya sama dengan kategori buku
