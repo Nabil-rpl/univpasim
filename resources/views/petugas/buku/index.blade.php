@@ -13,7 +13,7 @@
                 </div>
                 <h1 class="fw-bold mb-3 hero-title">Perpustakaan Digital</h1>
                 <p class="text-muted fs-5">Kelola koleksi buku dengan mudah dan efisien</p>
-                
+
                 <!-- Stats Cards -->
                 <div class="row g-3 mt-4 mb-4">
                     <div class="col-md-4">
@@ -55,9 +55,8 @@
                     <form action="{{ route('petugas.buku.index') }}" method="GET">
                         <div class="search-box">
                             <i class="bi bi-search search-icon"></i>
-                            <input type="text" name="search" class="form-control search-input" 
-                                   placeholder="Cari judul, penulis, atau penerbit..."
-                                   value="{{ request('search') }}">
+                            <input type="text" name="search" class="form-control search-input"
+                                placeholder="Cari judul, penulis, atau penerbit..." value="{{ request('search') }}">
                             <button class="btn btn-search" type="submit">
                                 Cari
                             </button>
@@ -74,13 +73,10 @@
                     <!-- Book Image -->
                     <div class="book-image-wrapper">
                         @if ($item->foto && file_exists(public_path('storage/' . $item->foto)))
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#fotoModal{{ $item->id }}">
-                                <img src="{{ asset('storage/' . $item->foto) }}" alt="{{ $item->judul }}" 
-                                     class="book-image">
-                                <div class="image-overlay">
-                                    <i class="bi bi-zoom-in"></i>
-                                </div>
-                            </a>
+                            {{-- SESUDAH - hapus overlay, klik langsung buka modal --}}
+                            {{-- SESUDAH - foto tidak bisa diklik, tidak ada overlay --}}
+                            <img src="{{ asset('storage/' . $item->foto) }}" alt="{{ $item->judul }}" class="book-image"
+                                style="pointer-events: none;">
 
                             <!-- Modal Preview -->
                             <div class="modal fade" id="fotoModal{{ $item->id }}" tabindex="-1">
@@ -88,7 +84,8 @@
                                     <div class="modal-content modal-modern">
                                         <div class="modal-header">
                                             <h5 class="modal-title">📖 {{ $item->judul }}</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            <button type="button" class="btn-close btn-close-white"
+                                                data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body text-center p-4">
                                             <img src="{{ asset('storage/' . $item->foto) }}" alt="{{ $item->judul }}"
@@ -102,7 +99,7 @@
                                 <i class="bi bi-book" style="font-size: 48px; color: #9e9e9e;"></i>
                             </div>
                         @endif
-                        
+
                         <!-- Stock Badge -->
                         <div class="stock-badge">
                             <i class="bi bi-box-seam me-1"></i>{{ $item->stok }}
@@ -112,7 +109,7 @@
                     <!-- Book Info -->
                     <div class="book-info">
                         <div class="book-category mb-2">
-                            @if($item->kategori)
+                            @if ($item->kategori)
                                 <span class="category-badge">{{ $item->kategori }}</span>
                             @else
                                 <span class="category-badge">Umum</span>
@@ -121,7 +118,7 @@
                         </div>
 
                         <h5 class="book-title" title="{{ $item->judul }}">{{ $item->judul }}</h5>
-                        
+
                         <div class="book-meta">
                             <div class="meta-item">
                                 <i class="bi bi-person"></i>
@@ -135,16 +132,16 @@
 
                         <!-- Action Buttons -->
                         <div class="book-actions mt-3">
-                            <a href="{{ route('petugas.buku.show', $item->id) }}" 
-                               class="btn-action btn-detail" title="Lihat Detail">
+                            <a href="{{ route('petugas.buku.show', $item->id) }}" class="btn-action btn-detail"
+                                title="Lihat Detail">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <a href="{{ route('petugas.buku.edit', $item->id) }}" 
-                               class="btn-action btn-edit" title="Edit Buku">
+                            <a href="{{ route('petugas.buku.edit', $item->id) }}" class="btn-action btn-edit"
+                                title="Edit Buku">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form action="{{ route('petugas.buku.destroy', $item->id) }}" method="POST"
-                                  class="d-inline" onsubmit="return confirm('Yakin ingin menghapus buku ini?')">
+                            <form action="{{ route('petugas.buku.destroy', $item->id) }}" method="POST" class="d-inline"
+                                onsubmit="return confirm('Yakin ingin menghapus buku ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn-action btn-delete" title="Hapus Buku">
@@ -208,8 +205,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
         }
 
         .hero-title {
@@ -285,7 +289,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.5s;
         }
 
@@ -368,6 +372,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -392,29 +397,6 @@
 
         .book-card:hover .book-image {
             transform: scale(1.05);
-        }
-
-        .image-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .image-overlay i {
-            color: white;
-            font-size: 48px;
-        }
-
-        .book-image-wrapper:hover .image-overlay {
-            opacity: 1;
         }
 
         .book-image-placeholder {
@@ -531,17 +513,23 @@
         }
 
         .btn-detail {
-            background: #468aff; 0%, #f5576c 100%);
+            background: #468aff;
+            0%,
+            #f5576c 100%);
             color: white;
         }
 
         .btn-edit {
-            background: #0046FF; 0%, #f5576c 100%);
+            background: #0046FF;
+            0%,
+            #f5576c 100%);
             color: white;
         }
 
         .btn-delete {
-            background: #ec2416; 0%, #f5576c 100%);
+            background: #ec2416;
+            0%,
+            #f5576c 100%);
             color: white;
         }
 

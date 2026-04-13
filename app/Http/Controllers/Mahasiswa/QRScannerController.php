@@ -16,10 +16,15 @@ class QRScannerController extends Controller
     /**
      * Tampilkan halaman scanner
      */
-    public function index()
-    {
-        return view('mahasiswa.qr-scanner.index');
-    }
+    // ✅ PERBAIKI
+public function index()
+{
+    $unreadNotifCount = \App\Models\Notifikasi::where('user_id', auth()->id())
+                        ->where('dibaca', false)
+                        ->count();
+
+    return view('mahasiswa.qr-scanner.index', compact('unreadNotifCount'));
+}
 
     /**
      * Proses hasil scan QR Code dengan durasi peminjaman

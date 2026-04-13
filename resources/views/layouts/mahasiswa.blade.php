@@ -467,7 +467,6 @@
 
         /* ========== RESPONSIVE: TABLET & MOBILE (≤ 768px) ========== */
         @media (max-width: 768px) {
-            /* Sidebar tersembunyi ke kiri, muncul saat toggle */
             .sidebar {
                 left: calc(-1 * var(--sidebar-width));
             }
@@ -528,30 +527,43 @@
     {{-- Sidebar --}}
     <div class="sidebar" id="sidebar">
         <h4>Mahasiswa</h4>
-        <a href="{{ route('mahasiswa.dashboard') }}" class="{{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}">
+
+        <a href="{{ route('mahasiswa.dashboard') }}"
+           class="{{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}">
             <i class="bi bi-speedometer2"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('mahasiswa.peminjaman.riwayat') }}" class="{{ request()->routeIs('mahasiswa.peminjaman.riwayat') ? 'active' : '' }}">
+
+        {{-- FIX: pakai wildcard mahasiswa.peminjaman.* agar aktif di semua sub-halaman riwayat --}}
+        <a href="{{ route('mahasiswa.peminjaman.riwayat') }}"
+           class="{{ request()->routeIs('mahasiswa.peminjaman.*') ? 'active' : '' }}">
             <i class="bi bi-clock-history"></i>
             <span>Riwayat</span>
         </a>
-        <a href="{{ route('mahasiswa.buku.index') }}" class="{{ request()->routeIs('mahasiswa.buku.index') ? 'active' : '' }}">
+
+        <a href="{{ route('mahasiswa.buku.index') }}"
+           class="{{ request()->routeIs('mahasiswa.buku.*') ? 'active' : '' }}">
             <i class="bi bi-book"></i>
             <span>Data Buku</span>
         </a>
-        <a href="{{ route('mahasiswa.notifikasi.index') }}" class="{{ request()->routeIs('mahasiswa.notifikasi.*') ? 'active' : '' }}">
+
+        <a href="{{ route('mahasiswa.notifikasi.index') }}"
+           class="{{ request()->routeIs('mahasiswa.notifikasi.*') ? 'active' : '' }}">
             <i class="bi bi-bell"></i>
             <span>Notifikasi</span>
             @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
             <span class="badge">{{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}</span>
             @endif
         </a>
-        <a href="{{ route('mahasiswa.pengaturan.index') }}" class="{{ request()->routeIs('mahasiswa.pengaturan.index') ? 'active' : '' }}">
+
+        <a href="{{ route('mahasiswa.pengaturan.index') }}"
+           class="{{ request()->routeIs('mahasiswa.pengaturan.*') ? 'active' : '' }}">
             <i class="bi bi-gear"></i>
             <span>Pengaturan</span>
         </a>
-        <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+
+        <a href="{{ route('logout') }}"
+           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="bi bi-box-arrow-right"></i>
             <span>Logout</span>
         </a>
