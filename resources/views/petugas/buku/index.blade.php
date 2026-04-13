@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="container mt-4 mb-5">
-        <!-- Hero Header dengan Ilustrasi -->
+        <!-- Menampilkan Judul Aplikasi dan deskripsi halaman -->
         <div class="hero-header text-center mb-5 position-relative">
             <div class="hero-bg"></div>
             <div class="position-relative z-1">
@@ -15,6 +15,7 @@
                 <p class="text-muted fs-5">Kelola koleksi buku dengan mudah dan efisien</p>
 
                 <!-- Stats Cards -->
+                <!-- menampilkan total buku, total stok, dan jumlah kategori yang ada di database -->
                 <div class="row g-3 mt-4 mb-4">
                     <div class="col-md-4">
                         <div class="stat-card">
@@ -42,6 +43,7 @@
         </div>
 
         <!-- Action Bar -->
+        <!-- menampilkan tombol untuk tambah buku baru dan fitur perncarian -->
         <div class="action-bar mb-4">
             <div class="row g-3 align-items-center">
                 <div class="col-lg-4">
@@ -67,13 +69,13 @@
         </div>
 
         <!-- Books Grid/Table View -->
+        <!-- menampilkan daftar buku dalam bentuk kartu -->
         <div class="books-container">
             @forelse ($buku as $item)
                 <div class="book-card">
                     <!-- Book Image -->
                     <div class="book-image-wrapper">
                         @if ($item->foto && file_exists(public_path('storage/' . $item->foto)))
-                            {{-- SESUDAH - hapus overlay, klik langsung buka modal --}}
                             {{-- SESUDAH - foto tidak bisa diklik, tidak ada overlay --}}
                             <img src="{{ asset('storage/' . $item->foto) }}" alt="{{ $item->judul }}" class="book-image"
                                 style="pointer-events: none;">
@@ -131,6 +133,7 @@
                         </div>
 
                         <!-- Action Buttons -->
+                        <!-- menampilkan tombol aksi untuk setiap buku -->
                         <div class="book-actions mt-3">
                             <a href="{{ route('petugas.buku.show', $item->id) }}" class="btn-action btn-detail"
                                 title="Lihat Detail">
